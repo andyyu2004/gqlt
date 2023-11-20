@@ -1,0 +1,8 @@
+
+[TestParser/mutation - 1]
+let foo = mutation {
+  example {
+    foo
+  }
+}
+---

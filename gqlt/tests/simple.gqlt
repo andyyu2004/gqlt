@@ -1,0 +1,29 @@
+let dogs = query {
+	animals {
+		dogs {
+			list {
+				name
+			}
+		}
+	}
+}
+
+let name = query {
+	animals {
+		dogs {
+			first {
+				name
+			}
+		}
+	}
+}
+
+let dog = query ($name: String!) {
+	animals {
+		dogs {
+			find(name: $name) {
+				name
+			}
+		}
+	}
+}

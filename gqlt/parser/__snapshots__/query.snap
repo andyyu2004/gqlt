@@ -1,0 +1,8 @@
+
+[TestParser/query - 1]
+let foo = query {
+  example {
+    foo
+  }
+}
+---

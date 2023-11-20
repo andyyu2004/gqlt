@@ -1,0 +1,3 @@
+projects:
+  gqlt:
+    schema: gqlt/**/*.graphql

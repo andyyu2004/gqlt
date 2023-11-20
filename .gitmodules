@@ -1,0 +1,3 @@
+[submodule "gqlparser"]
+	path = gqlparser
+	url = git@github.com:andyyu2004/gqlparser
