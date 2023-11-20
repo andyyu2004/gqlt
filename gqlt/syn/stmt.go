@@ -7,6 +7,19 @@ type Stmt interface {
 	isStmt()
 }
 
+type ExprStmt struct {
+	Expr Expr
+}
+
+var _ Stmt = ExprStmt{}
+
+func (ExprStmt) isStmt() {}
+func (ExprStmt) isNode() {}
+
+func (stmt ExprStmt) Dump(w io.Writer) error {
+	return stmt.Expr.Dump(w)
+}
+
 type LetStmt struct {
 	Pat  Pat
 	Expr Expr

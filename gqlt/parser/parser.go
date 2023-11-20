@@ -96,8 +96,11 @@ func (p *Parser) parseStmt() syn.Stmt {
 	case lex.Let:
 		return p.parseLetStmt()
 	default:
-		p.errors = append(p.errors, mkError(tok, "expected statement, found %s `%s`", tok.Kind.Name(), tok.String()))
-		return nil
+		expr := p.parseExpr()
+		if expr == nil {
+			return nil
+		}
+		return &syn.ExprStmt{Expr: expr}
 	}
 }
 

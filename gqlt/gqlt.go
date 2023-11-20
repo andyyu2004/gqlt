@@ -24,11 +24,15 @@ type executionContext struct {
 }
 
 func (e *Executor) Run(ctx context.Context, file syn.File) error {
-	ecx := executionContext{vars: map[string]any{}}
+	ecx := &executionContext{vars: map[string]any{}}
 	for _, stmt := range file.Stmts {
 		switch stmt := stmt.(type) {
 		case *syn.LetStmt:
-			if err := e.let(ctx, &ecx, stmt); err != nil {
+			if err := e.let(ctx, ecx, stmt); err != nil {
+				return err
+			}
+		case *syn.ExprStmt:
+			if _, err := e.eval(ctx, ecx, stmt.Expr); err != nil {
 				return err
 			}
 		default:

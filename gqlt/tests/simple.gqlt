@@ -27,3 +27,4 @@ let dog = query ($name: String!) {
 		}
 	}
 }
+
