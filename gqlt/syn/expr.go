@@ -21,13 +21,12 @@ type OperationExpr struct {
 
 var _ Expr = OperationExpr{}
 
-func (expr OperationExpr) Dump(w io.Writer) error {
-	_, err := io.WriteString(w, expr.Query)
-	return err
-}
-
 func (OperationExpr) isExpr() {}
 func (OperationExpr) isNode() {}
+
+func (expr OperationExpr) Dump(w io.Writer) {
+	io.WriteString(w, expr.Query)
+}
 
 type LiteralExpr struct {
 	Value any
@@ -35,15 +34,37 @@ type LiteralExpr struct {
 
 var _ Expr = LiteralExpr{}
 
-func (expr LiteralExpr) Dump(w io.Writer) (err error) {
-	switch expr.Value.(type) {
-	case string:
-		_, err = fmt.Fprintf(w, "\"%v\"", expr.Value)
-	default:
-		_, err = fmt.Fprintf(w, "%v", expr.Value)
-	}
-	return
-}
-
 func (LiteralExpr) isExpr() {}
 func (LiteralExpr) isNode() {}
+
+func (expr LiteralExpr) Dump(w io.Writer) {
+	switch expr.Value.(type) {
+	case string:
+		fmt.Fprintf(w, "\"%v\"", expr.Value)
+	default:
+		fmt.Fprintf(w, "%v", expr.Value)
+	}
+}
+
+type CallExpr struct {
+	Fn   Expr
+	Args []Expr
+}
+
+var _ Expr = CallExpr{}
+
+func (CallExpr) isExpr() {}
+func (CallExpr) isNode() {}
+
+func (expr CallExpr) Dump(w io.Writer) {
+	expr.Fn.Dump(w)
+	io.WriteString(w, "(")
+
+	for i, arg := range expr.Args {
+		if i > 0 {
+			io.WriteString(w, ", ")
+		}
+		arg.Dump(w)
+	}
+	io.WriteString(w, ")")
+}

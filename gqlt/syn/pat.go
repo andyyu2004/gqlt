@@ -17,9 +17,8 @@ type NamePat struct {
 
 var _ Pat = NamePat{}
 
-func (name NamePat) Dump(w io.Writer) error {
-	_, err := io.WriteString(w, name.Name)
-	return err
+func (name NamePat) Dump(w io.Writer) {
+	io.WriteString(w, name.Name)
 }
 
 func (NamePat) isPat()  {}
@@ -31,32 +30,17 @@ type ObjectPat struct {
 
 var _ Pat = ObjectPat{}
 
-func (pat ObjectPat) Dump(w io.Writer) error {
-	if _, err := io.WriteString(w, "{"); err != nil {
-		return err
-	}
+func (pat ObjectPat) Dump(w io.Writer) {
+	io.WriteString(w, "{")
 
 	for entry := pat.Fields.Oldest(); entry != nil; entry = entry.Next() {
-		if _, err := io.WriteString(w, " "); err != nil {
-			return err
-		}
-
-		if _, err := io.WriteString(w, entry.Key); err != nil {
-			return err
-		}
-
-		if _, err := io.WriteString(w, ": "); err != nil {
-			return err
-		}
-
-		if err := entry.Value.Dump(w); err != nil {
-			return err
-		}
-
+		io.WriteString(w, " ")
+		io.WriteString(w, entry.Key)
+		io.WriteString(w, ": ")
+		entry.Value.Dump(w)
 	}
 
-	_, err := io.WriteString(w, " }")
-	return err
+	io.WriteString(w, " }")
 }
 
 func (ObjectPat) isPat()  {}

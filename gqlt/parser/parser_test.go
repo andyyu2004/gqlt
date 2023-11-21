@@ -36,7 +36,7 @@ func TestParser(t *testing.T) {
 			require.NoError(t, err)
 
 			buf := bytes.Buffer{}
-			require.NoError(t, file.Dump(&buf))
+			file.Dump(&buf)
 
 			snaps.WithConfig(snaps.Filename(name)).MatchSnapshot(t, buf.String())
 		})

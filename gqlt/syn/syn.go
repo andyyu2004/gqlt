@@ -5,25 +5,19 @@ import "io"
 type Node interface {
 	isNode()
 
-	Dump(io.Writer) error
+	Dump(io.Writer)
 }
 
 type File struct {
 	Stmts []Stmt
 }
 
-func (f File) Dump(w io.Writer) error {
+func (f File) Dump(w io.Writer) {
 	for i, stmt := range f.Stmts {
 		if i > 0 {
-			if _, err := io.WriteString(w, "\n"); err != nil {
-				return err
-			}
+			io.WriteString(w, "\n")
 		}
 
-		if err := stmt.Dump(w); err != nil {
-			return err
-		}
-
+		stmt.Dump(w)
 	}
-	return nil
 }
