@@ -19,6 +19,7 @@ import (
 // Implementation notes:
 // The error handling invariant is that if you return nil, you must have already emitted an error.
 type Parser struct {
+	steps  int
 	lexer  lex.Lexer
 	stmts  []syn.Stmt
 	errors []error
@@ -58,12 +59,20 @@ func (p *Parser) Parse() (syn.File, error) {
 	return syn.File{Stmts: p.stmts}, errors.Join(p.errors...)
 }
 
+func (p *Parser) step() {
+	p.steps++
+	if p.steps > 100000 {
+		panic("oops, detected loop")
+	}
+}
+
 func (p *Parser) peek() lex.Token {
+	p.step()
 	return p.lexer.Peek()
 }
 
 func (p *Parser) at(kind lex.TokenKind) bool {
-	tok := p.lexer.Peek()
+	tok := p.peek()
 	return tok.Kind == kind
 }
 
@@ -117,6 +126,7 @@ func (p *Parser) parseStmt() syn.Stmt {
 		if expr == nil {
 			return nil
 		}
+
 		return &syn.ExprStmt{Expr: expr}
 	}
 }
@@ -190,13 +200,13 @@ func (p *Parser) parseExpr() syn.Expr {
 	return expr
 }
 
-func (p *Parser) parseCallExpr(f syn.Expr) syn.CallExpr {
+func (p *Parser) parseCallExpr(f syn.Expr) *syn.CallExpr {
 	p.bump(lex.ParenL)
 	args := []syn.Expr{}
 	for !p.at(lex.EOF) && !p.at(lex.ParenR) {
 		arg := p.parseExpr()
 		if arg == nil {
-			continue
+			return nil
 		}
 
 		args = append(args, arg)
@@ -204,7 +214,7 @@ func (p *Parser) parseCallExpr(f syn.Expr) syn.CallExpr {
 
 	p.expect(lex.ParenR)
 
-	return syn.CallExpr{Fn: f, Args: args}
+	return &syn.CallExpr{Fn: f, Args: args}
 }
 
 func (p *Parser) parseAtomExpr() syn.Expr {
@@ -212,7 +222,7 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 	switch tok.Kind {
 	case lex.Query, lex.Mutation:
 		return p.parseQueryExpr()
-	case lex.Int, lex.Float, lex.String, lex.BlockString, lex.True, lex.False:
+	case lex.Int, lex.Float, lex.String, lex.BlockString, lex.True, lex.False, lex.Null:
 		return p.parseLiteralExpr()
 	case lex.Name:
 		p.bump(lex.Name)
@@ -238,8 +248,10 @@ func (p *Parser) parseLiteralExpr() *syn.LiteralExpr {
 		return &syn.LiteralExpr{Value: true}
 	} else if p.eat_(lex.False) {
 		return &syn.LiteralExpr{Value: false}
+	} else if p.eat_(lex.Null) {
+		return &syn.LiteralExpr{Value: nil}
 	} else {
-		panic("unreachable")
+		panic("unreachable, token types was checked by caller")
 	}
 }
 

@@ -85,6 +85,8 @@ func convertToken(tok lexer.Token) Token {
 			kind = True
 		case "false":
 			kind = False
+		case "null":
+			kind = Null
 		default:
 			kind = Name
 		}
@@ -135,6 +137,7 @@ const (
 	Mutation
 	True
 	False
+	Null
 )
 
 func (t TokenKind) Name() string {
@@ -195,6 +198,8 @@ func (t TokenKind) Name() string {
 		return "true"
 	case False:
 		return "false"
+	case Null:
+		return "null"
 	}
 	return "Unknown " + strconv.Itoa(int(t))
 }
@@ -257,6 +262,8 @@ func (t TokenKind) String() string {
 		return "true"
 	case False:
 		return "false"
+	case Null:
+		return "null"
 	}
 	return "Unknown " + strconv.Itoa(int(t))
 }

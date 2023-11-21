@@ -18,6 +18,7 @@ let name = query {
 	}
 };
 
+
 let { id, name } = query ($name: String!) {
 	animals {
 		dogs {
@@ -28,5 +29,4 @@ let { id, name } = query ($name: String!) {
 		}
 	}
 };
-
 
