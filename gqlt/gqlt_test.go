@@ -22,7 +22,7 @@ var schema string
 func TestGqlt(t *testing.T) {
 	ctx := context.Background()
 
-	paths, err := filepath.Glob(filepath.Join("tests", "**/*.gqlt"))
+	paths, err := filepath.Glob(filepath.Join("tests", "**.gqlt"))
 	require.NoError(t, err)
 
 	q := &query{

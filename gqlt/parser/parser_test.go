@@ -14,8 +14,9 @@ import (
 )
 
 func TestParser(t *testing.T) {
-	paths, err := filepath.Glob(filepath.Join("test-data", "**/*.gqlt"))
+	paths, err := filepath.Glob(filepath.Join("test-data", "**.gqlt"))
 	require.NoError(t, err)
+	require.NotEmpty(t, paths)
 
 	for _, path := range paths {
 		path := path

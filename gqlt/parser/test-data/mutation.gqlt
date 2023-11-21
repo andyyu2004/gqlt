@@ -2,4 +2,4 @@ let foo = mutation {
   example {
     foo
   }
-}
+};

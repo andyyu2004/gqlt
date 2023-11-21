@@ -2,4 +2,4 @@ let foo = query {
   example {
     foo
   }
-}
+};

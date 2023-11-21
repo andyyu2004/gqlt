@@ -1,7 +1,7 @@
-let { id: id, name: name } = query { id name }
+let { id: id, name: name } = query { id name };
 
 # without commas
-let { id: id name: name } = query { id name }
+let { id: id name: name } = query { id name };
 
 # punning shorthand
-let { id, name } = query { id name }
+let { id, name } = query { id name };

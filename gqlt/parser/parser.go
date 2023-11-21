@@ -40,12 +40,15 @@ func New(src *ast.Source) (*Parser, error) {
 func (p *Parser) Parse() (syn.File, error) {
 	for !p.at(lex.EOF) {
 		stmt := p.parseStmt()
-		// could do some error recovery here
 		if !isNil(stmt) {
+			p.expect(lex.Semi)
 			p.stmts = append(p.stmts, stmt)
+		} else {
+			// error recovery by skipping tokens until the next start of statement by searching for a semicolon
+			for !p.at(lex.EOF) && !p.eat_(lex.Semi) {
+				p.lexer.Next()
+			}
 		}
-
-		// error recovery by skipping tokens until the next start of statement
 	}
 
 	assert(p.at(lex.EOF))
@@ -93,7 +96,7 @@ func (p *Parser) expect(kind lex.TokenKind) (lex.Token, bool) {
 	}
 
 	tok := p.lexer.Peek()
-	p.errors = append(p.errors, mkError(tok, "expected token %s, found %s `%s`", kind.Name(), tok.Kind.Name(), tok.String()))
+	p.errors = append(p.errors, mkError(tok, "expected %s, found %s `%s`", kind.Name(), tok.Kind.Name(), tok.String()))
 	return lex.Token{}, false
 }
 
