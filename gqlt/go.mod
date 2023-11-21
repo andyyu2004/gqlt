@@ -9,6 +9,7 @@ require (
 	github.com/graph-gophers/graphql-go v1.5.0
 	github.com/stretchr/testify v1.8.4
 	github.com/vektah/gqlparser/v2 v2.5.10
+	github.com/wk8/go-ordered-map/v2 v2.1.8
 )
 
 require (
@@ -27,6 +28,5 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
-	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

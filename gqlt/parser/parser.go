@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"andyyu2004/gqlt/lex"
@@ -45,11 +46,9 @@ func (p *Parser) Parse() (syn.File, error) {
 		}
 
 		// error recovery by skipping tokens until the next start of statement
-		for !p.at(lex.EOF) && !p.at(lex.Let) {
-			p.lexer.Next()
-		}
-
 	}
+
+	assert(p.at(lex.EOF))
 
 	return syn.File{Stmts: p.stmts}, errors.Join(p.errors...)
 }
@@ -180,9 +179,27 @@ func (p *Parser) parseExpr() syn.Expr {
 	switch tok.Kind {
 	case lex.Query, lex.Mutation:
 		return p.parseQueryExpr()
+	case lex.Int, lex.Float, lex.String, lex.BlockString:
+		return p.parseLiteralExpr()
 	default:
 		p.errors = append(p.errors, mkError(tok, "expected expression, found %s `%s`", tok.Kind.Name(), tok.String()))
 		return nil
+	}
+}
+
+func (p *Parser) parseLiteralExpr() *syn.LiteralExpr {
+	if s, ok := p.eat(lex.Int); ok {
+		i := must(strconv.Atoi(s.Value))
+		return &syn.LiteralExpr{Value: i}
+	} else if s, ok := p.eat(lex.Float); ok {
+		f := must(strconv.ParseFloat(s.Value, 64))
+		return &syn.LiteralExpr{Value: f}
+	} else if s, ok := p.eat(lex.String); ok {
+		return &syn.LiteralExpr{Value: s.Value}
+	} else if s, ok := p.eat(lex.BlockString); ok {
+		return &syn.LiteralExpr{Value: s.Value}
+	} else {
+		panic("unreachable")
 	}
 }
 
@@ -205,6 +222,14 @@ func assert(cond bool) {
 	if !cond {
 		panic("assertion failed")
 	}
+}
+
+func must[T any](t T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+
+	return t
 }
 
 func isNil(i any) bool {

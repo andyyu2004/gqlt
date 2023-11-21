@@ -1,6 +1,7 @@
 package syn
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -27,3 +28,22 @@ func (expr OperationExpr) Dump(w io.Writer) error {
 
 func (OperationExpr) isExpr() {}
 func (OperationExpr) isNode() {}
+
+type LiteralExpr struct {
+	Value any
+}
+
+var _ Expr = LiteralExpr{}
+
+func (expr LiteralExpr) Dump(w io.Writer) (err error) {
+	switch expr.Value.(type) {
+	case string:
+		_, err = fmt.Fprintf(w, "\"%v\"", expr.Value)
+	default:
+		_, err = fmt.Fprintf(w, "%v", expr.Value)
+	}
+	return
+}
+
+func (LiteralExpr) isExpr() {}
+func (LiteralExpr) isNode() {}

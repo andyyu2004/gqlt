@@ -1,0 +1,7 @@
+
+[TestParser/literal - 1]
+1
+3
+"a string"
+3.14
+---
