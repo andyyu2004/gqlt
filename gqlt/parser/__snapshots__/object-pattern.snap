@@ -1,0 +1,6 @@
+
+[TestParser/object-pattern - 1]
+let { id: id name: name } = query { id name }
+let { id: id name: name } = query { id name }
+let { id: id name: name } = query { id name }
+---

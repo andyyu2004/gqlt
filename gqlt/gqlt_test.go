@@ -28,6 +28,7 @@ func TestGqlt(t *testing.T) {
 	q := &query{
 		dogs: []dog{
 			{
+				ID:   "1",
 				Name: "Buddy",
 			},
 		},
@@ -101,5 +102,6 @@ func (q dogQuery) Find(args struct{ Name string }) *dog {
 }
 
 type dog struct {
+	ID   graphql.ID
 	Name string
 }

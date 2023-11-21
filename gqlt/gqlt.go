@@ -49,21 +49,45 @@ func (e *Executor) let(ctx context.Context, ecx *executionContext, let *syn.LetS
 		return err
 	}
 
-	if err := e.bindPat(ecx, let.Pat, val); err != nil {
+	if err := bindPat(ecx, let.Pat, val); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (e *Executor) bindPat(ecx *executionContext, pat syn.Pat, val any) error {
+func bindPat(ecx *executionContext, pat syn.Pat, val any) error {
 	switch pat := pat.(type) {
 	case *syn.NamePat:
 		ecx.vars[pat.Name] = val
 		return nil
+	case *syn.ObjectPat:
+		vals, ok := val.(map[string]any)
+		if !ok {
+			return fmt.Errorf("cannot bind object pattern to value: %T", val)
+		}
+		return bindObjectPat(ecx, pat, vals)
 	default:
 		panic(fmt.Sprintf("missing pattern case: %T", pat))
 	}
+}
+
+func bindObjectPat(ecx *executionContext, pat *syn.ObjectPat, values map[string]any) error {
+	for entry := pat.Fields.Oldest(); entry != nil; entry = entry.Next() {
+		name := entry.Key
+		pat := entry.Value
+
+		val, ok := values[name]
+		if !ok {
+			return fmt.Errorf("object missing field specified in pattern %s", name)
+		}
+
+		if err := bindPat(ecx, pat, val); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Expr) (any, error) {

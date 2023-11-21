@@ -18,13 +18,15 @@ let name = query {
 	}
 }
 
-let dog = query ($name: String!) {
+let { id, name } = query ($name: String!) {
 	animals {
 		dogs {
 			find(name: $name) {
+				id
 				name
 			}
 		}
 	}
 }
+
 

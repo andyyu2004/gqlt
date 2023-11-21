@@ -33,6 +33,7 @@ func TestParser(t *testing.T) {
 
 			file, err := parser.Parse()
 			require.NoError(t, err)
+
 			buf := bytes.Buffer{}
 			require.NoError(t, file.Dump(&buf))
 

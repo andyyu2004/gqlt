@@ -12,6 +12,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"github.com/vektah/gqlparser/v2/parser"
+	"github.com/wk8/go-ordered-map/v2"
 )
 
 type Parser struct {
@@ -62,27 +63,39 @@ func (p *Parser) at(kind lex.TokenKind) bool {
 	return tok.Kind == kind
 }
 
-func (p *Parser) eat(kind lex.TokenKind) bool {
+func (p *Parser) eat_(kind lex.TokenKind) bool {
+	_, ok := p.eat(kind)
+	return ok
+}
+
+func (p *Parser) eat(kind lex.TokenKind) (lex.Token, bool) {
 	tok := p.lexer.Peek()
 	if tok.Kind == kind {
-		p.lexer.Next()
-		return true
+		tok := p.lexer.Next()
+		return tok, true
 	}
-	return false
+
+	return lex.Token{}, false
 }
 
 func (p *Parser) bump(kind lex.TokenKind) {
-	assert(p.eat(kind))
+	_, ok := p.eat(kind)
+	assert(ok)
 }
 
-func (p *Parser) expect(kind lex.TokenKind) bool {
-	if p.eat(kind) {
-		return true
+func (p *Parser) expect_(kind lex.TokenKind) bool {
+	_, ok := p.expect(kind)
+	return ok
+}
+
+func (p *Parser) expect(kind lex.TokenKind) (lex.Token, bool) {
+	if tok, ok := p.eat(kind); ok {
+		return tok, true
 	}
 
 	tok := p.lexer.Peek()
 	p.errors = append(p.errors, mkError(tok, "expected token %s, found %s `%s`", kind.Name(), tok.Kind.Name(), tok.String()))
-	return false
+	return lex.Token{}, false
 }
 
 func mkError(tok lex.Token, msg string, args ...any) *gqlerror.Error {
@@ -105,13 +118,13 @@ func (p *Parser) parseStmt() syn.Stmt {
 }
 
 func (p *Parser) parseLetStmt() *syn.LetStmt {
-	assert(p.expect(lex.Let))
+	p.bump(lex.Let)
 	pat := p.parsePat()
 	if pat == nil {
 		return nil
 	}
 
-	if !p.expect(lex.Equals) {
+	if !p.expect_(lex.Equals) {
 		return nil
 	}
 
@@ -129,10 +142,37 @@ func (p *Parser) parsePat() syn.Pat {
 	case lex.Name:
 		p.bump(lex.Name)
 		return &syn.NamePat{Name: tok.Value}
+	case lex.BraceL:
+		return p.parseObjectPat()
 	default:
 		p.errors = append(p.errors, mkError(tok, "expected pattern, found %s `%s`", tok.Kind.Name(), tok.String()))
 		return nil
 	}
+}
+
+func (p *Parser) parseObjectPat() *syn.ObjectPat {
+	p.bump(lex.BraceL)
+	fields := orderedmap.New[string, syn.Pat]()
+	for !p.at(lex.EOF) && !p.at(lex.BraceR) {
+		name, ok := p.expect(lex.Name)
+		if !ok {
+			return nil
+		}
+
+		var pat syn.Pat = &syn.NamePat{Name: name.Value}
+		if p.eat_(lex.Colon) {
+			pat = p.parsePat()
+			if pat == nil {
+				return nil
+			}
+		}
+
+		fields.Set(name.Value, pat)
+	}
+
+	p.expect(lex.BraceR)
+
+	return &syn.ObjectPat{Fields: fields}
 }
 
 func (p *Parser) parseExpr() syn.Expr {
