@@ -13,7 +13,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"github.com/vektah/gqlparser/v2/parser"
-	orderedmap "github.com/wk8/go-ordered-map/v2"
+	"github.com/wk8/go-ordered-map/v2"
 )
 
 // Implementation notes:
@@ -238,6 +238,8 @@ func (p *Parser) parseCallExpr(f syn.Expr) *syn.CallExpr {
 func (p *Parser) parseAtomExpr() syn.Expr {
 	tok := p.peek()
 	switch tok.Kind {
+	case lex.BraceL:
+		return p.parseObjectExpr()
 	case lex.Query, lex.Mutation:
 		return p.parseQueryExpr()
 	case lex.Int, lex.Float, lex.String, lex.BlockString, lex.True, lex.False, lex.Null:
@@ -249,6 +251,31 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 		p.errors = append(p.errors, mkError(tok, "expected expression, found %s", tok.Kind.Name()))
 		return nil
 	}
+}
+
+func (p *Parser) parseObjectExpr() *syn.ObjectExpr {
+	p.bump(lex.BraceL)
+	fields := orderedmap.New[string, syn.Expr]()
+	for !p.at(lex.EOF) && !p.at(lex.BraceR) {
+		name, ok := p.expect(lex.Name)
+		if !ok {
+			return nil
+		}
+
+		var expr syn.Expr = &syn.NameExpr{Name: name.Value}
+		if p.eat_(lex.Colon) {
+			expr = p.parseExpr()
+			if expr == nil {
+				return nil
+			}
+		}
+
+		fields.Set(name.Value, expr)
+	}
+
+	p.expect(lex.BraceR)
+
+	return &syn.ObjectExpr{Fields: fields}
 }
 
 func (p *Parser) parseLiteralExpr() *syn.LiteralExpr {

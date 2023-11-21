@@ -1,5 +1,5 @@
 
-[TestParser/mutation - 1]
+[TestParser/expr/mutation.gqlt - 1]
 let foo = mutation {
   example {
     foo

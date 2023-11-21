@@ -223,6 +223,19 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 
 		return val, nil
 
+	case *syn.ObjectExpr:
+		fields := make(map[string]any, expr.Fields.Len())
+		for entry := expr.Fields.Oldest(); entry != nil; entry = entry.Next() {
+			name := entry.Key
+			val, err := e.eval(ctx, ecx, entry.Value)
+			if err != nil {
+				return nil, err
+			}
+			fields[name] = val
+		}
+
+		return fields, nil
+
 	case *syn.MatchesExpr:
 		val, err := e.eval(ctx, ecx, expr.Expr)
 		if err != nil {

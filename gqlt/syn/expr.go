@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/vektah/gqlparser/v2/ast"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 type Expr interface {
@@ -96,4 +97,26 @@ func (expr MatchesExpr) Dump(w io.Writer) {
 	expr.Expr.Dump(w)
 	io.WriteString(w, " matches ")
 	expr.Pat.Dump(w)
+}
+
+type ObjectExpr struct {
+	Fields *orderedmap.OrderedMap[string, Expr]
+}
+
+var _ Expr = ObjectExpr{}
+
+func (ObjectExpr) isExpr() {}
+func (ObjectExpr) isNode() {}
+
+func (expr ObjectExpr) Dump(w io.Writer) {
+	io.WriteString(w, "{")
+
+	for entry := expr.Fields.Oldest(); entry != nil; entry = entry.Next() {
+		io.WriteString(w, " ")
+		io.WriteString(w, entry.Key)
+		io.WriteString(w, ": ")
+		entry.Value.Dump(w)
+	}
+
+	io.WriteString(w, " }")
 }

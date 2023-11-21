@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"andyyu2004/gqlt/parser"
@@ -31,14 +32,16 @@ func glob(dir string, ext string) ([]string, error) {
 }
 
 func TestParser(t *testing.T) {
-	paths, err := glob("test-data", ".gqlt")
+	const testdata = "test-data"
+	paths, err := glob(testdata, ".gqlt")
 	require.NoError(t, err)
 	require.NotEmpty(t, paths)
 
 	for _, path := range paths {
 		path := path
-		_, filename := filepath.Split(path)
-		name := filename[:len(filename)-len(filepath.Ext(path))]
+		idx := strings.Index(path, testdata)
+		require.True(t, idx != -1)
+		name := path[idx+len(testdata)+1:]
 
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()

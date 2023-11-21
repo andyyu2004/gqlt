@@ -1,4 +1,0 @@
-
-[TestParser/matches - 1]
-assert(1 matches 1)
----
