@@ -37,7 +37,9 @@ func New(src *ast.Source) (Lexer, error) {
 			return Lexer{}, err
 		}
 
-		tokens = append(tokens, tok)
+		if tok.Kind != lexer.Comment {
+			tokens = append(tokens, tok)
+		}
 
 		if tok.Kind == lexer.EOF {
 			break
