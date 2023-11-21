@@ -1,4 +1,5 @@
 let 1 = 1;
+assert(1 matches 1);
 
 let dogs = query {
 	animals {
@@ -20,6 +21,7 @@ let name = query {
 	}
 };
 
+assert(name matches "Buddy");
 
 let { id, name } = query ($name: String!) {
 	animals {

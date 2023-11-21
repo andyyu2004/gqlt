@@ -29,7 +29,7 @@ type scope struct {
 	vars   map[string]any
 }
 
-func (s *scope) Bind(name string, val any) {
+func (s *scope) bind(name string, val any) {
 	s.vars[name] = val
 }
 
@@ -70,7 +70,7 @@ func (s *scope) gqlVars() map[string]any {
 	return vars
 }
 
-type function = func(args ...any) (any, error)
+type function = func(args []any) (any, error)
 
 func checkArity(arity int, args []any) error {
 	if len(args) != arity {
@@ -99,7 +99,7 @@ func truthy(val any) bool {
 
 var builtinScope = &scope{
 	vars: map[string]any{
-		"assert": func(args ...any) (any, error) {
+		"assert": func(args []any) (any, error) {
 			if err := checkArity(1, args); err != nil {
 				return nil, err
 			}
@@ -145,24 +145,34 @@ func (e *Executor) let(ctx context.Context, ecx *executionContext, let *syn.LetS
 		return err
 	}
 
-	if err := bindPat(ecx, let.Pat, val); err != nil {
+	if err := bindPat(ecx.scope, let.Pat, val); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func bindPat(ecx *executionContext, pat syn.Pat, val any) error {
+type binder interface {
+	bind(name string, val any)
+}
+
+type dummyBinder struct{}
+
+var _ binder = dummyBinder{}
+
+func (dummyBinder) bind(string, any) {}
+
+func bindPat(binder binder, pat syn.Pat, val any) error {
 	switch pat := pat.(type) {
 	case *syn.NamePat:
-		ecx.scope.Bind(pat.Name, val)
+		binder.bind(pat.Name, val)
 		return nil
 	case *syn.ObjectPat:
 		vals, ok := val.(map[string]any)
 		if !ok {
 			return fmt.Errorf("cannot bind object pattern to value: %T", val)
 		}
-		return bindObjectPat(ecx, pat, vals)
+		return bindObjectPat(binder, pat, vals)
 	case *syn.LiteralPat:
 		if pat.Value != val {
 			return fmt.Errorf("literal pattern does not match value: %v != %v", pat.Value, val)
@@ -173,7 +183,7 @@ func bindPat(ecx *executionContext, pat syn.Pat, val any) error {
 	}
 }
 
-func bindObjectPat(ecx *executionContext, pat *syn.ObjectPat, values map[string]any) error {
+func bindObjectPat(binder binder, pat *syn.ObjectPat, values map[string]any) error {
 	for entry := pat.Fields.Oldest(); entry != nil; entry = entry.Next() {
 		name := entry.Key
 		pat := entry.Value
@@ -183,7 +193,7 @@ func bindObjectPat(ecx *executionContext, pat *syn.ObjectPat, values map[string]
 			return fmt.Errorf("object missing field specified in pattern %s", name)
 		}
 
-		if err := bindPat(ecx, pat, val); err != nil {
+		if err := bindPat(binder, pat, val); err != nil {
 			return err
 		}
 	}
@@ -213,6 +223,14 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 
 		return val, nil
 
+	case *syn.MatchesExpr:
+		val, err := e.eval(ctx, ecx, expr.Expr)
+		if err != nil {
+			return nil, err
+		}
+
+		return bindPat(dummyBinder{}, expr.Pat, val) == nil, nil
+
 	case *syn.CallExpr:
 		fn, err := e.eval(ctx, ecx, expr.Fn)
 		if err != nil {
@@ -230,7 +248,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			if err != nil {
 				return nil, err
 			}
-			args[i] = reflect.ValueOf(arg)
+			args[i] = arg
 		}
 
 		return f(args)

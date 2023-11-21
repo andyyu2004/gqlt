@@ -81,3 +81,19 @@ func (expr CallExpr) Dump(w io.Writer) {
 	}
 	io.WriteString(w, ")")
 }
+
+type MatchesExpr struct {
+	Expr Expr
+	Pat  Pat
+}
+
+var _ Expr = MatchesExpr{}
+
+func (MatchesExpr) isExpr() {}
+func (MatchesExpr) isNode() {}
+
+func (expr MatchesExpr) Dump(w io.Writer) {
+	expr.Expr.Dump(w)
+	io.WriteString(w, " matches ")
+	expr.Pat.Dump(w)
+}

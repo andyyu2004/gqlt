@@ -13,7 +13,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"github.com/vektah/gqlparser/v2/parser"
-	"github.com/wk8/go-ordered-map/v2"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 // Implementation notes:
@@ -201,9 +201,21 @@ func (p *Parser) parseExpr() syn.Expr {
 	switch p.peek().Kind {
 	case lex.ParenL:
 		return p.parseCallExpr(expr)
+	case lex.Matches:
+		return p.parseMatchesExpr(expr)
 	}
 
 	return expr
+}
+
+func (p *Parser) parseMatchesExpr(expr syn.Expr) *syn.MatchesExpr {
+	p.bump(lex.Matches)
+	pat := p.parsePat()
+	if pat == nil {
+		return nil
+	}
+
+	return &syn.MatchesExpr{Expr: expr, Pat: pat}
 }
 
 func (p *Parser) parseCallExpr(f syn.Expr) *syn.CallExpr {
@@ -234,7 +246,7 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 		p.bump(lex.Name)
 		return &syn.NameExpr{Name: tok.Value}
 	default:
-		p.errors = append(p.errors, mkError(tok, "expected expression, found %s `%s`", tok.Kind.Name(), tok.String()))
+		p.errors = append(p.errors, mkError(tok, "expected expression, found %s", tok.Kind.Name()))
 		return nil
 	}
 }
