@@ -81,6 +81,10 @@ func convertToken(tok lexer.Token) Token {
 			kind = Query
 		case "mutation":
 			kind = Mutation
+		case "true":
+			kind = True
+		case "false":
+			kind = False
 		default:
 			kind = Name
 		}
@@ -129,6 +133,8 @@ const (
 	Let
 	Query
 	Mutation
+	True
+	False
 )
 
 func (t TokenKind) Name() string {
@@ -185,6 +191,10 @@ func (t TokenKind) Name() string {
 		return "query"
 	case Mutation:
 		return "mutation"
+	case True:
+		return "true"
+	case False:
+		return "false"
 	}
 	return "Unknown " + strconv.Itoa(int(t))
 }
@@ -243,6 +253,10 @@ func (t TokenKind) String() string {
 		return "query"
 	case Mutation:
 		return "mutation"
+	case True:
+		return "true"
+	case False:
+		return "false"
 	}
 	return "Unknown " + strconv.Itoa(int(t))
 }

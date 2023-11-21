@@ -2,3 +2,5 @@
 3;
 "a string";
 3.14;
+true;
+false;

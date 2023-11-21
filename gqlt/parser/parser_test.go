@@ -13,8 +13,25 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
+// builtin glob doesn't implement ** :/
+func glob(dir string, ext string) ([]string, error) {
+	files := []string{}
+	err := filepath.Walk(dir, func(path string, _ os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if filepath.Ext(path) == ext {
+			files = append(files, path)
+		}
+		return nil
+	})
+
+	return files, err
+}
+
 func TestParser(t *testing.T) {
-	paths, err := filepath.Glob(filepath.Join("test-data", "**.gqlt"))
+	paths, err := glob("test-data", ".gqlt")
 	require.NoError(t, err)
 	require.NotEmpty(t, paths)
 

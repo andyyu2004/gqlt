@@ -16,6 +16,8 @@ import (
 	"github.com/wk8/go-ordered-map/v2"
 )
 
+// Implementation notes:
+// The error handling invariant is that if you return nil, you must have already emitted an error.
 type Parser struct {
 	lexer  lex.Lexer
 	stmts  []syn.Stmt
@@ -178,12 +180,43 @@ func (p *Parser) parseObjectPat() *syn.ObjectPat {
 }
 
 func (p *Parser) parseExpr() syn.Expr {
+	expr := p.parseAtomExpr()
+
+	switch p.peek().Kind {
+	case lex.ParenL:
+		return p.parseCallExpr(expr)
+	}
+
+	return expr
+}
+
+func (p *Parser) parseCallExpr(f syn.Expr) syn.CallExpr {
+	p.bump(lex.ParenL)
+	args := []syn.Expr{}
+	for !p.at(lex.EOF) && !p.at(lex.ParenR) {
+		arg := p.parseExpr()
+		if arg == nil {
+			continue
+		}
+
+		args = append(args, arg)
+	}
+
+	p.expect(lex.ParenR)
+
+	return syn.CallExpr{Fn: f, Args: args}
+}
+
+func (p *Parser) parseAtomExpr() syn.Expr {
 	tok := p.peek()
 	switch tok.Kind {
 	case lex.Query, lex.Mutation:
 		return p.parseQueryExpr()
-	case lex.Int, lex.Float, lex.String, lex.BlockString:
+	case lex.Int, lex.Float, lex.String, lex.BlockString, lex.True, lex.False:
 		return p.parseLiteralExpr()
+	case lex.Name:
+		p.bump(lex.Name)
+		return &syn.NameExpr{Name: tok.Value}
 	default:
 		p.errors = append(p.errors, mkError(tok, "expected expression, found %s `%s`", tok.Kind.Name(), tok.String()))
 		return nil
@@ -201,6 +234,10 @@ func (p *Parser) parseLiteralExpr() *syn.LiteralExpr {
 		return &syn.LiteralExpr{Value: s.Value}
 	} else if s, ok := p.eat(lex.BlockString); ok {
 		return &syn.LiteralExpr{Value: s.Value}
+	} else if p.eat_(lex.True) {
+		return &syn.LiteralExpr{Value: true}
+	} else if p.eat_(lex.False) {
+		return &syn.LiteralExpr{Value: false}
 	} else {
 		panic("unreachable")
 	}

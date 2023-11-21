@@ -12,6 +12,19 @@ type Expr interface {
 	isExpr()
 }
 
+type NameExpr struct {
+	Name string
+}
+
+var _ Expr = NameExpr{}
+
+func (NameExpr) isExpr() {}
+func (NameExpr) isNode() {}
+
+func (expr NameExpr) Dump(w io.Writer) {
+	io.WriteString(w, expr.Name)
+}
+
 type OperationExpr struct {
 	// unparsed graphql string
 	Query string
