@@ -1,3 +1,5 @@
+let 1 = 1;
+
 let dogs = query {
 	animals {
 		dogs {

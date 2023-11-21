@@ -158,10 +158,16 @@ func (p *Parser) parsePat() syn.Pat {
 		return &syn.NamePat{Name: tok.Value}
 	case lex.BraceL:
 		return p.parseObjectPat()
+	case lex.Int, lex.Float, lex.String, lex.BlockString, lex.True, lex.False, lex.Null:
+		return p.parseLiteralPat()
 	default:
 		p.errors = append(p.errors, mkError(tok, "expected pattern, found %s `%s`", tok.Kind.Name(), tok.String()))
 		return nil
 	}
+}
+
+func (p *Parser) parseLiteralPat() *syn.LiteralPat {
+	return &syn.LiteralPat{Value: p.parseLiteral()}
 }
 
 func (p *Parser) parseObjectPat() *syn.ObjectPat {
@@ -234,24 +240,26 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 }
 
 func (p *Parser) parseLiteralExpr() *syn.LiteralExpr {
+	return &syn.LiteralExpr{Value: p.parseLiteral()}
+}
+
+func (p *Parser) parseLiteral() any {
 	if s, ok := p.eat(lex.Int); ok {
-		i := must(strconv.Atoi(s.Value))
-		return &syn.LiteralExpr{Value: i}
+		return must(strconv.Atoi(s.Value))
 	} else if s, ok := p.eat(lex.Float); ok {
-		f := must(strconv.ParseFloat(s.Value, 64))
-		return &syn.LiteralExpr{Value: f}
+		return must(strconv.ParseFloat(s.Value, 64))
 	} else if s, ok := p.eat(lex.String); ok {
-		return &syn.LiteralExpr{Value: s.Value}
+		return s.Value
 	} else if s, ok := p.eat(lex.BlockString); ok {
-		return &syn.LiteralExpr{Value: s.Value}
+		return s.Value
 	} else if p.eat_(lex.True) {
-		return &syn.LiteralExpr{Value: true}
+		return true
 	} else if p.eat_(lex.False) {
-		return &syn.LiteralExpr{Value: false}
+		return false
 	} else if p.eat_(lex.Null) {
-		return &syn.LiteralExpr{Value: nil}
+		return nil
 	} else {
-		panic("unreachable, token types was checked by caller")
+		panic("unreachable, token types were checked by caller")
 	}
 }
 

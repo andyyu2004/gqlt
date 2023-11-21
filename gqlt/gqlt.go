@@ -163,6 +163,11 @@ func bindPat(ecx *executionContext, pat syn.Pat, val any) error {
 			return fmt.Errorf("cannot bind object pattern to value: %T", val)
 		}
 		return bindObjectPat(ecx, pat, vals)
+	case *syn.LiteralPat:
+		if pat.Value != val {
+			return fmt.Errorf("literal pattern does not match value: %v != %v", pat.Value, val)
+		}
+		return nil
 	default:
 		panic(fmt.Sprintf("missing pattern case: %T", pat))
 	}

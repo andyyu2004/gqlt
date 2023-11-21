@@ -7,3 +7,7 @@
 true
 false
 ---
+
+[TestParser/literal#01 - 1]
+let 1 = 1
+---
