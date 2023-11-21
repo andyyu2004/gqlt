@@ -109,6 +109,7 @@ const (
 	ParenR
 	Spread
 	Colon
+	Semi
 	Equals
 	At
 	BracketL
@@ -150,6 +151,8 @@ func (t TokenKind) Name() string {
 		return "Spread"
 	case Colon:
 		return "Colon"
+	case Semi:
+		return "Semicolon"
 	case Equals:
 		return "Equals"
 	case At:
@@ -206,6 +209,8 @@ func (t TokenKind) String() string {
 		return "..."
 	case Colon:
 		return ":"
+	case Semi:
+		return ";"
 	case Equals:
 		return "="
 	case At:
