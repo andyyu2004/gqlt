@@ -99,7 +99,7 @@ func truthy(val any) bool {
 
 var builtinScope = &scope{
 	vars: map[string]any{
-		"assert": func(args []any) (any, error) {
+		"example": func(args []any) (any, error) {
 			if err := checkArity(1, args); err != nil {
 				return nil, err
 			}
@@ -131,6 +131,17 @@ func (e *Executor) Run(ctx context.Context, file syn.File) error {
 			if _, err := e.eval(ctx, ecx, stmt.Expr); err != nil {
 				return err
 			}
+
+		case *syn.AssertStmt:
+			val, err := e.eval(ctx, ecx, stmt.Expr)
+			if err != nil {
+				return err
+			}
+
+			if !truthy(val) {
+				return fmt.Errorf("assertion failed")
+			}
+
 		default:
 			panic(fmt.Sprintf("missing stmt case: %T", stmt))
 		}

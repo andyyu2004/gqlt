@@ -20,6 +20,20 @@ func (stmt ExprStmt) Dump(w io.Writer) {
 	stmt.Expr.Dump(w)
 }
 
+type AssertStmt struct {
+	Expr Expr
+}
+
+var _ Stmt = AssertStmt{}
+
+func (AssertStmt) isStmt() {}
+func (AssertStmt) isNode() {}
+
+func (stmt AssertStmt) Dump(w io.Writer) {
+	io.WriteString(w, "assert ")
+	stmt.Expr.Dump(w)
+}
+
 type LetStmt struct {
 	Pat  Pat
 	Expr Expr
@@ -29,6 +43,7 @@ var _ Stmt = LetStmt{}
 
 func (LetStmt) isStmt() {}
 func (LetStmt) isNode() {}
+
 func (let LetStmt) Dump(w io.Writer) {
 	io.WriteString(w, "let ")
 	let.Pat.Dump(w)

@@ -1,0 +1,2 @@
+assert true;
+assert 1 matches 1;

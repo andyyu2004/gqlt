@@ -87,6 +87,8 @@ func convertToken(tok lexer.Token) Token {
 			kind = Null
 		case "matches":
 			kind = Matches
+		case "assert":
+			kind = Assert
 		default:
 			kind = Name
 		}
@@ -139,6 +141,7 @@ const (
 	False
 	Null
 	Matches
+	Assert
 )
 
 func (t TokenKind) Name() string {
@@ -157,6 +160,8 @@ func (t TokenKind) Name() string {
 		return "null"
 	case Matches:
 		return "matches"
+	case Assert:
+		return "assert"
 	default:
 		return lexer.Type(t).Name()
 	}
@@ -178,6 +183,8 @@ func (t TokenKind) String() string {
 		return "null"
 	case Matches:
 		return "matches"
+	case Assert:
+		return "assert"
 	default:
 		return lexer.Type(t).String()
 	}

@@ -1,4 +1,4 @@
 
 [TestParser/expr/matches.gqlt - 1]
-assert(1 matches 1)
+1 matches 1
 ---

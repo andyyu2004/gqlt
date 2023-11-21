@@ -121,6 +121,8 @@ func (p *Parser) parseStmt() syn.Stmt {
 	switch tok.Kind {
 	case lex.Let:
 		return p.parseLetStmt()
+	case lex.Assert:
+		return p.parseAssertStmt()
 	default:
 		expr := p.parseExpr()
 		if expr == nil {
@@ -129,6 +131,16 @@ func (p *Parser) parseStmt() syn.Stmt {
 
 		return &syn.ExprStmt{Expr: expr}
 	}
+}
+
+func (p *Parser) parseAssertStmt() *syn.AssertStmt {
+	p.bump(lex.Assert)
+	expr := p.parseExpr()
+	if expr == nil {
+		return nil
+	}
+
+	return &syn.AssertStmt{Expr: expr}
 }
 
 func (p *Parser) parseLetStmt() *syn.LetStmt {

@@ -1,0 +1,5 @@
+
+[TestParser/stmt/assert.gqlt - 1]
+assert true
+assert 1 matches 1
+---
