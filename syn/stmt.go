@@ -20,6 +20,23 @@ func (stmt ExprStmt) Dump(w io.Writer) {
 	stmt.Expr.Dump(w)
 }
 
+type SetStmt struct {
+	Key   string
+	Value Expr
+}
+
+var _ Stmt = SetStmt{}
+
+func (SetStmt) isStmt() {}
+func (SetStmt) isNode() {}
+
+func (stmt SetStmt) Dump(w io.Writer) {
+	io.WriteString(w, "set ")
+	io.WriteString(w, stmt.Key)
+	io.WriteString(w, " ")
+	stmt.Value.Dump(w)
+}
+
 type AssertStmt struct {
 	Expr Expr
 }

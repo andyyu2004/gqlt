@@ -126,8 +126,39 @@ func New(client Client) *Executor {
 	return &Executor{client}
 }
 
+type settings struct {
+	namespace []string
+}
+
+func (s *settings) Set(key string, val any) error {
+	switch key {
+	case "namespace":
+		switch val := val.(type) {
+		case string:
+			s.namespace = strings.Split(val, "/")
+			return nil
+		case []any:
+			parts := make([]string, len(val))
+			for i, v := range val {
+				s, ok := v.(string)
+				if !ok {
+					return fmt.Errorf("expected string elements in namespace list, found %T", v)
+				}
+				parts[i] = s
+			}
+			s.namespace = parts
+			return nil
+		default:
+			return fmt.Errorf("expected slash-separated string or list of strings for namespace setting, found %T", val)
+		}
+	default:
+		return fmt.Errorf("unknown setting: %s", key)
+	}
+}
+
 type executionContext struct {
-	scope *scope
+	scope    *scope
+	settings settings
 }
 
 type scope struct {
@@ -382,6 +413,16 @@ func (e *Executor) runFile(ctx context.Context, file syn.File) error {
 				return err
 			}
 
+		case *syn.SetStmt:
+			val, err := e.eval(ctx, ecx, stmt.Value)
+			if err != nil {
+				return err
+			}
+
+			if err := ecx.settings.Set(stmt.Key, val); err != nil {
+				return err
+			}
+
 		case *syn.AssertStmt:
 			bin, ok := stmt.Expr.(*syn.BinaryExpr)
 			if ok && bin.Op == lex.Equals2 {
@@ -490,12 +531,45 @@ func formatOperation(operation *ast.OperationDefinition) string {
 	return buf.String()
 }
 
+func mapSlice[T, U any](xs []T, f func(T) U) []U {
+	ys := make([]U, len(xs))
+	for i, x := range xs {
+		ys[i] = f(x)
+	}
+	return ys
+}
+
+func applyNamespaces(namespace []string, operation *ast.OperationDefinition) *ast.OperationDefinition {
+	selectionSet := operation.SelectionSet
+	// iterate in reverse order to build up the selection set from the inside out
+	for i := len(namespace) - 1; i >= 0; i-- {
+		selectionSet = ast.SelectionSet{
+			&ast.Field{Alias: namespace[i], Name: namespace[i], SelectionSet: selectionSet},
+		}
+	}
+
+	return &ast.OperationDefinition{
+		Operation:           operation.Operation,
+		Name:                operation.Name,
+		VariableDefinitions: operation.VariableDefinitions,
+		Directives:          operation.Directives,
+		SelectionSet:        selectionSet,
+		Position:            operation.Position,
+		Comment:             operation.Comment,
+	}
+}
+
 func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Expr) (any, error) {
 	switch expr := expr.(type) {
 	case *syn.OperationExpr:
-		query := formatOperation(expr.Operation)
-		var data any
+		query := formatOperation(applyNamespaces(ecx.settings.namespace, expr.Operation))
+		if len(ecx.settings.namespace) > 0 {
+			fmt.Printf("namespace: %v\n", ecx.settings.namespace)
+			println(query)
+		}
+
 		// Pass our local variables directly also as graphql variables
+		var data any
 		req := Request{Query: query, Variables: ecx.scope.gqlVars()}
 		if err := e.client.Request(ctx, req, &data); err != nil {
 			return nil, err
