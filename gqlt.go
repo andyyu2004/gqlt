@@ -237,7 +237,10 @@ type runConfig struct {
 
 // `Run` all `gqlt` tests in the given directory (recursively).
 func (e *Executor) Run(t *testing.T, ctx context.Context, root string, opts ...RunOpt) {
-	var runConfig runConfig
+	runConfig := runConfig{
+		glob: "**",
+	}
+
 	for _, opt := range opts {
 		opt(&runConfig)
 	}
