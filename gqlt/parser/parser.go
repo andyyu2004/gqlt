@@ -304,6 +304,8 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 	switch tok.Kind {
 	case lex.BraceL:
 		return p.parseObjectExpr()
+	case lex.BracketL:
+		return p.parseListExpr()
 	case lex.Query, lex.Mutation:
 		return p.parseQueryExpr()
 	case lex.Int, lex.Float, lex.String, lex.BlockString, lex.True, lex.False, lex.Null:
@@ -315,6 +317,23 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 		p.errors = append(p.errors, mkError(tok, "expected expression, found `%s`", tok.Kind.String()))
 		return nil
 	}
+}
+
+func (p *Parser) parseListExpr() *syn.ListExpr {
+	p.bump(lex.BracketL)
+	exprs := []syn.Expr{}
+	for !p.at(lex.EOF) && !p.at(lex.BracketR) {
+		expr := p.parseExpr()
+		if expr == nil {
+			return nil
+		}
+
+		exprs = append(exprs, expr)
+	}
+
+	p.expect(lex.BracketR)
+
+	return &syn.ListExpr{Exprs: exprs}
 }
 
 func (p *Parser) parseObjectExpr() *syn.ObjectExpr {

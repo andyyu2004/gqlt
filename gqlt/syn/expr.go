@@ -101,6 +101,28 @@ func (expr MatchesExpr) Dump(w io.Writer) {
 	expr.Pat.Dump(w)
 }
 
+type ListExpr struct {
+	Exprs []Expr
+}
+
+var _ Expr = ListExpr{}
+
+func (ListExpr) isExpr() {}
+func (ListExpr) isNode() {}
+
+func (expr ListExpr) Dump(w io.Writer) {
+	io.WriteString(w, "[")
+
+	for i, expr := range expr.Exprs {
+		if i > 0 {
+			io.WriteString(w, ", ")
+		}
+		expr.Dump(w)
+	}
+
+	io.WriteString(w, "]")
+}
+
 type ObjectExpr struct {
 	Fields *orderedmap.OrderedMap[string, Expr]
 }

@@ -255,6 +255,18 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 
 		return val, nil
 
+	case *syn.ListExpr:
+		vals := make([]any, len(expr.Exprs))
+		for i, expr := range expr.Exprs {
+			val, err := e.eval(ctx, ecx, expr)
+			if err != nil {
+				return nil, err
+			}
+			vals[i] = val
+		}
+
+		return vals, nil
+
 	case *syn.ObjectExpr:
 		fields := make(map[string]any, expr.Fields.Len())
 		for entry := expr.Fields.Oldest(); entry != nil; entry = entry.Next() {
