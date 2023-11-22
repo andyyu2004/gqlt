@@ -267,6 +267,14 @@ func (p *Parser) currentOp() (bp, lex.Token, assoc) {
 		return 10, tok, left
 	case lex.BangEqual:
 		return 10, tok, left
+	case lex.Plus:
+		return 20, tok, left
+	case lex.Minus:
+		return 20, tok, left
+	case lex.Star:
+		return 30, tok, left
+	case lex.Slash:
+		return 30, tok, left
 	default:
 		return 0, tok, left
 	}
@@ -367,7 +375,8 @@ func (p *Parser) parseLiteralExpr() *syn.LiteralExpr {
 
 func (p *Parser) parseLiteral() any {
 	if s, ok := p.eat(lex.Int); ok {
-		return must(strconv.Atoi(s.Value))
+		// we only deal with float64s as values for simplicity
+		return float64(must(strconv.Atoi(s.Value)))
 	} else if s, ok := p.eat(lex.Float); ok {
 		return must(strconv.ParseFloat(s.Value, 64))
 	} else if s, ok := p.eat(lex.String); ok {

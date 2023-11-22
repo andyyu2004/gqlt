@@ -149,6 +149,10 @@ const (
 	BraceL
 	BraceR
 	Pipe
+	Plus
+	Minus
+	Star
+	Slash
 	Name
 	Int
 	Float

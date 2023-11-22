@@ -81,6 +81,78 @@ func checkArity(arity int, args []any) error {
 	return nil
 }
 
+func eq(lhs, rhs any) bool {
+	return reflect.DeepEqual(lhs, rhs)
+}
+
+func add(lhs, rhs any) (any, error) {
+	switch lhs := lhs.(type) {
+	case float64:
+		switch rhs := rhs.(type) {
+		case float64:
+			return lhs + rhs, nil
+		}
+	case string:
+		switch rhs := rhs.(type) {
+		case string:
+			return lhs + rhs, nil
+		}
+	case []any:
+		switch rhs := rhs.(type) {
+		case []any:
+			return append(lhs, rhs...), nil
+		}
+	}
+
+	return nil, fmt.Errorf("cannot add %T and %T", lhs, rhs)
+}
+
+func sub(lhs, rhs any) (any, error) {
+	switch lhs := lhs.(type) {
+	case float64:
+		switch rhs := rhs.(type) {
+		case float64:
+			return lhs - rhs, nil
+		}
+	}
+
+	return nil, fmt.Errorf("cannot subtract %T and %T", lhs, rhs)
+}
+
+func mul(lhs, rhs any) (any, error) {
+	switch lhs := lhs.(type) {
+	case float64:
+		switch rhs := rhs.(type) {
+		case float64:
+			return lhs * rhs, nil
+		}
+	case []any:
+		switch rhs := rhs.(type) {
+		case float64:
+			n := int(rhs)
+			copy := make([]any, 0, len(lhs)*n)
+			for i := 0; i < n; i++ {
+				copy = append(copy, lhs...)
+			}
+			return copy, nil
+		}
+	}
+
+	return nil, fmt.Errorf("cannot multiply %T and %T", lhs, rhs)
+}
+
+func div(lhs, rhs any) (any, error) {
+	switch lhs := lhs.(type) {
+	case float64:
+		switch rhs := rhs.(type) {
+		case float64:
+			return lhs / rhs, nil
+		}
+	}
+
+	return nil, fmt.Errorf("cannot divide %T and %T", lhs, rhs)
+}
+
 func truthy(val any) bool {
 	switch val := val.(type) {
 	case nil:
@@ -134,13 +206,32 @@ func (e *Executor) Run(ctx context.Context, file syn.File) error {
 			}
 
 		case *syn.AssertStmt:
-			val, err := e.eval(ctx, ecx, stmt.Expr)
-			if err != nil {
-				return err
-			}
+			bin, ok := stmt.Expr.(*syn.BinaryExpr)
+			if ok && bin.Op == lex.Equals2 {
+				// special case for common equality assertions to have a better error message
+				lhs, err := e.eval(ctx, ecx, bin.Left)
+				if err != nil {
+					return err
+				}
 
-			if !truthy(val) {
-				return fmt.Errorf("assertion failed")
+				rhs, err := e.eval(ctx, ecx, bin.Right)
+				if err != nil {
+					return err
+				}
+
+				if !eq(lhs, rhs) {
+					return fmt.Errorf("assertion failed: %v != %v", lhs, rhs)
+				}
+			} else {
+				val, err := e.eval(ctx, ecx, stmt.Expr)
+				if err != nil {
+					return err
+				}
+
+				if !truthy(val) {
+					return fmt.Errorf("assertion failed")
+				}
+
 			}
 
 		default:
@@ -240,11 +331,19 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 
 		switch expr.Op {
 		case lex.Equals2:
-			return reflect.DeepEqual(lhs, rhs), nil
+			return eq(lhs, rhs), nil
 		case lex.BangEqual:
-			return !reflect.DeepEqual(lhs, rhs), nil
+			return !eq(lhs, rhs), nil
+		case lex.Plus:
+			return add(lhs, rhs)
+		case lex.Minus:
+			return sub(lhs, rhs)
+		case lex.Star:
+			return mul(lhs, rhs)
+		case lex.Slash:
+			return div(lhs, rhs)
 		default:
-			panic(fmt.Sprintf("missing binary op eval case: %s", expr.Op))
+			panic(fmt.Sprintf("missing binary expr eval case: %s", expr.Op))
 		}
 
 	case *syn.NameExpr:

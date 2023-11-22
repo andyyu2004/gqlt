@@ -1,3 +1,4 @@
+assert 1.0 == 1;
 assert 1 == 1;
 assert 1 != 2;
 assert 1 == 1 != false;
@@ -6,3 +7,14 @@ assert { foo: "bar" } != { foo: "baz" };
 assert [1, 2, 3] == [1, 2, 3];
 assert [1, 2, 3] != [1, 2, 4];
 assert [1, 2, 3] != { foo: "bar" };
+
+assert 1 + 2 == 3;
+assert 2 - 1 == 1;
+assert 1 * 2 == 2;
+assert 1 / 1 == 1;
+assert 1 + 2 * 3 == 7;
+assert 1 + 2 * 3 / 2 == 4;
+
+assert [1, 2, 3] + [4, 5, 6] == [1, 2, 3, 4, 5, 6];
+assert [1, 2, 3] * 2 == [1, 2, 3, 1, 2, 3];
+
