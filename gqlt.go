@@ -43,9 +43,7 @@ var _ Client = GraphQLGophersClient{}
 
 type Executor struct{ client Client }
 
-type Option func(*Executor)
-
-func New(client Client, opts ...Option) *Executor {
+func New(client Client) *Executor {
 	return &Executor{client}
 }
 
@@ -238,7 +236,7 @@ type runConfig struct {
 }
 
 // `Run` all `gqlt` tests in the given directory (recursively).
-func (e *Executor) Run(t *testing.T, ctx context.Context, root string, client Client, opts ...RunOpt) {
+func (e *Executor) Run(t *testing.T, ctx context.Context, root string, opts ...RunOpt) {
 	var runConfig runConfig
 	for _, opt := range opts {
 		opt(&runConfig)
@@ -276,8 +274,7 @@ func (e *Executor) Run(t *testing.T, ctx context.Context, root string, client Cl
 				t.Fatal(err)
 			}
 
-			executor := New(client)
-			if err := executor.runFile(ctx, file); err != nil {
+			if err := e.runFile(ctx, file); err != nil {
 				t.Fatal(err)
 			}
 		})

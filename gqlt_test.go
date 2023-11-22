@@ -33,8 +33,7 @@ func TestGqlt(t *testing.T) {
 
 	client := gqlt.GraphQLGophersClient{graphql.MustParseSchema(schema, q, graphql.UseFieldResolvers())}
 
-	executor := gqlt.New(client)
-	executor.Run(t, ctx, testpath, client, gqlt.WithGlob(debugGlob))
+	gqlt.New(client).Run(t, ctx, testpath, gqlt.WithGlob(debugGlob))
 }
 
 type query struct {
