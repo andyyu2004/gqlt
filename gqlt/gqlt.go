@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"andyyu2004/gqlt/lex"
 	"andyyu2004/gqlt/syn"
 )
 
@@ -143,7 +144,7 @@ func (e *Executor) Run(ctx context.Context, file syn.File) error {
 			}
 
 		default:
-			panic(fmt.Sprintf("missing stmt case: %T", stmt))
+			panic(fmt.Sprintf("missing stmt eval case: %T", stmt))
 		}
 	}
 
@@ -190,7 +191,7 @@ func bindPat(binder binder, pat syn.Pat, val any) error {
 		}
 		return nil
 	default:
-		panic(fmt.Sprintf("missing pattern case: %T", pat))
+		panic(fmt.Sprintf("missing pattern bind case: %T", pat))
 	}
 }
 
@@ -225,6 +226,24 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 
 	case *syn.LiteralExpr:
 		return expr.Value, nil
+
+	case *syn.BinaryExpr:
+		lhs, err := e.eval(ctx, ecx, expr.Left)
+		if err != nil {
+			return nil, err
+		}
+
+		rhs, err := e.eval(ctx, ecx, expr.Right)
+		if err != nil {
+			return nil, err
+		}
+
+		switch expr.Op {
+		case lex.Equals2:
+			return lhs == rhs, nil
+		default:
+			panic(fmt.Sprintf("missing binary op eval case: %s", expr.Op))
+		}
 
 	case *syn.NameExpr:
 		val, ok := ecx.scope.Lookup(expr.Name)
@@ -278,7 +297,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 		return f(args)
 
 	default:
-		panic(fmt.Sprintf("missing expr case: %T", expr))
+		panic(fmt.Sprintf("missing expr eval case: %T", expr))
 	}
 }
 

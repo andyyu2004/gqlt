@@ -107,7 +107,7 @@ func (p *Parser) expect(kind lex.TokenKind) (lex.Token, bool) {
 	}
 
 	tok := p.lexer.Peek()
-	p.errors = append(p.errors, mkError(tok, "expected %s, found %s `%s`", kind.Name(), tok.Kind.Name(), tok.String()))
+	p.errors = append(p.errors, mkError(tok, "expected `%s`, found `%s`", kind.String(), tok.String()))
 	return lex.Token{}, false
 }
 
@@ -173,7 +173,7 @@ func (p *Parser) parsePat() syn.Pat {
 	case lex.Int, lex.Float, lex.String, lex.BlockString, lex.True, lex.False, lex.Null:
 		return p.parseLiteralPat()
 	default:
-		p.errors = append(p.errors, mkError(tok, "expected pattern, found %s `%s`", tok.Kind.Name(), tok.String()))
+		p.errors = append(p.errors, mkError(tok, "expected pattern, found `%s`", tok.String()))
 		return nil
 	}
 }
@@ -208,16 +208,66 @@ func (p *Parser) parseObjectPat() *syn.ObjectPat {
 }
 
 func (p *Parser) parseExpr() syn.Expr {
-	expr := p.parseAtomExpr()
+	expr := p.parseExprBP(1)
 
 	switch p.peek().Kind {
 	case lex.ParenL:
 		return p.parseCallExpr(expr)
 	case lex.Matches:
 		return p.parseMatchesExpr(expr)
+	default:
+		return expr
+	}
+}
+
+// pratt parser binding power
+type bp int
+
+type assoc bool
+
+const (
+	left  assoc = false
+	right assoc = true
+)
+
+func (p *Parser) parseExprBP(minBp bp) syn.Expr {
+	expr := p.parseAtomExpr()
+	if expr == nil {
+		return nil
+	}
+
+	for {
+		bp, token, assoc := p.currentOp()
+
+		if bp < minBp {
+			break
+		}
+
+		p.bump(token.Kind)
+
+		if assoc == left {
+			bp++
+		}
+
+		rhs := p.parseExprBP(bp)
+		if rhs == nil {
+			return nil
+		}
+
+		expr = &syn.BinaryExpr{Left: expr, Op: token.Kind, Right: rhs}
 	}
 
 	return expr
+}
+
+func (p *Parser) currentOp() (bp, lex.Token, assoc) {
+	tok := p.peek()
+	switch tok.Kind {
+	case lex.Equals2:
+		return 10, tok, left
+	default:
+		return 0, tok, left
+	}
 }
 
 func (p *Parser) parseMatchesExpr(expr syn.Expr) *syn.MatchesExpr {
@@ -260,7 +310,7 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 		p.bump(lex.Name)
 		return &syn.NameExpr{Name: tok.Value}
 	default:
-		p.errors = append(p.errors, mkError(tok, "expected expression, found %s", tok.Kind.Name()))
+		p.errors = append(p.errors, mkError(tok, "expected expression, found `%s`", tok.Kind.String()))
 		return nil
 	}
 }

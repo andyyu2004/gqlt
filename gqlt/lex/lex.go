@@ -55,24 +55,40 @@ func assert(ok bool) {
 	}
 }
 
+const n = 2
+
 func (l *Lexer) Peek() Token {
-	return convertToken(l.tokens[0])
+	token, _ := l.peek()
+	return token
+}
+
+func (l *Lexer) peek() (Token, int) {
+	var ts [n]lexer.Token
+	if len(l.tokens) > 1 {
+		ts = [n]lexer.Token(l.tokens[:n])
+	} else {
+		ts = [n]lexer.Token{l.tokens[0], {Kind: lexer.EOF}}
+	}
+	return convertToken(ts)
 }
 
 func (l *Lexer) Next() Token {
-	tok := l.Peek()
+	tok, len := l.peek()
 	if tok.Kind != EOF {
 		// avoid advancing beyond EOF
-		l.tokens = l.tokens[1:]
+		l.tokens = l.tokens[len:]
 	}
 	return tok
 }
 
-func convertToken(tok lexer.Token) Token {
-	var kind TokenKind
-	switch tok.Kind {
+// we take 2 tokens in as some gqlt tokens are composed of up to `n` tokens
+func convertToken(tok [n]lexer.Token) (Token, int) {
+	// we have a test asserting the numeric values of these tokens are matching so this conversion is correct
+	kind := TokenKind(tok[0].Kind)
+	len := 1
+	switch tok[0].Kind {
 	case lexer.Name:
-		switch tok.Value {
+		switch tok[0].Value {
 		case "let":
 			kind = Let
 		case "query":
@@ -92,11 +108,13 @@ func convertToken(tok lexer.Token) Token {
 		default:
 			kind = Name
 		}
-	default:
-		// we have a test asserting the numeric values of these tokens are matching so this conversion is correct
-		kind = TokenKind(tok.Kind)
+	case lexer.Equals:
+		if tok[1].Kind == lexer.Equals {
+			kind = Equals2
+			len = 2
+		}
 	}
-	return Token{Kind: kind, Value: tok.Value, Pos: tok.Pos}
+	return Token{Kind: kind, Value: tok[0].Value, Pos: tok[0].Pos}, len
 }
 
 type Token struct {
@@ -142,6 +160,8 @@ const (
 	Null
 	Matches
 	Assert
+	Equals2
+	BangEqual
 )
 
 func (t TokenKind) Name() string {
@@ -162,6 +182,8 @@ func (t TokenKind) Name() string {
 		return "matches"
 	case Assert:
 		return "assert"
+	case Equals2:
+		return "Equals2"
 	default:
 		return lexer.Type(t).Name()
 	}
@@ -185,6 +207,8 @@ func (t TokenKind) String() string {
 		return "matches"
 	case Assert:
 		return "assert"
+	case Equals2:
+		return "=="
 	default:
 		return lexer.Type(t).String()
 	}

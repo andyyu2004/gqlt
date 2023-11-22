@@ -39,11 +39,14 @@ func glob(dir string, ext string) ([]string, error) {
 }
 
 func TestGqlt(t *testing.T) {
+	// set this to debug a particular case i.e. `binary.gqlt`
+	const debugFilter = "binary.gqlt"
+
 	ctx := context.Background()
 
 	const testpath = "tests"
 
-	paths, err := glob(testpath, testpath)
+	paths, err := glob(testpath, ".gqlt")
 	require.NoError(t, err)
 
 	q := &query{
@@ -58,6 +61,11 @@ func TestGqlt(t *testing.T) {
 
 	for _, path := range paths {
 		path := path
+
+		if !strings.HasSuffix(path, debugFilter) {
+			t.SkipNow()
+		}
+
 		idx := strings.Index(path, testpath)
 		require.True(t, idx != -1)
 		name := path[idx+len(testpath)+1:]

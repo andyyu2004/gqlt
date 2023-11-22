@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 
+	"andyyu2004/gqlt/lex"
+
 	"github.com/vektah/gqlparser/v2/ast"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
@@ -119,4 +121,23 @@ func (expr ObjectExpr) Dump(w io.Writer) {
 	}
 
 	io.WriteString(w, " }")
+}
+
+type BinaryExpr struct {
+	Op    lex.TokenKind
+	Left  Expr
+	Right Expr
+}
+
+var _ Expr = BinaryExpr{}
+
+func (BinaryExpr) isExpr() {}
+func (BinaryExpr) isNode() {}
+
+func (expr BinaryExpr) Dump(w io.Writer) {
+	expr.Left.Dump(w)
+	io.WriteString(w, " ")
+	io.WriteString(w, expr.Op.String())
+	io.WriteString(w, " ")
+	expr.Right.Dump(w)
 }
