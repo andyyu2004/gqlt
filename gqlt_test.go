@@ -4,50 +4,24 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/andyyu2004/gqlt"
-	"github.com/andyyu2004/gqlt/parser"
 
 	_ "embed"
 
 	"github.com/graph-gophers/graphql-go"
-	"github.com/stretchr/testify/require"
 )
 
 //go:embed tests/schema.graphql
 var schema string
 
-// builtin glob doesn't implement ** :/
-func glob(dir string, ext string) ([]string, error) {
-	files := []string{}
-	err := filepath.Walk(dir, func(path string, _ os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if filepath.Ext(path) == ext {
-			files = append(files, path)
-		}
-		return nil
-	})
-
-	return files, err
-}
-
 func TestGqlt(t *testing.T) {
-	// set this to debug a particular case i.e. `binary.gqlt`
-	const debugFilter = "binary.gqlt"
+	const debugGlob = "**"
 
 	ctx := context.Background()
 
 	const testpath = "tests"
-
-	paths, err := glob(testpath, ".gqlt")
-	require.NoError(t, err)
 
 	q := &query{
 		dogs: []dog{
@@ -59,29 +33,8 @@ func TestGqlt(t *testing.T) {
 	}
 	client := schemaClientAdaptor{graphql.MustParseSchema(schema, q, graphql.UseFieldResolvers())}
 
-	for _, path := range paths {
-		path := path
-
-		if !strings.HasSuffix(path, debugFilter) {
-			t.SkipNow()
-		}
-
-		idx := strings.Index(path, testpath)
-		require.True(t, idx != -1)
-		name := path[idx+len(testpath)+1:]
-
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-			parser, err := parser.NewFromPath(path)
-			require.NoError(t, err)
-
-			file, err := parser.Parse()
-			require.NoError(t, err)
-
-			executor := gqlt.New(client)
-			require.NoError(t, executor.Run(ctx, file))
-		})
-	}
+	executor := gqlt.New(client)
+	executor.Run(t, ctx, testpath, client, gqlt.WithGlob(debugGlob))
 }
 
 type schemaClientAdaptor struct {

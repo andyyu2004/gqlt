@@ -4,11 +4,16 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
+	"testing"
 
 	"github.com/andyyu2004/gqlt/lex"
+	"github.com/andyyu2004/gqlt/parser"
 	"github.com/andyyu2004/gqlt/syn"
+	"github.com/bmatcuk/doublestar/v4"
 )
 
+// A thread-safe graphql client
 type Client interface {
 	Request(ctx context.Context, query string, variables map[string]any, out any) error
 }
@@ -186,7 +191,77 @@ var builtinScope = &scope{
 	},
 }
 
-func (e *Executor) Run(ctx context.Context, file syn.File) error {
+const gqltExt = ".gqlt"
+
+// Discover all `gqlt` tests in the given directory (recursively).
+// Returns the paths of all the test files.
+func Discover(dir string) ([]string, error) {
+	return doublestar.FilepathGlob(fmt.Sprintf("%s/**/*%s", dir, gqltExt))
+}
+
+type RunOpt func(*runConfig)
+
+// Apply a glob filter to the test files
+// This is applied to the path formed by stripping the root from the test file's path.
+func WithGlob(glob string) RunOpt {
+	return func(o *runConfig) {
+		o.glob = glob
+	}
+}
+
+type runConfig struct {
+	// Filter is a glob pattern (with support for **) that is matched against each test file path.
+	glob string
+}
+
+// `Run` all `gqlt` tests in the given directory (recursively).
+func (e *Executor) Run(t *testing.T, ctx context.Context, root string, client Client, opts ...RunOpt) {
+	var runConfig runConfig
+	for _, opt := range opts {
+		opt(&runConfig)
+	}
+
+	paths, err := Discover(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, path := range paths {
+		path := path
+
+		matches, err := doublestar.PathMatch(runConfig.glob, path)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if !matches {
+			t.SkipNow()
+		}
+
+		idx := strings.Index(path, root)
+		name := path[idx+len(root)+1:]
+
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			parser, err := parser.NewFromPath(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			file, err := parser.Parse()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			executor := New(client)
+			if err := executor.runFile(ctx, file); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func (e *Executor) runFile(ctx context.Context, file syn.File) error {
 	ecx := &executionContext{
 		scope: &scope{
 			parent: builtinScope,

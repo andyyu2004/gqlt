@@ -1,8 +1,9 @@
 assert "foo";
 assert !"";
-assert !1;
-assert !true;
-assert !!false;
+assert !0;
+assert 1
+assert !!true;
+assert !false;
 assert !null;
 assert [];
 assert [1];
