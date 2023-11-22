@@ -1,0 +1,10 @@
+assert "foo";
+assert !"";
+assert !1;
+assert !true;
+assert !!false;
+assert !null;
+assert [];
+assert [1];
+assert {};
+assert {a: 1};

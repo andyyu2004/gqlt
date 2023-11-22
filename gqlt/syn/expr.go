@@ -163,3 +163,18 @@ func (expr BinaryExpr) Dump(w io.Writer) {
 	io.WriteString(w, " ")
 	expr.Right.Dump(w)
 }
+
+type UnaryExpr struct {
+	Op   lex.TokenKind
+	Expr Expr
+}
+
+var _ Expr = UnaryExpr{}
+
+func (UnaryExpr) isExpr() {}
+func (UnaryExpr) isNode() {}
+
+func (expr UnaryExpr) Dump(w io.Writer) {
+	io.WriteString(w, expr.Op.String())
+	expr.Expr.Dump(w)
+}

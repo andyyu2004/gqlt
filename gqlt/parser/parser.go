@@ -221,7 +221,7 @@ func (p *Parser) parseExpr() syn.Expr {
 }
 
 // pratt parser binding power
-type bp int
+type bp uint8
 
 type assoc bool
 
@@ -231,13 +231,25 @@ const (
 )
 
 func (p *Parser) parseExprBP(minBp bp) syn.Expr {
-	expr := p.parseAtomExpr()
-	if expr == nil {
+	var lhs syn.Expr
+	if tok, bp := p.prefixOp(); tok != nil {
+		p.bump(tok.Kind)
+		expr := p.parseExprBP(bp)
+		if expr == nil {
+			return nil
+		}
+
+		lhs = &syn.UnaryExpr{Op: tok.Kind, Expr: expr}
+	} else {
+		lhs = p.parseAtomExpr()
+	}
+
+	if lhs == nil {
 		return nil
 	}
 
 	for {
-		bp, token, assoc := p.currentOp()
+		bp, token, assoc := p.infixOp()
 
 		if bp < minBp {
 			break
@@ -254,27 +266,31 @@ func (p *Parser) parseExprBP(minBp bp) syn.Expr {
 			return nil
 		}
 
-		expr = &syn.BinaryExpr{Left: expr, Op: token.Kind, Right: rhs}
+		lhs = &syn.BinaryExpr{Left: lhs, Op: token.Kind, Right: rhs}
 	}
 
-	return expr
+	return lhs
 }
 
-func (p *Parser) currentOp() (bp, lex.Token, assoc) {
+func (p *Parser) prefixOp() (*lex.Token, bp) {
 	tok := p.peek()
 	switch tok.Kind {
-	case lex.Equals2:
-		return 10, tok, left
-	case lex.BangEqual:
-		return 10, tok, left
-	case lex.Plus:
-		return 20, tok, left
-	case lex.Minus:
-		return 20, tok, left
-	case lex.Star:
-		return 30, tok, left
-	case lex.Slash:
-		return 30, tok, left
+	case lex.Minus, lex.Bang:
+		return &tok, 140
+	default:
+		return nil, 0
+	}
+}
+
+func (p *Parser) infixOp() (bp, lex.Token, assoc) {
+	tok := p.peek()
+	switch tok.Kind {
+	case lex.Equals2, lex.BangEqual:
+		return 110, tok, left
+	case lex.Plus, lex.Minus:
+		return 120, tok, left
+	case lex.Star, lex.Slash:
+		return 130, tok, left
 	default:
 		return 0, tok, left
 	}

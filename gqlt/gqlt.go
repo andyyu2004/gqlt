@@ -318,6 +318,26 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 	case *syn.LiteralExpr:
 		return expr.Value, nil
 
+	case *syn.UnaryExpr:
+		val, err := e.eval(ctx, ecx, expr.Expr)
+		if err != nil {
+			return nil, err
+		}
+
+		switch expr.Op {
+		case lex.Minus:
+			switch lhs := val.(type) {
+			case float64:
+				return -lhs, nil
+			default:
+				return nil, fmt.Errorf("cannot negate %T", lhs)
+			}
+		case lex.Bang:
+			return !truthy(val), nil
+		default:
+			panic(fmt.Sprintf("missing unary expr eval case: %s", expr.Op))
+		}
+
 	case *syn.BinaryExpr:
 		lhs, err := e.eval(ctx, ecx, expr.Left)
 		if err != nil {
