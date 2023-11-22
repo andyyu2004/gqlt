@@ -113,6 +113,12 @@ func convertToken(tok [n]lexer.Token) (Token, int) {
 			kind = Equals2
 			len = 2
 		}
+	case lexer.Bang:
+		if tok[1].Kind == lexer.Equals {
+			kind = BangEqual
+			len = 2
+		}
+
 	}
 	return Token{Kind: kind, Value: tok[0].Value, Pos: tok[0].Pos}, len
 }
@@ -184,6 +190,8 @@ func (t TokenKind) Name() string {
 		return "assert"
 	case Equals2:
 		return "Equals2"
+	case BangEqual:
+		return "BangEqual"
 	default:
 		return lexer.Type(t).Name()
 	}
@@ -209,6 +217,8 @@ func (t TokenKind) String() string {
 		return "assert"
 	case Equals2:
 		return "=="
+	case BangEqual:
+		return "!="
 	default:
 		return lexer.Type(t).String()
 	}

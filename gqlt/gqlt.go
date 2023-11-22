@@ -241,6 +241,8 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 		switch expr.Op {
 		case lex.Equals2:
 			return lhs == rhs, nil
+		case lex.BangEqual:
+			return lhs != rhs, nil
 		default:
 			panic(fmt.Sprintf("missing binary op eval case: %s", expr.Op))
 		}

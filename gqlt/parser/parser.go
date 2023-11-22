@@ -265,6 +265,8 @@ func (p *Parser) currentOp() (bp, lex.Token, assoc) {
 	switch tok.Kind {
 	case lex.Equals2:
 		return 10, tok, left
+	case lex.BangEqual:
+		return 10, tok, left
 	default:
 		return 0, tok, left
 	}
