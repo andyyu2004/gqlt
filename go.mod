@@ -2,9 +2,11 @@ module github.com/andyyu2004/gqlt
 
 go 1.21.4
 
-replace github.com/vektah/gqlparser/v2 => ./gqlparser
+// replace github.com/vektah/gqlparser/v2 => ./gqlparser
+replace github.com/vektah/gqlparser/v2 => github.com/andyyu2004/gqlparser/v2 v2.6.2
 
 require (
+	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/gkampitakis/go-snaps v0.4.12
 	github.com/graph-gophers/graphql-go v1.5.0
 	github.com/stretchr/testify v1.8.4
@@ -14,7 +16,6 @@ require (
 
 require (
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
-	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gkampitakis/ciinfo v0.3.0 // indirect
