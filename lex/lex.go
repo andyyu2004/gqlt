@@ -1,11 +1,11 @@
-// This package is a small wrapper around "github.com/vektah/gqlparser/v2/lexer" with an extended token set
+// This package is a small wrapper around "github.com/andyyu2004/gqlt/gqlparser/lexer" with an extended token set
 // and a slightly altered interface.
 package lex
 
 import (
-	"github.com/vektah/gqlparser/v2/ast"
-	"github.com/vektah/gqlparser/v2/lexer"
-	"github.com/vektah/gqlparser/v2/parser"
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/lexer"
+	"github.com/andyyu2004/gqlt/gqlparser/parser"
 )
 
 type Lexer struct {

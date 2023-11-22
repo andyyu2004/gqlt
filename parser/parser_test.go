@@ -9,9 +9,9 @@ import (
 	"github.com/andyyu2004/gqlt"
 	"github.com/andyyu2004/gqlt/parser"
 
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/gkampitakis/go-snaps/snaps"
 	"github.com/stretchr/testify/require"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 func TestParser(t *testing.T) {

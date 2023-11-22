@@ -10,9 +10,9 @@ import (
 	"github.com/andyyu2004/gqlt/lex"
 	"github.com/andyyu2004/gqlt/syn"
 
-	"github.com/vektah/gqlparser/v2/ast"
-	"github.com/vektah/gqlparser/v2/gqlerror"
-	"github.com/vektah/gqlparser/v2/parser"
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
+	"github.com/andyyu2004/gqlt/gqlparser/parser"
 	"github.com/wk8/go-ordered-map/v2"
 )
 
