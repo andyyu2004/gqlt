@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"andyyu2004/gqlt/lex"
-	"andyyu2004/gqlt/syn"
+	"github.com/andyyu2004/gqlt/lex"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 type Client interface {

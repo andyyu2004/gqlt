@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"andyyu2004/gqlt/parser"
+	"github.com/andyyu2004/gqlt/parser"
 
 	"github.com/gkampitakis/go-snaps/snaps"
 	"github.com/stretchr/testify/require"

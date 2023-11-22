@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"andyyu2004/gqlt/lex"
+	"github.com/andyyu2004/gqlt/lex"
 
 	"github.com/vektah/gqlparser/v2/ast"
 	orderedmap "github.com/wk8/go-ordered-map/v2"

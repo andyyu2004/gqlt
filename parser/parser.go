@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"andyyu2004/gqlt/lex"
-	"andyyu2004/gqlt/syn"
+	"github.com/andyyu2004/gqlt/lex"
+	"github.com/andyyu2004/gqlt/syn"
 
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"

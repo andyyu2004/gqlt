@@ -1,8 +1,8 @@
-module andyyu2004/gqlt
+module github.com/andyyu2004/gqlt
 
 go 1.21.4
 
-replace github.com/vektah/gqlparser/v2 => ../gqlparser
+replace github.com/vektah/gqlparser/v2 => ./gqlparser
 
 require (
 	github.com/gkampitakis/go-snaps v0.4.12

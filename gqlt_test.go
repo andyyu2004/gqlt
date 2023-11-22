@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"andyyu2004/gqlt"
-	"andyyu2004/gqlt/parser"
+	"github.com/andyyu2004/gqlt"
+	"github.com/andyyu2004/gqlt/parser"
 
 	_ "embed"
 
