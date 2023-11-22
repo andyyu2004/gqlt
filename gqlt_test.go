@@ -9,6 +9,7 @@ import (
 	_ "embed"
 
 	"github.com/graph-gophers/graphql-go"
+	"github.com/graph-gophers/graphql-go/relay"
 )
 
 //go:embed tests/schema.graphql
@@ -31,9 +32,17 @@ func TestGqlt(t *testing.T) {
 		},
 	}
 
-	client := gqlt.GraphQLGophersClient{graphql.MustParseSchema(schema, q, graphql.UseFieldResolvers())}
+	schema := graphql.MustParseSchema(schema, q, graphql.UseFieldResolvers())
+	handler := &relay.Handler{Schema: schema}
 
-	gqlt.New(client).Run(t, ctx, testpath, gqlt.WithGlob(debugGlob))
+	clients := []gqlt.Client{
+		gqlt.GraphQLGophersClient{schema},
+		gqlt.HTTPClient{Handler: handler},
+	}
+
+	for _, client := range clients {
+		gqlt.New(client).Run(t, ctx, testpath, gqlt.WithGlob(debugGlob))
+	}
 }
 
 type query struct {
