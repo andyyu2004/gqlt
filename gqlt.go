@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/formatter"
 	"github.com/andyyu2004/gqlt/lex"
 	"github.com/andyyu2004/gqlt/parser"
 	"github.com/andyyu2004/gqlt/syn"
@@ -480,12 +481,22 @@ func bindObjectPat(binder binder, pat *syn.ObjectPat, values map[string]any) err
 	return nil
 }
 
+func formatOperation(operation *ast.OperationDefinition) string {
+	buf := bytes.NewBufferString("")
+	f := formatter.NewFormatter(buf, formatter.WithIndent("  "))
+	f.FormatQueryDocument(&ast.QueryDocument{
+		Operations: []*ast.OperationDefinition{operation},
+	})
+	return buf.String()
+}
+
 func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Expr) (any, error) {
 	switch expr := expr.(type) {
 	case *syn.OperationExpr:
+		query := formatOperation(expr.Operation)
 		var data any
 		// Pass our local variables directly also as graphql variables
-		req := Request{Query: expr.Query, Variables: ecx.scope.gqlVars()}
+		req := Request{Query: query, Variables: ecx.scope.gqlVars()}
 		if err := e.client.Request(ctx, req, &data); err != nil {
 			return nil, err
 		}

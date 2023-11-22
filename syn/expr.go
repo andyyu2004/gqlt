@@ -30,6 +30,7 @@ func (expr NameExpr) Dump(w io.Writer) {
 
 type OperationExpr struct {
 	// unparsed graphql string
+	// useful for pretty printing without formatting
 	Query string
 	// parsed graphql ast
 	Operation *ast.OperationDefinition
