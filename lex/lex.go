@@ -105,6 +105,8 @@ func convertToken(tok [n]lexer.Token) (Token, int) {
 			kind = Matches
 		case "assert":
 			kind = Assert
+		case "set":
+			kind = Set
 		default:
 			kind = Name
 		}
@@ -170,6 +172,7 @@ const (
 	Null
 	Matches
 	Assert
+	Set
 	Equals2
 	BangEqual
 )
@@ -192,6 +195,8 @@ func (t TokenKind) Name() string {
 		return "matches"
 	case Assert:
 		return "assert"
+	case Set:
+		return "set"
 	case Equals2:
 		return "Equals2"
 	case BangEqual:
@@ -219,6 +224,8 @@ func (t TokenKind) String() string {
 		return "matches"
 	case Assert:
 		return "assert"
+	case Set:
+		return "set"
 	case Equals2:
 		return "=="
 	case BangEqual:

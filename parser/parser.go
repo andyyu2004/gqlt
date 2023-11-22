@@ -123,6 +123,8 @@ func (p *Parser) parseStmt() syn.Stmt {
 		return p.parseLetStmt()
 	case lex.Assert:
 		return p.parseAssertStmt()
+	case lex.Set:
+		return p.parseSetStmt()
 	default:
 		expr := p.parseExpr()
 		if expr == nil {
@@ -131,6 +133,24 @@ func (p *Parser) parseStmt() syn.Stmt {
 
 		return &syn.ExprStmt{Expr: expr}
 	}
+}
+
+func (p *Parser) parseSetStmt() *syn.SetStmt {
+	p.bump(lex.Set)
+	key, ok := p.expect(lex.Name)
+	if !ok {
+		return nil
+	}
+
+	// optional equals
+	p.eat(lex.Equals)
+
+	expr := p.parseExpr()
+	if expr == nil {
+		return nil
+	}
+
+	return &syn.SetStmt{Key: key.Value, Value: expr}
 }
 
 func (p *Parser) parseAssertStmt() *syn.AssertStmt {
