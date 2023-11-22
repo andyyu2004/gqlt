@@ -2,6 +2,8 @@ package gqlt
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -11,12 +13,33 @@ import (
 	"github.com/andyyu2004/gqlt/parser"
 	"github.com/andyyu2004/gqlt/syn"
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/graph-gophers/graphql-go"
 )
 
 // A thread-safe graphql client
 type Client interface {
 	Request(ctx context.Context, query string, variables map[string]any, out any) error
 }
+
+type GraphQLGophersClient struct {
+	Schema *graphql.Schema
+}
+
+func (a GraphQLGophersClient) Request(ctx context.Context, query string, variables map[string]any, out any) error {
+	res := a.Schema.Exec(ctx, query, "", variables)
+	if len(res.Errors) > 0 {
+		errs := make([]error, 0, len(res.Errors))
+		for _, err := range res.Errors {
+			errs = append(errs, err)
+		}
+
+		return errors.Join(errs...)
+	}
+
+	return json.Unmarshal([]byte(res.Data), out)
+}
+
+var _ Client = GraphQLGophersClient{}
 
 type Executor struct{ client Client }
 

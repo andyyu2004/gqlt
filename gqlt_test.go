@@ -2,8 +2,6 @@ package gqlt_test
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"testing"
 
 	"github.com/andyyu2004/gqlt"
@@ -17,6 +15,7 @@ import (
 var schema string
 
 func TestGqlt(t *testing.T) {
+	// change this to something else to debug a particular test
 	const debugGlob = "**"
 
 	ctx := context.Background()
@@ -31,31 +30,12 @@ func TestGqlt(t *testing.T) {
 			},
 		},
 	}
-	client := schemaClientAdaptor{graphql.MustParseSchema(schema, q, graphql.UseFieldResolvers())}
+
+	client := gqlt.GraphQLGophersClient{graphql.MustParseSchema(schema, q, graphql.UseFieldResolvers())}
 
 	executor := gqlt.New(client)
 	executor.Run(t, ctx, testpath, client, gqlt.WithGlob(debugGlob))
 }
-
-type schemaClientAdaptor struct {
-	schema *graphql.Schema
-}
-
-func (a schemaClientAdaptor) Request(ctx context.Context, query string, variables map[string]any, out any) error {
-	res := a.schema.Exec(ctx, query, "", variables)
-	if len(res.Errors) > 0 {
-		errs := make([]error, 0, len(res.Errors))
-		for _, err := range res.Errors {
-			errs = append(errs, err)
-		}
-
-		return errors.Join(errs...)
-	}
-
-	return json.Unmarshal([]byte(res.Data), out)
-}
-
-var _ gqlt.Client = schemaClientAdaptor{}
 
 type query struct {
 	dogs []dog
