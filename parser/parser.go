@@ -330,6 +330,14 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 		return p.parseObjectExpr()
 	case lex.BracketL:
 		return p.parseListExpr()
+	case lex.ParenL:
+		p.bump(lex.ParenL)
+		expr := p.parseExpr()
+		if expr == nil {
+			return nil
+		}
+		p.expect(lex.ParenR)
+		return expr
 	case lex.Query, lex.Mutation:
 		return p.parseQueryExpr()
 	case lex.Int, lex.Float, lex.String, lex.BlockString, lex.True, lex.False, lex.Null:
