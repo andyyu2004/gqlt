@@ -44,7 +44,7 @@ func (p *Parser) Parse() (syn.File, error) {
 	for !p.at(lex.EOF) {
 		stmt := p.parseStmt()
 		if !isNil(stmt) {
-			p.expect(lex.Semi)
+			p.eat(lex.Semi)
 			p.stmts = append(p.stmts, stmt)
 		} else {
 			// error recovery by skipping tokens until the next start of statement by searching for a semicolon

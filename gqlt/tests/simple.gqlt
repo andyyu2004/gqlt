@@ -1,7 +1,7 @@
-let 1 = 1;
-assert 1 matches 1;
+let 1 = 1
+assert 1 matches 1
 
-assert { x: 2 } matches { x };
+assert { x: 2 } matches { x }
 
 let dogs = query {
 	animals {
@@ -11,7 +11,7 @@ let dogs = query {
 			}
 		}
 	}
-};
+}
 
 let name = query {
 	animals {
@@ -21,9 +21,9 @@ let name = query {
 			}
 		}
 	}
-};
+}
 
-assert name matches "Buddy";
+assert name matches "Buddy"
 
 assert query ($name: String!) {
 	animals {
@@ -34,5 +34,5 @@ assert query ($name: String!) {
 			}
 		}
 	}
-} matches { id: "1", name: "Buddy" };
+} matches { id: "1", name: "Buddy" }
 
