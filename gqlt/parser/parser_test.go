@@ -32,16 +32,16 @@ func glob(dir string, ext string) ([]string, error) {
 }
 
 func TestParser(t *testing.T) {
-	const testdata = "test-data"
-	paths, err := glob(testdata, ".gqlt")
+	const testpath = "tests"
+	paths, err := glob(testpath, ".gqlt")
 	require.NoError(t, err)
 	require.NotEmpty(t, paths)
 
 	for _, path := range paths {
 		path := path
-		idx := strings.Index(path, testdata)
+		idx := strings.Index(path, testpath)
 		require.True(t, idx != -1)
-		name := path[idx+len(testdata)+1:]
+		name := path[idx+len(testpath)+1:]
 
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()

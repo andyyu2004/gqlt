@@ -70,7 +70,7 @@ func (s *scope) gqlVars() map[string]any {
 	return vars
 }
 
-type function = func(args []any) (any, error)
+type function func(args []any) (any, error)
 
 func checkArity(arity int, args []any) error {
 	if len(args) != arity {
@@ -99,7 +99,7 @@ func truthy(val any) bool {
 
 var builtinScope = &scope{
 	vars: map[string]any{
-		"example": func(args []any) (any, error) {
+		"example": function(func(args []any) (any, error) {
 			if err := checkArity(1, args); err != nil {
 				return nil, err
 			}
@@ -109,7 +109,7 @@ var builtinScope = &scope{
 			}
 
 			return nil, nil
-		},
+		}),
 	},
 }
 
