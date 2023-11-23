@@ -1,5 +1,5 @@
 
-[TestParser/expr/object.gqlt - 1]
+[TestParser/expr/object - 1]
 { x: "wer" y: 5 }
 { x: { y: z } }
 ---

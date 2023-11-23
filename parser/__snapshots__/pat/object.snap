@@ -1,6 +1,5 @@
 
-[TestParser/pat/object.gqlt - 1]
-let { id: id name: name } = query { id name }
+[TestParser/pat/object - 1]
 let { id: id name: name } = query { id name }
 let { id: id name: name } = query { id name }
 ---

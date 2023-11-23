@@ -1,5 +1,5 @@
 
-[TestParser/multi.gqlt - 1]
+[TestParser/multi - 1]
 let bar = query { foo { bar } }
 let baz = query { bar { baz } }
 ---

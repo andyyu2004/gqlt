@@ -24,7 +24,7 @@ func TestParser(t *testing.T) {
 		path := path
 		idx := strings.Index(path, testpath)
 		require.True(t, idx != -1)
-		name := path[idx+len(testpath)+1:]
+		name := path[idx+len(testpath)+1 : len(path)-len(gqlt.Ext)]
 
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()

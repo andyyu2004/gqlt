@@ -1,6 +1,15 @@
 package syn
 
-import "io"
+import (
+	"bytes"
+	"io"
+)
+
+func Dump(node Node) string {
+	var buf bytes.Buffer
+	node.Dump(&buf)
+	return buf.String()
+}
 
 type Node interface {
 	isNode()

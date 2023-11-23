@@ -1,0 +1,4 @@
+
+[TestParser/stmt/expr-stmt - 1]
+query { foo }
+---

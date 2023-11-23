@@ -1,0 +1,12 @@
+let xs = [1, 2, 3]
+assert xs[0] == 1
+assert xs[1] == 2
+assert xs[2] == 3
+assert xs[2] matches 3
+assert xs[3] == null
+
+let obj = { foo: "bar", bar: "baz" }
+assert obj["foo"] == "bar"
+assert obj["bar"] == "baz"
+assert obj["bad"] == null
+

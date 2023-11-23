@@ -1,5 +1,5 @@
 
-[TestParser/expr/call.gqlt - 1]
+[TestParser/expr/call - 1]
 let t = f(x, y)
 let t = f(x, g(y))
 ---

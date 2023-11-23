@@ -45,6 +45,23 @@ func (expr OperationExpr) Dump(w io.Writer) {
 	io.WriteString(w, expr.Query)
 }
 
+type IndexExpr struct {
+	Expr  Expr
+	Index Expr
+}
+
+var _ Expr = IndexExpr{}
+
+func (IndexExpr) isExpr() {}
+func (IndexExpr) isNode() {}
+
+func (expr IndexExpr) Dump(w io.Writer) {
+	expr.Expr.Dump(w)
+	io.WriteString(w, "[")
+	expr.Index.Dump(w)
+	io.WriteString(w, "]")
+}
+
 type LiteralExpr struct {
 	Value any
 }

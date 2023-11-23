@@ -145,6 +145,7 @@ const (
 	ParenR
 	Spread
 	Colon
+	Comma
 	Semi
 	Equals
 	At

@@ -1,4 +1,0 @@
-
-[TestParser/stmt/expr-stmt.gqlt - 1]
-query { foo }
----

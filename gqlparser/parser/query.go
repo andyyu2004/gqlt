@@ -8,13 +8,11 @@ import (
 )
 
 func ParseQuery(source *Source) (*QueryDocument, error) {
-	p := Parser{
-		lexer: lexer.New(source),
-	}
+	p := New(lexer.New(source))
 	return p.parseQueryDocument(), p.err
 }
 
-func (p *Parser) parseQueryDocument() *QueryDocument {
+func (p *parser) parseQueryDocument() *QueryDocument {
 	var doc QueryDocument
 	for p.peek().Kind != lexer.EOF {
 		if p.err != nil {
@@ -41,7 +39,7 @@ func (p *Parser) parseQueryDocument() *QueryDocument {
 	return &doc
 }
 
-func (p *Parser) ParseOperationDefinition() *OperationDefinition {
+func (p *parser) ParseOperationDefinition() *OperationDefinition {
 	if p.peek().Kind == lexer.BraceL {
 		return &OperationDefinition{
 			Position:     p.peekPos(),
@@ -67,7 +65,7 @@ func (p *Parser) ParseOperationDefinition() *OperationDefinition {
 	return &od
 }
 
-func (p *Parser) parseOperationType() Operation {
+func (p *parser) parseOperationType() Operation {
 	tok := p.next()
 	switch tok.Value {
 	case "query":
@@ -81,7 +79,7 @@ func (p *Parser) parseOperationType() Operation {
 	return ""
 }
 
-func (p *Parser) parseVariableDefinitions() VariableDefinitionList {
+func (p *parser) parseVariableDefinitions() VariableDefinitionList {
 	var defs []*VariableDefinition
 	p.many(lexer.ParenL, lexer.ParenR, func() {
 		defs = append(defs, p.parseVariableDefinition())
@@ -90,7 +88,7 @@ func (p *Parser) parseVariableDefinitions() VariableDefinitionList {
 	return defs
 }
 
-func (p *Parser) parseVariableDefinition() *VariableDefinition {
+func (p *parser) parseVariableDefinition() *VariableDefinition {
 	var def VariableDefinition
 	def.Position = p.peekPos()
 	def.Comment = p.comment
@@ -109,12 +107,12 @@ func (p *Parser) parseVariableDefinition() *VariableDefinition {
 	return &def
 }
 
-func (p *Parser) parseVariable() string {
+func (p *parser) parseVariable() string {
 	p.expect(lexer.Dollar)
 	return p.parseName()
 }
 
-func (p *Parser) parseOptionalSelectionSet() SelectionSet {
+func (p *parser) parseOptionalSelectionSet() SelectionSet {
 	var selections []Selection
 	p.some(lexer.BraceL, lexer.BraceR, func() {
 		selections = append(selections, p.parseSelection())
@@ -123,7 +121,7 @@ func (p *Parser) parseOptionalSelectionSet() SelectionSet {
 	return selections
 }
 
-func (p *Parser) parseRequiredSelectionSet() SelectionSet {
+func (p *parser) parseRequiredSelectionSet() SelectionSet {
 	if p.peek().Kind != lexer.BraceL {
 		p.error(p.peek(), "Expected %s, found %s", lexer.BraceL, p.peek().Kind.String())
 		return nil
@@ -137,14 +135,14 @@ func (p *Parser) parseRequiredSelectionSet() SelectionSet {
 	return selections
 }
 
-func (p *Parser) parseSelection() Selection {
+func (p *parser) parseSelection() Selection {
 	if p.peek().Kind == lexer.Spread {
 		return p.parseFragment()
 	}
 	return p.parseField()
 }
 
-func (p *Parser) parseField() *Field {
+func (p *parser) parseField() *Field {
 	var field Field
 	field.Position = p.peekPos()
 	field.Comment = p.comment
@@ -165,7 +163,7 @@ func (p *Parser) parseField() *Field {
 	return &field
 }
 
-func (p *Parser) parseArguments(isConst bool) ArgumentList {
+func (p *parser) parseArguments(isConst bool) ArgumentList {
 	var arguments ArgumentList
 	p.many(lexer.ParenL, lexer.ParenR, func() {
 		arguments = append(arguments, p.parseArgument(isConst))
@@ -174,7 +172,7 @@ func (p *Parser) parseArguments(isConst bool) ArgumentList {
 	return arguments
 }
 
-func (p *Parser) parseArgument(isConst bool) *Argument {
+func (p *parser) parseArgument(isConst bool) *Argument {
 	arg := Argument{}
 	arg.Position = p.peekPos()
 	arg.Comment = p.comment
@@ -185,7 +183,7 @@ func (p *Parser) parseArgument(isConst bool) *Argument {
 	return &arg
 }
 
-func (p *Parser) parseFragment() Selection {
+func (p *parser) parseFragment() Selection {
 	_, comment := p.expect(lexer.Spread)
 
 	if peek := p.peek(); peek.Kind == lexer.Name && peek.Value != "on" {
@@ -211,7 +209,7 @@ func (p *Parser) parseFragment() Selection {
 	return &def
 }
 
-func (p *Parser) parseFragmentDefinition() *FragmentDefinition {
+func (p *parser) parseFragmentDefinition() *FragmentDefinition {
 	var def FragmentDefinition
 	def.Position = p.peekPos()
 	def.Comment = p.comment
@@ -228,7 +226,7 @@ func (p *Parser) parseFragmentDefinition() *FragmentDefinition {
 	return &def
 }
 
-func (p *Parser) parseFragmentName() string {
+func (p *parser) parseFragmentName() string {
 	if p.peek().Value == "on" {
 		p.unexpectedError()
 		return ""
@@ -237,7 +235,7 @@ func (p *Parser) parseFragmentName() string {
 	return p.parseName()
 }
 
-func (p *Parser) parseValueLiteral(isConst bool) *Value {
+func (p *parser) parseValueLiteral(isConst bool) *Value {
 	token := p.peek()
 	raw := token.Value
 
@@ -293,7 +291,7 @@ func (p *Parser) parseValueLiteral(isConst bool) *Value {
 	return &Value{Position: &token.Pos, Comment: p.comment, Raw: raw, Kind: kind}
 }
 
-func (p *Parser) parseList(isConst bool) *Value {
+func (p *parser) parseList(isConst bool) *Value {
 	var values ChildValueList
 	pos := p.peekPos()
 	comment := p.comment
@@ -304,7 +302,7 @@ func (p *Parser) parseList(isConst bool) *Value {
 	return &Value{Children: values, Kind: ListValue, Position: pos, Comment: comment}
 }
 
-func (p *Parser) parseObject(isConst bool) *Value {
+func (p *parser) parseObject(isConst bool) *Value {
 	var fields ChildValueList
 	pos := p.peekPos()
 	comment := p.comment
@@ -315,7 +313,7 @@ func (p *Parser) parseObject(isConst bool) *Value {
 	return &Value{Children: fields, Kind: ObjectValue, Position: pos, Comment: comment}
 }
 
-func (p *Parser) parseObjectField(isConst bool) *ChildValue {
+func (p *parser) parseObjectField(isConst bool) *ChildValue {
 	field := ChildValue{}
 	field.Position = p.peekPos()
 	field.Comment = p.comment
@@ -327,7 +325,7 @@ func (p *Parser) parseObjectField(isConst bool) *ChildValue {
 	return &field
 }
 
-func (p *Parser) parseDirectives(isConst bool) []*Directive {
+func (p *parser) parseDirectives(isConst bool) []*Directive {
 	var directives []*Directive
 
 	for p.peek().Kind == lexer.At {
@@ -339,7 +337,7 @@ func (p *Parser) parseDirectives(isConst bool) []*Directive {
 	return directives
 }
 
-func (p *Parser) parseDirective(isConst bool) *Directive {
+func (p *parser) parseDirective(isConst bool) *Directive {
 	p.expect(lexer.At)
 
 	return &Directive{
@@ -349,7 +347,7 @@ func (p *Parser) parseDirective(isConst bool) *Directive {
 	}
 }
 
-func (p *Parser) parseTypeReference() *Type {
+func (p *parser) parseTypeReference() *Type {
 	var typ Type
 
 	if p.skip(lexer.BracketL) {
@@ -367,7 +365,7 @@ func (p *Parser) parseTypeReference() *Type {
 	return &typ
 }
 
-func (p *Parser) parseName() string {
+func (p *parser) parseName() string {
 	token, _ := p.expect(lexer.Name)
 
 	return token.Value

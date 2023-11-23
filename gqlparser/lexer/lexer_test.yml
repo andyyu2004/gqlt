@@ -54,14 +54,6 @@ simple tokens:
         end: 9
         value: "foo"
 
-  - name: skips commas
-    input: ",,,foo,,,"
-    tokens:
-      - kind: NAME
-        start: 3
-        end: 6
-        value: "foo"
-
   - name: errors respect whitespace
     input: "\n\n    ?\n\n\n"
     error:

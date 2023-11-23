@@ -8,15 +8,34 @@ import (
 	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 )
 
-func New(lexer Lexer) *Parser {
-	return &Parser{lexer: lexer}
+// Commas exist in the lexer for use by the gqlt parser.
+// However, graphql treats them as whitespace so we need to ignore it.
+type skipCommas struct {
+	lexer Lexer
+}
+
+func (s skipCommas) ReadToken() (lexer.Token, error) {
+	for {
+		tok, err := s.lexer.ReadToken()
+		if err != nil {
+			return tok, err
+		}
+
+		if tok.Kind != lexer.Comma {
+			return tok, err
+		}
+	}
+}
+
+func New(lexer Lexer) *parser {
+	return &parser{lexer: skipCommas{lexer}}
 }
 
 type Lexer interface {
 	ReadToken() (lexer.Token, error)
 }
 
-type Parser struct {
+type parser struct {
 	lexer Lexer
 	err   error
 
@@ -30,11 +49,11 @@ type Parser struct {
 	commentConsuming bool
 }
 
-func (p *Parser) Err() error {
+func (p *parser) Err() error {
 	return p.err
 }
 
-func (p *Parser) consumeComment() (*ast.Comment, bool) {
+func (p *parser) consumeComment() (*ast.Comment, bool) {
 	if p.err != nil {
 		return nil, false
 	}
@@ -49,7 +68,7 @@ func (p *Parser) consumeComment() (*ast.Comment, bool) {
 	}, true
 }
 
-func (p *Parser) consumeCommentGroup() {
+func (p *parser) consumeCommentGroup() {
 	if p.err != nil {
 		return
 	}
@@ -71,7 +90,7 @@ func (p *Parser) consumeCommentGroup() {
 	p.commentConsuming = false
 }
 
-func (p *Parser) peekPos() *ast.Position {
+func (p *parser) peekPos() *ast.Position {
 	if p.err != nil {
 		return nil
 	}
@@ -80,7 +99,7 @@ func (p *Parser) peekPos() *ast.Position {
 	return &peek.Pos
 }
 
-func (p *Parser) peek() lexer.Token {
+func (p *parser) peek() lexer.Token {
 	if p.err != nil {
 		return p.prev
 	}
@@ -96,14 +115,14 @@ func (p *Parser) peek() lexer.Token {
 	return p.peekToken
 }
 
-func (p *Parser) error(tok lexer.Token, format string, args ...interface{}) {
+func (p *parser) error(tok lexer.Token, format string, args ...interface{}) {
 	if p.err != nil {
 		return
 	}
 	p.err = gqlerror.ErrorLocf(tok.Pos.Src.Name, tok.Pos.Line, tok.Pos.Column, format, args...)
 }
 
-func (p *Parser) next() lexer.Token {
+func (p *parser) next() lexer.Token {
 	if p.err != nil {
 		return p.prev
 	}
@@ -120,7 +139,7 @@ func (p *Parser) next() lexer.Token {
 	return p.prev
 }
 
-func (p *Parser) expectKeyword(value string) (lexer.Token, *ast.CommentGroup) {
+func (p *parser) expectKeyword(value string) (lexer.Token, *ast.CommentGroup) {
 	tok := p.peek()
 	comment := p.comment
 	if tok.Kind == lexer.Name && tok.Value == value {
@@ -131,7 +150,7 @@ func (p *Parser) expectKeyword(value string) (lexer.Token, *ast.CommentGroup) {
 	return tok, comment
 }
 
-func (p *Parser) expect(kind lexer.Type) (lexer.Token, *ast.CommentGroup) {
+func (p *parser) expect(kind lexer.Type) (lexer.Token, *ast.CommentGroup) {
 	tok := p.peek()
 	comment := p.comment
 	if tok.Kind == kind {
@@ -142,7 +161,7 @@ func (p *Parser) expect(kind lexer.Type) (lexer.Token, *ast.CommentGroup) {
 	return tok, comment
 }
 
-func (p *Parser) skip(kind lexer.Type) bool {
+func (p *parser) skip(kind lexer.Type) bool {
 	if p.err != nil {
 		return false
 	}
@@ -156,15 +175,15 @@ func (p *Parser) skip(kind lexer.Type) bool {
 	return true
 }
 
-func (p *Parser) unexpectedError() {
+func (p *parser) unexpectedError() {
 	p.unexpectedToken(p.peek())
 }
 
-func (p *Parser) unexpectedToken(tok lexer.Token) {
+func (p *parser) unexpectedToken(tok lexer.Token) {
 	p.error(tok, "Unexpected %s", tok.String())
 }
 
-func (p *Parser) many(start lexer.Type, end lexer.Type, cb func()) {
+func (p *parser) many(start lexer.Type, end lexer.Type, cb func()) {
 	hasDef := p.skip(start)
 	if !hasDef {
 		return
@@ -176,7 +195,7 @@ func (p *Parser) many(start lexer.Type, end lexer.Type, cb func()) {
 	p.next()
 }
 
-func (p *Parser) some(start lexer.Type, end lexer.Type, cb func()) *ast.CommentGroup {
+func (p *parser) some(start lexer.Type, end lexer.Type, cb func()) *ast.CommentGroup {
 	hasDef := p.skip(start)
 	if !hasDef {
 		return nil

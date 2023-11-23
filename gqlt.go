@@ -322,12 +322,12 @@ var builtinScope = &scope{
 	},
 }
 
-const gqltExt = ".gqlt"
+const Ext = ".gqlt"
 
 // Discover all `gqlt` tests in the given directory (recursively).
 // Returns the paths of all the test files.
 func Discover(dir string) ([]string, error) {
-	return doublestar.FilepathGlob(fmt.Sprintf("%s/**/*%s", dir, gqltExt))
+	return doublestar.FilepathGlob(fmt.Sprintf("%s/**/*%s", dir, Ext))
 }
 
 type RunOpt func(*runConfig)
@@ -373,7 +373,7 @@ func (e *Executor) Run(t *testing.T, ctx context.Context, root string, opts ...R
 		}
 
 		idx := strings.Index(path, root)
-		name := path[idx+len(root)+1:]
+		name := path[idx+len(root)+1 : len(path)-len(Ext)]
 
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -589,10 +589,6 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 	switch expr := expr.(type) {
 	case *syn.OperationExpr:
 		query := formatOperation(applyNamespaces(ecx.settings.namespace, expr.Operation))
-		if len(ecx.settings.namespace) > 0 {
-			fmt.Printf("namespace: %v\n", ecx.settings.namespace)
-			println(query)
-		}
 
 		// Pass our local variables directly also as graphql variables
 		var data any
@@ -694,6 +690,39 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 		}
 
 		return bindPat(dummyBinder{}, expr.Pat, val) == nil, nil
+
+	case *syn.IndexExpr:
+		val, err := e.eval(ctx, ecx, expr.Expr)
+		if err != nil {
+			return nil, err
+		}
+
+		idx, err := e.eval(ctx, ecx, expr.Index)
+		if err != nil {
+			return nil, err
+		}
+
+		switch val := val.(type) {
+		case []any:
+			switch idx := idx.(type) {
+			case float64:
+				if idx < 0 || idx >= float64(len(val)) {
+					return nil, nil
+				}
+
+				return val[int(idx)], nil
+			}
+		case map[string]any:
+			switch idx := idx.(type) {
+			case string:
+				if val, ok := val[idx]; ok {
+					return val, nil
+				}
+				return nil, nil
+			}
+		}
+
+		return nil, fmt.Errorf("cannot index %T with %T", val, idx)
 
 	case *syn.CallExpr:
 		fn, err := e.eval(ctx, ecx, expr.Fn)

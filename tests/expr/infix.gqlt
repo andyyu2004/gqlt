@@ -21,3 +21,5 @@ assert 12 / 4 / 2 == 1.5
 assert [1, 2, 3] + [4, 5, 6] == [1, 2, 3, 4, 5, 6]
 assert [1, 2, 3] * 2 == [1, 2, 3, 1, 2, 3]
 
+assert 1 matches 1 matches true
+assert 1 == 1 matches true

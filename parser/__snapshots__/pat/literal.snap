@@ -1,0 +1,4 @@
+
+[TestParser/pat/literal - 1]
+let 1 = 1
+---

@@ -165,6 +165,6 @@ func TestParserUtils(t *testing.T) {
 	})
 }
 
-func newParser(input string) *Parser {
+func newParser(input string) *parser {
 	return New(lexer.New(&ast.Source{Input: input, Name: "input.graphql"}))
 }

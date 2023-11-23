@@ -129,6 +129,8 @@ func (s *Lexer) ReadToken() (Token, error) {
 		return s.makeValueToken(Star, "")
 	case '/':
 		return s.makeValueToken(Slash, "")
+	case ',':
+		return s.makeValueToken(Comma, "")
 
 	case '#':
 		return s.readComment()
@@ -166,7 +168,7 @@ func (s *Lexer) ReadToken() (Token, error) {
 func (s *Lexer) ws() {
 	for s.end < len(s.Input) {
 		switch s.Input[s.end] {
-		case '\t', ' ', ',':
+		case '\t', ' ':
 			s.end++
 			s.endRunes++
 		case '\n':

@@ -1,5 +1,5 @@
 
-[TestParser/expr/query.gqlt - 1]
+[TestParser/expr/query - 1]
 let foo = query {
   example {
     foo

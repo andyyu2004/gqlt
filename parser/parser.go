@@ -217,6 +217,10 @@ func (p *Parser) parseListPat() *syn.ListPat {
 		}
 
 		pats = append(pats, pat)
+
+		if !p.eat_(lex.Comma) {
+			break
+		}
 	}
 
 	p.expect(lex.BracketR)
@@ -242,6 +246,10 @@ func (p *Parser) parseObjectPat() *syn.ObjectPat {
 		}
 
 		fields.Set(name.Value, pat)
+
+		if !p.eat_(lex.Comma) {
+			break
+		}
 	}
 
 	p.expect(lex.BraceR)
@@ -252,11 +260,10 @@ func (p *Parser) parseObjectPat() *syn.ObjectPat {
 func (p *Parser) parseExpr() syn.Expr {
 	expr := p.parseExprBP(1)
 
+	// fixme these need to move inside parseExprBP
 	switch p.peek().Kind {
 	case lex.ParenL:
 		return p.parseCallExpr(expr)
-	case lex.Matches:
-		return p.parseMatchesExpr(expr)
 	default:
 		return expr
 	}
@@ -291,10 +298,31 @@ func (p *Parser) parseExprBP(minBp bp) syn.Expr {
 	}
 
 	for {
-		bp, token, assoc := p.infixOp()
 
+		if tok, bp := p.postfixOp(); tok != nil {
+			if bp < minBp {
+				break
+			}
+
+			switch tok.Kind {
+			case lex.BracketL:
+				lhs = p.parseIndexExpr(lhs)
+			default:
+				panic("unreachable")
+			}
+
+			continue
+		}
+
+		bp, token, assoc := p.infixOp()
 		if bp < minBp {
 			break
+		}
+
+		if token.Kind == lex.Matches {
+			assert(assoc == left)
+			lhs = p.parseMatchesExpr(lhs)
+			continue
 		}
 
 		p.bump(token.Kind)
@@ -327,6 +355,8 @@ func (p *Parser) prefixOp() (*lex.Token, bp) {
 func (p *Parser) infixOp() (bp, lex.Token, assoc) {
 	tok := p.peek()
 	switch tok.Kind {
+	case lex.Matches:
+		return 100, tok, left
 	case lex.Equals2, lex.BangEqual:
 		return 110, tok, left
 	case lex.Plus, lex.Minus:
@@ -335,6 +365,18 @@ func (p *Parser) infixOp() (bp, lex.Token, assoc) {
 		return 130, tok, left
 	default:
 		return 0, tok, left
+	}
+}
+
+func (p *Parser) postfixOp() (*lex.Token, bp) {
+	tok := p.peek()
+	switch tok.Kind {
+	// case lex.ParenL:
+	// 	return &tok, 150
+	case lex.BracketL:
+		return &tok, 150
+	default:
+		return nil, 0
 	}
 }
 
@@ -348,6 +390,18 @@ func (p *Parser) parseMatchesExpr(expr syn.Expr) *syn.MatchesExpr {
 	return &syn.MatchesExpr{Expr: expr, Pat: pat}
 }
 
+func (p *Parser) parseIndexExpr(expr syn.Expr) *syn.IndexExpr {
+	p.bump(lex.BracketL)
+	index := p.parseExpr()
+	if index == nil {
+		return nil
+	}
+
+	p.expect(lex.BracketR)
+
+	return &syn.IndexExpr{Expr: expr, Index: index}
+}
+
 func (p *Parser) parseCallExpr(f syn.Expr) *syn.CallExpr {
 	p.bump(lex.ParenL)
 	args := []syn.Expr{}
@@ -358,6 +412,10 @@ func (p *Parser) parseCallExpr(f syn.Expr) *syn.CallExpr {
 		}
 
 		args = append(args, arg)
+
+		if !p.eat_(lex.Comma) {
+			break
+		}
 	}
 
 	p.expect(lex.ParenR)
@@ -403,6 +461,10 @@ func (p *Parser) parseListExpr() *syn.ListExpr {
 		}
 
 		exprs = append(exprs, expr)
+
+		if !p.eat_(lex.Comma) {
+			break
+		}
 	}
 
 	p.expect(lex.BracketR)
@@ -428,6 +490,10 @@ func (p *Parser) parseObjectExpr() *syn.ObjectExpr {
 		}
 
 		fields.Set(name.Value, expr)
+
+		if !p.eat_(lex.Comma) {
+			break
+		}
 	}
 
 	p.expect(lex.BraceR)

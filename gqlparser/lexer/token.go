@@ -16,6 +16,7 @@ const (
 	ParenR
 	Spread
 	Colon
+	Comma
 	Semi
 	Equals
 	At
@@ -56,6 +57,8 @@ func (t Type) Name() string {
 		return "Spread"
 	case Colon:
 		return "Colon"
+	case Comma:
+		return "Comma"
 	case Semi:
 		return "Semicolon"
 	case Equals:
@@ -114,6 +117,8 @@ func (t Type) String() string {
 		return ")"
 	case Spread:
 		return "..."
+	case Comma:
+		return ","
 	case Colon:
 		return ":"
 	case Semi:
