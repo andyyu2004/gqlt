@@ -40,6 +40,29 @@ func (name LiteralPat) Dump(w io.Writer) {
 	fmt.Fprintf(w, "%v", name.Value)
 }
 
+type ListPat struct {
+	Pats []Pat
+}
+
+var _ Pat = ListPat{}
+
+func (ListPat) isPat()  {}
+func (ListPat) isNode() {}
+
+func (pat ListPat) Dump(w io.Writer) {
+	io.WriteString(w, "[")
+
+	for i, pat := range pat.Pats {
+		if i > 0 {
+			io.WriteString(w, ", ")
+		}
+
+		pat.Dump(w)
+	}
+
+	io.WriteString(w, "]")
+}
+
 type ObjectPat struct {
 	Fields *orderedmap.OrderedMap[string, Pat]
 }

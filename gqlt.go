@@ -488,10 +488,18 @@ func bindPat(binder binder, pat syn.Pat, val any) error {
 	case *syn.NamePat:
 		binder.bind(pat.Name, val)
 		return nil
+
+	case *syn.ListPat:
+		vals, ok := val.([]any)
+		if !ok {
+			return fmt.Errorf("cannot bind %T value `%v` to list pattern", val, val)
+		}
+		return bindListPat(binder, pat, vals)
+
 	case *syn.ObjectPat:
 		vals, ok := val.(map[string]any)
 		if !ok {
-			return fmt.Errorf("cannot bind object pattern to value: %T", val)
+			return fmt.Errorf("cannot bind %T value `%v` to object pattern", val, val)
 		}
 		return bindObjectPat(binder, pat, vals)
 	case *syn.LiteralPat:
@@ -502,6 +510,20 @@ func bindPat(binder binder, pat syn.Pat, val any) error {
 	default:
 		panic(fmt.Sprintf("missing pattern bind case: %T", pat))
 	}
+}
+
+func bindListPat(binder binder, pat *syn.ListPat, values []any) error {
+	for i, pat := range pat.Pats {
+		if i > len(values)-1 {
+			return bindPat(binder, pat, nil)
+		}
+
+		if err := bindPat(binder, pat, values[i]); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func bindObjectPat(binder binder, pat *syn.ObjectPat, values map[string]any) error {

@@ -1,0 +1,14 @@
+let [x, y] = [1, 2, 3]
+assert x == 1
+assert y == 2
+
+let [x, y] = [1]
+assert x == 1
+assert y == null
+
+let [a, [b, c]] = [3, [6, 7]];
+assert [a, b, c] == [3, 6, 7]
+
+let [a, { b, c }] = [15, { b: 16, c: 17 }];
+assert [a, b, c] == [15, 16, 17]
+

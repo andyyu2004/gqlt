@@ -190,6 +190,8 @@ func (p *Parser) parsePat() syn.Pat {
 		return &syn.NamePat{Name: tok.Value}
 	case lex.BraceL:
 		return p.parseObjectPat()
+	case lex.BracketL:
+		return p.parseListPat()
 	case lex.Int, lex.Float, lex.String, lex.BlockString, lex.True, lex.False, lex.Null:
 		return p.parseLiteralPat()
 	default:
@@ -200,6 +202,23 @@ func (p *Parser) parsePat() syn.Pat {
 
 func (p *Parser) parseLiteralPat() *syn.LiteralPat {
 	return &syn.LiteralPat{Value: p.parseLiteral()}
+}
+
+func (p *Parser) parseListPat() *syn.ListPat {
+	p.bump(lex.BracketL)
+	pats := []syn.Pat{}
+	for !p.at(lex.EOF) && !p.at(lex.BracketR) {
+		pat := p.parsePat()
+		if pat == nil {
+			return nil
+		}
+
+		pats = append(pats, pat)
+	}
+
+	p.expect(lex.BracketR)
+
+	return &syn.ListPat{Pats: pats}
 }
 
 func (p *Parser) parseObjectPat() *syn.ObjectPat {
