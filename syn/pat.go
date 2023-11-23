@@ -12,6 +12,17 @@ type Pat interface {
 	isPat()
 }
 
+type WildcardPat struct{}
+
+var _ Pat = WildcardPat{}
+
+func (WildcardPat) isPat()  {}
+func (WildcardPat) isNode() {}
+
+func (WildcardPat) Dump(w io.Writer) {
+	io.WriteString(w, "_")
+}
+
 // A name pattern matches any value and binds it to the name
 type NamePat struct {
 	Name string

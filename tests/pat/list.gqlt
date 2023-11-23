@@ -12,3 +12,6 @@ assert [a, b, c] == [3, 6, 7]
 let [a, { b, c }] = [15, { b: 16, c: 17 }];
 assert [a, b, c] == [15, 16, 17]
 
+let [_, b] = [1, 2]
+assert b == 2
+

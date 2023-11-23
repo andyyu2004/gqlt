@@ -185,6 +185,9 @@ func (p *Parser) parseLetStmt() *syn.LetStmt {
 func (p *Parser) parsePat() syn.Pat {
 	tok := p.lexer.Peek()
 	switch tok.Kind {
+	case lex.Underscore:
+		p.bump(lex.Underscore)
+		return &syn.WildcardPat{}
 	case lex.Name:
 		p.bump(lex.Name)
 		return &syn.NamePat{Name: tok.Value}

@@ -485,6 +485,9 @@ func (dummyBinder) bind(string, any) {}
 
 func bindPat(binder binder, pat syn.Pat, val any) error {
 	switch pat := pat.(type) {
+	case *syn.WildcardPat:
+		return nil
+
 	case *syn.NamePat:
 		binder.bind(pat.Name, val)
 		return nil
@@ -502,6 +505,7 @@ func bindPat(binder binder, pat syn.Pat, val any) error {
 			return fmt.Errorf("cannot bind %T value `%v` to object pattern", val, val)
 		}
 		return bindObjectPat(binder, pat, vals)
+
 	case *syn.LiteralPat:
 		if pat.Value != val {
 			return fmt.Errorf("literal pattern does not match value: %v != %v", pat.Value, val)
