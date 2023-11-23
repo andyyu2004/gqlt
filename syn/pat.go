@@ -95,3 +95,17 @@ func (pat ObjectPat) Dump(w io.Writer) {
 
 	io.WriteString(w, " }")
 }
+
+type RestPat struct {
+	Pat Pat
+}
+
+var _ Pat = RestPat{}
+
+func (RestPat) isPat()  {}
+func (RestPat) isNode() {}
+
+func (pat RestPat) Dump(w io.Writer) {
+	io.WriteString(w, "...")
+	pat.Pat.Dump(w)
+}

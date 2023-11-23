@@ -102,7 +102,7 @@ func TestLoadSchema(t *testing.T) {
 		require.Equal(t, "Canine", possibleTypes[0].Name)
 	})
 
-	testrunner.Test(t, "./schema_test.yml", func(t *testing.T, input string) testrunner.Spec {
+	testrunner.Test(t, "./schema_test.yml", func(_ *testing.T, input string) testrunner.Spec {
 		_, err := LoadSchema(Prelude, &ast.Source{Input: input})
 		if err != nil {
 			return testrunner.Spec{

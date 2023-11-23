@@ -15,3 +15,17 @@ assert [a, b, c] == [15, 16, 17]
 let [_, b] = [1, 2]
 assert b == 2
 
+let [x, ...xs] = [1, 2, 3, 4]
+assert x == 1
+assert xs == [2, 3, 4]
+
+let [x, ...xs] = [1]
+assert x == 1
+assert xs == []
+
+let [x, ...xs] = []
+assert x == null
+assert xs == []
+
+let [x, ...[a, b, c]] = [1, 2, 3, 4 ,5]
+assert [x, a, b, c] == [1, 2, 3, 4]

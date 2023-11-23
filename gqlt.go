@@ -511,6 +511,10 @@ func bindPat(binder binder, pat syn.Pat, val any) error {
 			return fmt.Errorf("literal pattern does not match value: %v != %v", pat.Value, val)
 		}
 		return nil
+
+	case *syn.RestPat:
+		panic("rest pattern should have special handling in list and object cases")
+
 	default:
 		panic(fmt.Sprintf("missing pattern bind case: %T", pat))
 	}
@@ -518,6 +522,15 @@ func bindPat(binder binder, pat syn.Pat, val any) error {
 
 func bindListPat(binder binder, pat *syn.ListPat, values []any) error {
 	for i, pat := range pat.Pats {
+		rest, ok := pat.(*syn.RestPat)
+		if ok {
+			if err := bindPat(binder, rest.Pat, values[i:]); err != nil {
+				return err
+			}
+			return nil
+
+		}
+
 		if i > len(values)-1 {
 			return bindPat(binder, pat, nil)
 		}

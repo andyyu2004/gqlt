@@ -107,7 +107,7 @@ func (p *Parser) expect(kind lex.TokenKind) (lex.Token, bool) {
 	}
 
 	tok := p.lexer.Peek()
-	p.errors = append(p.errors, mkError(tok, "expected `%s`, found `%s`", kind.String(), tok.String()))
+	p.error(tok, "expected `%s`, found `%s`", kind.String(), tok.String())
 	return lex.Token{}, false
 }
 
@@ -165,7 +165,7 @@ func (p *Parser) parseAssertStmt() *syn.AssertStmt {
 
 func (p *Parser) parseLetStmt() *syn.LetStmt {
 	p.bump(lex.Let)
-	pat := p.parsePat()
+	pat := p.parsePat(patOpts{})
 	if pat == nil {
 		return nil
 	}
@@ -182,12 +182,33 @@ func (p *Parser) parseLetStmt() *syn.LetStmt {
 	return &syn.LetStmt{Pat: pat, Expr: expr}
 }
 
-func (p *Parser) parsePat() syn.Pat {
+type patOpts struct {
+	allowSpread bool
+}
+
+func (p *Parser) error(tok lex.Token, msg string, args ...any) {
+	p.errors = append(p.errors, mkError(tok, msg, args...))
+}
+
+func (p *Parser) parsePat(opts patOpts) syn.Pat {
 	tok := p.lexer.Peek()
 	switch tok.Kind {
 	case lex.Underscore:
 		p.bump(lex.Underscore)
 		return &syn.WildcardPat{}
+	case lex.Spread:
+		p.bump(lex.Spread)
+		if !opts.allowSpread {
+			p.error(tok, "spread pattern not allowed here")
+			return nil
+		}
+
+		pat := p.parsePat(patOpts{})
+		if pat == nil {
+			return nil
+		}
+		return &syn.RestPat{Pat: pat}
+
 	case lex.Name:
 		p.bump(lex.Name)
 		return &syn.NamePat{Name: tok.Value}
@@ -198,7 +219,7 @@ func (p *Parser) parsePat() syn.Pat {
 	case lex.Int, lex.Float, lex.String, lex.BlockString, lex.True, lex.False, lex.Null:
 		return p.parseLiteralPat()
 	default:
-		p.errors = append(p.errors, mkError(tok, "expected pattern, found `%s`", tok.String()))
+		p.error(tok, "expected pattern, found `%s`", tok.String())
 		return nil
 	}
 }
@@ -211,7 +232,7 @@ func (p *Parser) parseListPat() *syn.ListPat {
 	p.bump(lex.BracketL)
 	pats := []syn.Pat{}
 	for !p.at(lex.EOF) && !p.at(lex.BracketR) {
-		pat := p.parsePat()
+		pat := p.parsePat(patOpts{allowSpread: true})
 		if pat == nil {
 			return nil
 		}
@@ -224,6 +245,17 @@ func (p *Parser) parseListPat() *syn.ListPat {
 	}
 
 	p.expect(lex.BracketR)
+
+	for i, pat := range pats {
+		rest, ok := pat.(*syn.RestPat)
+		_ = rest
+		if ok && i != len(pats)-1 {
+			// todo
+			// p.error(rest.Pos, "rest pattern must be last")
+			// return nil
+		}
+
+	}
 
 	return &syn.ListPat{Pats: pats}
 }
@@ -239,7 +271,7 @@ func (p *Parser) parseObjectPat() *syn.ObjectPat {
 
 		var pat syn.Pat = &syn.NamePat{Name: name.Value}
 		if p.eat_(lex.Colon) {
-			pat = p.parsePat()
+			pat = p.parsePat(patOpts{allowSpread: true})
 			if pat == nil {
 				return nil
 			}
@@ -382,7 +414,7 @@ func (p *Parser) postfixOp() (*lex.Token, bp) {
 
 func (p *Parser) parseMatchesExpr(expr syn.Expr) *syn.MatchesExpr {
 	p.bump(lex.Matches)
-	pat := p.parsePat()
+	pat := p.parsePat(patOpts{})
 	if pat == nil {
 		return nil
 	}
@@ -446,7 +478,7 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 		p.bump(lex.Name)
 		return &syn.NameExpr{Name: tok.Value}
 	default:
-		p.errors = append(p.errors, mkError(tok, "expected expression, found `%s`", tok.Kind.String()))
+		p.error(tok, "expected expression, found `%s`", tok.String())
 		return nil
 	}
 }

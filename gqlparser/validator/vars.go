@@ -11,7 +11,7 @@ import (
 	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
 )
 
-var ErrUnexpectedType = fmt.Errorf("Unexpected Type")
+var ErrUnexpectedType = fmt.Errorf("unexpected type")
 
 // VariableValues coerces and validates variable values
 func VariableValues(schema *ast.Schema, op *ast.OperationDefinition, variables map[string]interface{}) (map[string]interface{}, error) {
