@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
@@ -12,7 +13,9 @@ type Pat interface {
 	isPat()
 }
 
-type WildcardPat struct{}
+type WildcardPat struct {
+	ast.Position
+}
 
 var _ Pat = WildcardPat{}
 
@@ -25,6 +28,7 @@ func (WildcardPat) Dump(w io.Writer) {
 
 // A name pattern matches any value and binds it to the name
 type NamePat struct {
+	ast.Position
 	Name string
 }
 
@@ -39,6 +43,7 @@ func (name NamePat) Dump(w io.Writer) {
 
 // A literal pattern matches a value that is equal to the literal
 type LiteralPat struct {
+	ast.Position
 	Value any
 }
 
@@ -52,6 +57,7 @@ func (name LiteralPat) Dump(w io.Writer) {
 }
 
 type ListPat struct {
+	ast.Position
 	Pats []Pat
 }
 
@@ -75,6 +81,7 @@ func (pat ListPat) Dump(w io.Writer) {
 }
 
 type ObjectPat struct {
+	ast.Position
 	Fields *orderedmap.OrderedMap[string, Pat]
 }
 
@@ -97,6 +104,7 @@ func (pat ObjectPat) Dump(w io.Writer) {
 }
 
 type RestPat struct {
+	ast.Position
 	Pat Pat
 }
 

@@ -17,3 +17,25 @@ type Position struct {
 	Column int     // The column number at the start of this item.
 	Src    *Source // The source document this token belongs to
 }
+
+func (p Position) Pos() Position {
+	return p
+}
+
+type HasPosition interface {
+	Pos() Position
+}
+
+func (p Position) Merge(other HasPosition) Position {
+	pos := other.Pos()
+
+	if p.Start > pos.Start {
+		p.Start = pos.Start
+	}
+
+	if p.End < pos.End {
+		p.End = pos.End
+	}
+
+	return p
+}

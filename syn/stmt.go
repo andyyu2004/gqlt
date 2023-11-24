@@ -1,6 +1,10 @@
 package syn
 
-import "io"
+import (
+	"io"
+
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
+)
 
 type Stmt interface {
 	Node
@@ -8,6 +12,7 @@ type Stmt interface {
 }
 
 type ExprStmt struct {
+	ast.Position
 	Expr Expr
 }
 
@@ -21,6 +26,7 @@ func (stmt ExprStmt) Dump(w io.Writer) {
 }
 
 type SetStmt struct {
+	ast.Position
 	Key   string
 	Value Expr
 }
@@ -38,6 +44,7 @@ func (stmt SetStmt) Dump(w io.Writer) {
 }
 
 type AssertStmt struct {
+	ast.Position
 	Expr Expr
 }
 
@@ -52,6 +59,7 @@ func (stmt AssertStmt) Dump(w io.Writer) {
 }
 
 type LetStmt struct {
+	ast.Position
 	Pat  Pat
 	Expr Expr
 }

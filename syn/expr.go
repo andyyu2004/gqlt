@@ -16,6 +16,7 @@ type Expr interface {
 }
 
 type NameExpr struct {
+	ast.Position
 	Name string
 }
 
@@ -29,6 +30,7 @@ func (expr NameExpr) Dump(w io.Writer) {
 }
 
 type OperationExpr struct {
+	ast.Position
 	// unparsed graphql string
 	// useful for pretty printing without formatting
 	Query string
@@ -46,6 +48,7 @@ func (expr OperationExpr) Dump(w io.Writer) {
 }
 
 type IndexExpr struct {
+	ast.Position
 	Expr  Expr
 	Index Expr
 }
@@ -63,6 +66,7 @@ func (expr IndexExpr) Dump(w io.Writer) {
 }
 
 type LiteralExpr struct {
+	ast.Position
 	Value any
 }
 
@@ -81,6 +85,7 @@ func (expr LiteralExpr) Dump(w io.Writer) {
 }
 
 type CallExpr struct {
+	ast.Position
 	Fn   Expr
 	Args []Expr
 }
@@ -104,6 +109,7 @@ func (expr CallExpr) Dump(w io.Writer) {
 }
 
 type MatchesExpr struct {
+	ast.Position
 	Expr Expr
 	Pat  Pat
 }
@@ -120,6 +126,7 @@ func (expr MatchesExpr) Dump(w io.Writer) {
 }
 
 type ListExpr struct {
+	ast.Position
 	Exprs []Expr
 }
 
@@ -142,6 +149,7 @@ func (expr ListExpr) Dump(w io.Writer) {
 }
 
 type ObjectExpr struct {
+	ast.Position
 	Fields *orderedmap.OrderedMap[string, Expr]
 }
 
@@ -164,6 +172,7 @@ func (expr ObjectExpr) Dump(w io.Writer) {
 }
 
 type BinaryExpr struct {
+	ast.Position
 	Op    lex.TokenKind
 	Left  Expr
 	Right Expr
@@ -183,6 +192,7 @@ func (expr BinaryExpr) Dump(w io.Writer) {
 }
 
 type UnaryExpr struct {
+	ast.Position
 	Op   lex.TokenKind
 	Expr Expr
 }

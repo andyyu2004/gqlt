@@ -91,9 +91,10 @@ func (p *Parser) eat(kind lex.TokenKind) (lex.Token, bool) {
 	return lex.Token{}, false
 }
 
-func (p *Parser) bump(kind lex.TokenKind) {
-	_, ok := p.eat(kind)
+func (p *Parser) bump(kind lex.TokenKind) lex.Token {
+	tok, ok := p.eat(kind)
 	assert(ok)
+	return tok
 }
 
 func (p *Parser) expect_(kind lex.TokenKind) bool {
@@ -112,7 +113,7 @@ func (p *Parser) expect(kind lex.TokenKind) (lex.Token, bool) {
 }
 
 func mkError(tok lex.Token, msg string, args ...any) *gqlerror.Error {
-	return gqlerror.ErrorLocf(tok.Pos.Src.Name, tok.Pos.Line, tok.Pos.Column, msg, args...)
+	return gqlerror.ErrorLocf(tok.Src.Name, tok.Line, tok.Column, msg, args...)
 }
 
 func (p *Parser) parseStmt() syn.Stmt {
@@ -131,12 +132,12 @@ func (p *Parser) parseStmt() syn.Stmt {
 			return nil
 		}
 
-		return &syn.ExprStmt{Expr: expr}
+		return &syn.ExprStmt{Position: expr.Pos(), Expr: expr}
 	}
 }
 
 func (p *Parser) parseSetStmt() *syn.SetStmt {
-	p.bump(lex.Set)
+	start := p.bump(lex.Set)
 	key, ok := p.expect(lex.Name)
 	if !ok {
 		return nil
@@ -150,21 +151,21 @@ func (p *Parser) parseSetStmt() *syn.SetStmt {
 		return nil
 	}
 
-	return &syn.SetStmt{Key: key.Value, Value: expr}
+	return &syn.SetStmt{Position: start.Merge(expr), Key: key.Value, Value: expr}
 }
 
 func (p *Parser) parseAssertStmt() *syn.AssertStmt {
-	p.bump(lex.Assert)
+	start := p.bump(lex.Assert)
 	expr := p.parseExpr()
 	if expr == nil {
 		return nil
 	}
 
-	return &syn.AssertStmt{Expr: expr}
+	return &syn.AssertStmt{Position: start.Merge(expr), Expr: expr}
 }
 
 func (p *Parser) parseLetStmt() *syn.LetStmt {
-	p.bump(lex.Let)
+	start := p.bump(lex.Let)
 	pat := p.parsePat(patOpts{})
 	if pat == nil {
 		return nil
@@ -179,7 +180,7 @@ func (p *Parser) parseLetStmt() *syn.LetStmt {
 		return nil
 	}
 
-	return &syn.LetStmt{Pat: pat, Expr: expr}
+	return &syn.LetStmt{Position: start.Merge(expr), Pat: pat, Expr: expr}
 }
 
 type patOpts struct {
@@ -195,7 +196,7 @@ func (p *Parser) parsePat(opts patOpts) syn.Pat {
 	switch tok.Kind {
 	case lex.Underscore:
 		p.bump(lex.Underscore)
-		return &syn.WildcardPat{}
+		return &syn.WildcardPat{Position: tok.Pos()}
 	case lex.Spread:
 		p.bump(lex.Spread)
 		if !opts.allowSpread {
@@ -207,11 +208,11 @@ func (p *Parser) parsePat(opts patOpts) syn.Pat {
 		if pat == nil {
 			return nil
 		}
-		return &syn.RestPat{Pat: pat}
+		return &syn.RestPat{Position: tok.Pos(), Pat: pat}
 
 	case lex.Name:
 		p.bump(lex.Name)
-		return &syn.NamePat{Name: tok.Value}
+		return &syn.NamePat{Position: tok.Pos(), Name: tok.Value}
 	case lex.BraceL:
 		return p.parseObjectPat()
 	case lex.BracketL:
@@ -225,11 +226,12 @@ func (p *Parser) parsePat(opts patOpts) syn.Pat {
 }
 
 func (p *Parser) parseLiteralPat() *syn.LiteralPat {
-	return &syn.LiteralPat{Value: p.parseLiteral()}
+	pos := p.peek().Pos()
+	return &syn.LiteralPat{Position: pos, Value: p.parseLiteral()}
 }
 
 func (p *Parser) parseListPat() *syn.ListPat {
-	p.bump(lex.BracketL)
+	start := p.bump(lex.BracketL)
 	pats := []syn.Pat{}
 	for !p.at(lex.EOF) && !p.at(lex.BracketR) {
 		pat := p.parsePat(patOpts{allowSpread: true})
@@ -244,7 +246,7 @@ func (p *Parser) parseListPat() *syn.ListPat {
 		}
 	}
 
-	p.expect(lex.BracketR)
+	end, _ := p.expect(lex.BracketR)
 
 	for i, pat := range pats {
 		rest, ok := pat.(*syn.RestPat)
@@ -257,11 +259,11 @@ func (p *Parser) parseListPat() *syn.ListPat {
 
 	}
 
-	return &syn.ListPat{Pats: pats}
+	return &syn.ListPat{Position: start.Merge(end), Pats: pats}
 }
 
 func (p *Parser) parseObjectPat() *syn.ObjectPat {
-	p.bump(lex.BraceL)
+	start := p.bump(lex.BraceL)
 	fields := orderedmap.New[string, syn.Pat]()
 	for !p.at(lex.EOF) && !p.at(lex.BraceR) {
 		name, ok := p.expect(lex.Name)
@@ -284,9 +286,9 @@ func (p *Parser) parseObjectPat() *syn.ObjectPat {
 		}
 	}
 
-	p.expect(lex.BraceR)
+	end, _ := p.expect(lex.BraceR)
 
-	return &syn.ObjectPat{Fields: fields}
+	return &syn.ObjectPat{Position: start.Merge(end), Fields: fields}
 }
 
 func (p *Parser) parseExpr() syn.Expr {
@@ -320,7 +322,7 @@ func (p *Parser) parseExprBP(minBp bp) syn.Expr {
 			return nil
 		}
 
-		lhs = &syn.UnaryExpr{Op: tok.Kind, Expr: expr}
+		lhs = &syn.UnaryExpr{Position: tok.Merge(expr), Op: tok.Kind, Expr: expr}
 	} else {
 		lhs = p.parseAtomExpr()
 	}
@@ -419,7 +421,7 @@ func (p *Parser) parseMatchesExpr(expr syn.Expr) *syn.MatchesExpr {
 		return nil
 	}
 
-	return &syn.MatchesExpr{Expr: expr, Pat: pat}
+	return &syn.MatchesExpr{Position: expr.Pos().Merge(pat), Expr: expr, Pat: pat}
 }
 
 func (p *Parser) parseIndexExpr(expr syn.Expr) *syn.IndexExpr {
@@ -429,9 +431,9 @@ func (p *Parser) parseIndexExpr(expr syn.Expr) *syn.IndexExpr {
 		return nil
 	}
 
-	p.expect(lex.BracketR)
+	end, _ := p.expect(lex.BracketR)
 
-	return &syn.IndexExpr{Expr: expr, Index: index}
+	return &syn.IndexExpr{Position: expr.Pos().Merge(end), Expr: expr, Index: index}
 }
 
 func (p *Parser) parseCallExpr(f syn.Expr) *syn.CallExpr {
@@ -450,9 +452,9 @@ func (p *Parser) parseCallExpr(f syn.Expr) *syn.CallExpr {
 		}
 	}
 
-	p.expect(lex.ParenR)
+	end, _ := p.expect(lex.ParenR)
 
-	return &syn.CallExpr{Fn: f, Args: args}
+	return &syn.CallExpr{Position: f.Pos().Merge(end), Fn: f, Args: args}
 }
 
 func (p *Parser) parseAtomExpr() syn.Expr {
@@ -476,7 +478,7 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 		return p.parseLiteralExpr()
 	case lex.Name:
 		p.bump(lex.Name)
-		return &syn.NameExpr{Name: tok.Value}
+		return &syn.NameExpr{Position: tok.Pos(), Name: tok.Value}
 	default:
 		p.error(tok, "expected expression, found `%s`", tok.String())
 		return nil
@@ -484,7 +486,7 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 }
 
 func (p *Parser) parseListExpr() *syn.ListExpr {
-	p.bump(lex.BracketL)
+	start := p.bump(lex.BracketL)
 	exprs := []syn.Expr{}
 	for !p.at(lex.EOF) && !p.at(lex.BracketR) {
 		expr := p.parseExpr()
@@ -499,13 +501,13 @@ func (p *Parser) parseListExpr() *syn.ListExpr {
 		}
 	}
 
-	p.expect(lex.BracketR)
+	end, _ := p.expect(lex.BracketR)
 
-	return &syn.ListExpr{Exprs: exprs}
+	return &syn.ListExpr{Position: start.Merge(end), Exprs: exprs}
 }
 
 func (p *Parser) parseObjectExpr() *syn.ObjectExpr {
-	p.bump(lex.BraceL)
+	start := p.bump(lex.BraceL)
 	fields := orderedmap.New[string, syn.Expr]()
 	for !p.at(lex.EOF) && !p.at(lex.BraceR) {
 		name, ok := p.expect(lex.Name)
@@ -528,13 +530,14 @@ func (p *Parser) parseObjectExpr() *syn.ObjectExpr {
 		}
 	}
 
-	p.expect(lex.BraceR)
+	end, _ := p.expect(lex.BraceR)
 
-	return &syn.ObjectExpr{Fields: fields}
+	return &syn.ObjectExpr{Position: start.Merge(end), Fields: fields}
 }
 
 func (p *Parser) parseLiteralExpr() *syn.LiteralExpr {
-	return &syn.LiteralExpr{Value: p.parseLiteral()}
+	pos := p.peek().Pos()
+	return &syn.LiteralExpr{Position: pos, Value: p.parseLiteral()}
 }
 
 func (p *Parser) parseLiteral() any {
@@ -560,7 +563,7 @@ func (p *Parser) parseLiteral() any {
 
 func (p *Parser) parseQueryExpr() *syn.OperationExpr {
 	parser := parser.New(&p.lexer)
-	startPos := p.lexer.Peek().Pos
+	startPos := p.lexer.Peek()
 	operation := parser.ParseOperationDefinition()
 	if err := parser.Err(); err != nil {
 		p.errors = append(p.errors, err)
@@ -568,9 +571,9 @@ func (p *Parser) parseQueryExpr() *syn.OperationExpr {
 	}
 
 	endTok := p.lexer.Peek()
-	query := strings.TrimRight(endTok.Pos.Src.Input[startPos.Start:endTok.Pos.Start], "\n")
+	query := strings.TrimRight(endTok.Src.Input[startPos.Start:endTok.Start], "\n")
 
-	return &syn.OperationExpr{Query: query, Operation: operation}
+	return &syn.OperationExpr{Position: startPos.Merge(endTok), Query: query, Operation: operation}
 }
 
 func assert(cond bool) {

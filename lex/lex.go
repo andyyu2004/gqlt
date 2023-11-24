@@ -124,13 +124,13 @@ func convertToken(tok [n]lexer.Token) (Token, int) {
 		}
 
 	}
-	return Token{Kind: kind, Value: tok[0].Value, Pos: tok[0].Pos}, len
+	return Token{Kind: kind, Value: tok[0].Value, Position: tok[0].Pos}, len
 }
 
 type Token struct {
 	Kind  TokenKind
 	Value string
-	Pos   ast.Position
+	ast.Position
 }
 
 type TokenKind lexer.Type

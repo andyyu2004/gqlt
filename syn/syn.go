@@ -3,6 +3,8 @@ package syn
 import (
 	"bytes"
 	"io"
+
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
 )
 
 func Dump(node Node) string {
@@ -12,6 +14,7 @@ func Dump(node Node) string {
 }
 
 type Node interface {
+	ast.HasPosition
 	isNode()
 
 	Dump(io.Writer)
