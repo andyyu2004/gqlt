@@ -312,15 +312,7 @@ func (p *Parser) parseObjectPat() *syn.ObjectPat {
 }
 
 func (p *Parser) parseExpr() syn.Expr {
-	expr := p.parseExprBP(1)
-
-	// fixme these need to move inside parseExprBP
-	switch p.peek().Kind {
-	case lex.ParenL:
-		return p.parseCallExpr(expr)
-	default:
-		return expr
-	}
+	return p.parseExprBP(1)
 }
 
 // pratt parser binding power
@@ -360,6 +352,8 @@ func (p *Parser) parseExprBP(minBp bp) syn.Expr {
 			switch tok.Kind {
 			case lex.BracketL:
 				lhs = p.parseIndexExpr(lhs)
+			case lex.ParenL:
+				lhs = p.parseCallExpr(lhs)
 			default:
 				panic("unreachable")
 			}
@@ -424,8 +418,8 @@ func (p *Parser) infixOp() (bp, lex.Token, assoc) {
 func (p *Parser) postfixOp() (*lex.Token, bp) {
 	tok := p.peek()
 	switch tok.Kind {
-	// case lex.ParenL:
-	// 	return &tok, 150
+	case lex.ParenL:
+		return &tok, 150
 	case lex.BracketL:
 		return &tok, 150
 	default:
