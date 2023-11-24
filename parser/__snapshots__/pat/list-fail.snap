@@ -1,5 +1,7 @@
 
 [TestParser/pat/list-fail - 1]
 let [...ys, y] = [];
+#    ^^^^^ rest pattern must be last
+
 
 ---

@@ -27,11 +27,11 @@ type Parser struct {
 
 type Error struct {
 	ast.Position
-	Msg string
+	Message string
 }
 
 func (err Error) Error() string {
-	return fmt.Sprintf("%v: %s", err.Position, err.Msg)
+	return fmt.Sprintf("%v: %s", err.Position, err.Message)
 }
 
 type Errors []Error
@@ -208,7 +208,7 @@ type patOpts struct {
 }
 
 func (p *Parser) error(tok ast.HasPosition, msg string, args ...any) {
-	err := Error{Position: tok.Pos(), Msg: fmt.Sprintf(msg, args...)}
+	err := Error{Position: tok.Pos(), Message: fmt.Sprintf(msg, args...)}
 	p.errors = append(p.errors, err)
 }
 
@@ -229,7 +229,8 @@ func (p *Parser) parsePat(opts patOpts) syn.Pat {
 		if pat == nil {
 			return nil
 		}
-		return &syn.RestPat{Position: tok.Pos(), Pat: pat}
+
+		return &syn.RestPat{Position: tok.Pos().Merge(pat), Pat: pat}
 
 	case lex.Name:
 		p.bump(lex.Name)
@@ -589,7 +590,7 @@ func (p *Parser) parseQueryExpr() *syn.OperationExpr {
 		err := err.(*gqlerror.Error)
 		p.errors = append(p.errors, Error{
 			Position: startPos.Pos(),
-			Msg:      err.Message,
+			Message:  err.Message,
 		})
 		return nil
 	}
