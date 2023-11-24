@@ -1,5 +1,7 @@
 package ast
 
+import "fmt"
+
 // Source covers a single *.graphql file
 type Source struct {
 	// Name is the filename of the source
@@ -16,6 +18,10 @@ type Position struct {
 	Line   int     // The line number at the start of this item.
 	Column int     // The column number at the start of this item.
 	Src    *Source // The source document this token belongs to
+}
+
+func (p Position) String() string {
+	return fmt.Sprintf("%s:%d:%d", p.Src.Name, p.Line, p.Column)
 }
 
 func (p Position) Pos() Position {
