@@ -10,6 +10,7 @@ import (
 	"github.com/andyyu2004/gqlt/parser"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
 	"github.com/gkampitakis/go-snaps/snaps"
 	"github.com/stretchr/testify/require"
 )
@@ -36,12 +37,19 @@ func TestParser(t *testing.T) {
 			require.NoError(t, err)
 
 			file, err := parser.Parse()
-			require.NoError(t, err)
-
-			buf := bytes.Buffer{}
-			file.Dump(&buf)
-
-			snaps.WithConfig(snaps.Filename(name)).MatchSnapshot(t, buf.String())
+			if err != nil {
+				annotated := annotate(src, err.(gqlerror.List))
+				snaps.WithConfig(snaps.Filename(name)).MatchSnapshot(t, annotated)
+			} else {
+				buf := bytes.Buffer{}
+				file.Dump(&buf)
+				snaps.WithConfig(snaps.Filename(name)).MatchSnapshot(t, buf.String())
+			}
 		})
 	}
+}
+
+func annotate(src string, errors gqlerror.List) string {
+	lines := strings.Split(src, "\n")
+	return src
 }

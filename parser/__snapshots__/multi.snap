@@ -1,5 +1,6 @@
 
 [TestParser/multi - 1]
-let bar = query { foo { bar } }
-let baz = query { bar { baz } }
+let bar = query { foo { bar } };
+let baz = query { bar { baz } };
+
 ---

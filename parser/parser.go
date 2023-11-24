@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"errors"
+	"fmt"
 	"os"
 	"reflect"
 	"strconv"
@@ -22,7 +22,26 @@ type Parser struct {
 	steps  int
 	lexer  lex.Lexer
 	stmts  []syn.Stmt
-	errors []error
+	errors Errors
+}
+
+type Error struct {
+	ast.Position
+	Msg string
+}
+
+func (err Error) Error() string {
+	return fmt.Sprintf("%v: %s", err.Position, err.Msg)
+}
+
+type Errors []Error
+
+func (errs Errors) Error() string {
+	var b strings.Builder
+	for _, err := range errs {
+		fmt.Fprintf(&b, "%v\n", err)
+	}
+	return b.String()
 }
 
 func NewFromPath(path string) (*Parser, error) {
@@ -56,7 +75,12 @@ func (p *Parser) Parse() (syn.File, error) {
 
 	assert(p.at(lex.EOF))
 
-	return syn.File{Stmts: p.stmts}, errors.Join(p.errors...)
+	var err error
+	if len(p.errors) > 0 {
+		err = p.errors
+	}
+
+	return syn.File{Stmts: p.stmts}, err
 }
 
 func (p *Parser) step() {
@@ -110,10 +134,6 @@ func (p *Parser) expect(kind lex.TokenKind) (lex.Token, bool) {
 	tok := p.lexer.Peek()
 	p.error(tok, "expected `%s`, found `%s`", kind.String(), tok.String())
 	return lex.Token{}, false
-}
-
-func mkError(tok lex.Token, msg string, args ...any) *gqlerror.Error {
-	return gqlerror.ErrorLocf(tok.Src.Name, tok.Line, tok.Column, msg, args...)
 }
 
 func (p *Parser) parseStmt() syn.Stmt {
@@ -187,8 +207,9 @@ type patOpts struct {
 	allowSpread bool
 }
 
-func (p *Parser) error(tok lex.Token, msg string, args ...any) {
-	p.errors = append(p.errors, mkError(tok, msg, args...))
+func (p *Parser) error(tok ast.HasPosition, msg string, args ...any) {
+	err := Error{Position: tok.Pos(), Msg: fmt.Sprintf(msg, args...)}
+	p.errors = append(p.errors, err)
 }
 
 func (p *Parser) parsePat(opts patOpts) syn.Pat {
@@ -250,11 +271,9 @@ func (p *Parser) parseListPat() *syn.ListPat {
 
 	for i, pat := range pats {
 		rest, ok := pat.(*syn.RestPat)
-		_ = rest
 		if ok && i != len(pats)-1 {
-			// todo
-			// p.error(rest.Pos, "rest pattern must be last")
-			// return nil
+			p.error(rest, "rest pattern must be last")
+			return nil
 		}
 
 	}
@@ -332,7 +351,6 @@ func (p *Parser) parseExprBP(minBp bp) syn.Expr {
 	}
 
 	for {
-
 		if tok, bp := p.postfixOp(); tok != nil {
 			if bp < minBp {
 				break
@@ -566,7 +584,13 @@ func (p *Parser) parseQueryExpr() *syn.OperationExpr {
 	startPos := p.lexer.Peek()
 	operation := parser.ParseOperationDefinition()
 	if err := parser.Err(); err != nil {
-		p.errors = append(p.errors, err)
+		// we can make this conversion as this is the only error type returned by parser
+		// (excluding lexer errors which we have already handled)
+		err := err.(*gqlerror.Error)
+		p.errors = append(p.errors, Error{
+			Position: startPos.Pos(),
+			Msg:      err.Message,
+		})
 		return nil
 	}
 

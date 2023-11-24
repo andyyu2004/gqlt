@@ -25,11 +25,8 @@ type File struct {
 }
 
 func (f File) Dump(w io.Writer) {
-	for i, stmt := range f.Stmts {
-		if i > 0 {
-			io.WriteString(w, "\n")
-		}
-
+	for _, stmt := range f.Stmts {
 		stmt.Dump(w)
+		io.WriteString(w, ";\n")
 	}
 }

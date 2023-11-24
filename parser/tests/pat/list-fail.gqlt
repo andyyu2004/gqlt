@@ -1,0 +1,7 @@
+let [...ys, y] = [];
+#    ^^^^^
+# list rest patterns must be the last 
+let [y, y] = [];
+#       ^
+# pattern `y` already bound
+

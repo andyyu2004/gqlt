@@ -1,5 +1,6 @@
 
 [TestParser/stmt/assert - 1]
-assert true
-assert 1 matches 1
+assert true;
+assert 1 matches 1;
+
 ---

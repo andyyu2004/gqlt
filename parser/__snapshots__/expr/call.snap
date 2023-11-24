@@ -1,5 +1,6 @@
 
 [TestParser/expr/call - 1]
-let t = f(x, y)
-let t = f(x, g(y))
+let t = f(x, y);
+let t = f(x, g(y));
+
 ---
