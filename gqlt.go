@@ -629,7 +629,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			default:
 				return nil, fmt.Errorf("cannot negate %T", lhs)
 			}
-		case lex.Bang:
+		case lex.Bang, lex.Not:
 			return !truthy(val), nil
 		default:
 			panic(fmt.Sprintf("missing unary expr eval case: %s", expr.Op))

@@ -10,4 +10,5 @@ assert [1];
 assert {};
 assert {a: 1};
 assert "test" matches "test"
-assert !("test" matches "foo")
+assert not "test" matches "foo"
+assert not not "test" matches "test"

@@ -397,6 +397,11 @@ func (p *Parser) parseExprBP(minBp bp) syn.Expr {
 func (p *Parser) prefixOp() (*lex.Token, bp) {
 	tok := p.peek()
 	switch tok.Kind {
+	// not is the same as ! but with lower precedence
+	// it's useful for writing expressions such as `assert not x matches y`
+	// opposed to the clunky `assert !(x matches y)`
+	case lex.Not:
+		return &tok, 90
 	case lex.Minus, lex.Bang:
 		return &tok, 140
 	default:
