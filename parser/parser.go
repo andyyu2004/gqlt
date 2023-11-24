@@ -204,7 +204,9 @@ func (p *Parser) parseLetStmt() *syn.LetStmt {
 }
 
 type patOpts struct {
-	allowSpread bool
+	// allow ...<pat> pattern
+	allowSpread           bool
+	allowImplicitWildcard bool
 }
 
 func (p *Parser) error(tok ast.HasPosition, msg string, args ...any) {
@@ -225,7 +227,7 @@ func (p *Parser) parsePat(opts patOpts) syn.Pat {
 			return nil
 		}
 
-		pat := p.parsePat(patOpts{})
+		pat := p.parsePat(patOpts{allowImplicitWildcard: true})
 		if pat == nil {
 			return nil
 		}
@@ -242,6 +244,9 @@ func (p *Parser) parsePat(opts patOpts) syn.Pat {
 	case lex.Int, lex.Float, lex.String, lex.BlockString, lex.True, lex.False, lex.Null:
 		return p.parseLiteralPat()
 	default:
+		if opts.allowImplicitWildcard {
+			return &syn.WildcardPat{Position: tok.Pos()}
+		}
 		p.error(tok, "expected pattern, found `%s`", tok.String())
 		return nil
 	}

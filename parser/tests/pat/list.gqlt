@@ -1,0 +1,2 @@
+# should expand to `let [x, ..._]` = []
+let [x, ...] = []

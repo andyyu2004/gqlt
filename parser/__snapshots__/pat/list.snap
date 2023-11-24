@@ -1,4 +1,5 @@
 
 [TestParser/pat/list - 1]
+let [x, ..._] = [];
 
 ---
