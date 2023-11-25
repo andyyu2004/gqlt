@@ -3,6 +3,7 @@ package gqlt
 import (
 	"bytes"
 	"context"
+	"fmt"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/formatter"
@@ -13,7 +14,7 @@ func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.O
 	operation := expr.Operation
 	for _, transform := range []transform{
 		namespaceTransform{ecx.settings.namespace},
-		variableTransform{ecx.scope},
+		variableTransform{scope: ecx.scope},
 	} {
 		operation = transform.transformOperation(operation)
 	}
@@ -37,14 +38,6 @@ func formatOperation(operation *ast.OperationDefinition) string {
 		Operations: []*ast.OperationDefinition{operation},
 	})
 	return buf.String()
-}
-
-func mapSlice[T, U any](xs []T, f func(T) U) []U {
-	ys := make([]U, len(xs))
-	for i, x := range xs {
-		ys[i] = f(x)
-	}
-	return ys
 }
 
 type transform interface {
@@ -84,6 +77,7 @@ func (t namespaceTransform) transformOperation(operation *ast.OperationDefinitio
 // replace all variables with their values if no explicit parameter list
 type variableTransform struct {
 	scope *scope
+	err   error
 }
 
 func (t variableTransform) transformOperation(operation *ast.OperationDefinition) *ast.OperationDefinition {
@@ -93,17 +87,112 @@ func (t variableTransform) transformOperation(operation *ast.OperationDefinition
 	}
 
 	// otherwise, we replace all variables with their values inline
-	// todo currently a noop
 
 	return &ast.OperationDefinition{
 		Operation:           operation.Operation,
 		Name:                operation.Name,
-		VariableDefinitions: nil,
+		VariableDefinitions: nil, // drop all variable definitions as they have been "inlined"
 		Directives:          operation.Directives,
-		SelectionSet:        operation.SelectionSet,
+		SelectionSet:        t.transformSelectionSet(operation.SelectionSet),
 		Position:            operation.Position,
 		Comment:             operation.Comment,
 	}
+}
+
+func (t variableTransform) transformArgumentList(argumentList ast.ArgumentList) ast.ArgumentList {
+	return mapSlice(argumentList, func(argument *ast.Argument) *ast.Argument {
+		return &ast.Argument{
+			Name:     argument.Name,
+			Value:    t.transformValue(argument.Value),
+			Position: argument.Position,
+			Comment:  argument.Comment,
+		}
+	})
+}
+
+func (t variableTransform) transformValue(value *ast.Value) *ast.Value {
+	switch value.Kind {
+	case ast.Variable:
+		assert(len(value.Children) == 0, "unexpected children for variable value")
+		val, ok := t.scope.Lookup(value.Raw)
+		if !ok {
+			t.err = fmt.Errorf("reference to undefined variable in graphql query: %s", value.Raw)
+			return value
+		}
+
+		out := &ast.Value{Position: value.Position, Comment: value.Comment}
+		switch val := val.(type) {
+		case int:
+			out.Kind = ast.IntValue
+			out.Raw = fmt.Sprintf("%d", val)
+		case float64:
+			out.Kind = ast.FloatValue
+			out.Raw = fmt.Sprintf("%f", val)
+		case string:
+			out.Kind = ast.StringValue
+			out.Raw = val
+		case bool:
+			out.Kind = ast.BooleanValue
+			out.Raw = fmt.Sprintf("%t", val)
+		case nil:
+			out.Kind = ast.NullValue
+			out.Raw = "null"
+		}
+
+		return out
+	default:
+		return &ast.Value{
+			Raw: value.Raw,
+			Children: mapSlice(value.Children, func(child *ast.ChildValue) *ast.ChildValue {
+				return &ast.ChildValue{
+					Name:     child.Name,
+					Value:    t.transformValue(child.Value),
+					Position: child.Position,
+					Comment:  child.Comment,
+				}
+			}),
+			Kind:               value.Kind,
+			Position:           value.Position,
+			Comment:            value.Comment,
+			Definition:         value.Definition,
+			VariableDefinition: value.VariableDefinition,
+			ExpectedType:       value.ExpectedType,
+		}
+	}
+}
+
+func (t variableTransform) transformSelectionSet(selectionSet ast.SelectionSet) ast.SelectionSet {
+	return mapSlice(selectionSet, func(selection ast.Selection) ast.Selection {
+		switch selection := selection.(type) {
+		case *ast.Field:
+			return &ast.Field{
+				Alias:        selection.Alias,
+				Name:         selection.Name,
+				Arguments:    t.transformArgumentList(selection.Arguments),
+				Directives:   selection.Directives,
+				SelectionSet: t.transformSelectionSet(selection.SelectionSet),
+				Position:     selection.Position,
+				Comment:      selection.Comment,
+			}
+		case *ast.FragmentSpread:
+			return &ast.FragmentSpread{
+				Name:       selection.Name,
+				Directives: selection.Directives,
+				Position:   selection.Position,
+				Comment:    selection.Comment,
+			}
+		case *ast.InlineFragment:
+			return &ast.InlineFragment{
+				TypeCondition: selection.TypeCondition,
+				Directives:    selection.Directives,
+				SelectionSet:  t.transformSelectionSet(selection.SelectionSet),
+				Position:      selection.Position,
+				Comment:       selection.Comment,
+			}
+		default:
+			panic("unreachable")
+		}
+	})
 }
 
 // flatten removes unnecessary nesting in a (hopefully) intuitive way from the graphql response
@@ -126,4 +215,12 @@ func flatten(data any) any {
 	default:
 		return data
 	}
+}
+
+func mapSlice[T, U any](xs []T, f func(T) U) []U {
+	ys := make([]U, len(xs))
+	for i, x := range xs {
+		ys[i] = f(x)
+	}
+	return ys
 }

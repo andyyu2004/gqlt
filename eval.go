@@ -87,18 +87,26 @@ func (s *scope) Lookup(name string) (any, bool) {
 	return val, ok
 }
 
+func isGqlVar(val any) bool {
+	switch reflect.ValueOf(val).Kind() {
+	case reflect.Func:
+		return false
+	default:
+		return true
+	}
+}
+
 func (s *scope) gqlVars() map[string]any {
 	vars := map[string]any{}
 
 	for name, val := range s.vars {
 		// We avoid passing in function values as graphql variables.
 		// This is only a shallow check so we can still pass in a map containing functions for example.
-		switch reflect.ValueOf(val).Kind() {
-		case reflect.Func:
+		if !isGqlVar(val) {
 			continue
-		default:
-			vars[name] = val
 		}
+
+		vars[name] = val
 	}
 
 	if s.parent != nil {

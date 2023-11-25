@@ -37,6 +37,7 @@ func bindPat(binder binder, pat syn.Pat, val any) error {
 		if !ok {
 			return fmt.Errorf("cannot bind %T value `%v` to object pattern", val, val)
 		}
+
 		return bindObjectPat(binder, pat, vals)
 
 	case *syn.LiteralPat:

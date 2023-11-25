@@ -1,0 +1,22 @@
+set namespace "animals/dogs"
+
+let name = "Buddy"
+
+# it works with an explicit parameter list
+let id = query ($name: String!) {
+    find(name: $name) {
+        id
+    }
+}
+
+
+assert id == "1"
+
+# also works with no parameter list
+let id = query {
+    find(name: $name) {
+        id
+    }
+}
+
+
