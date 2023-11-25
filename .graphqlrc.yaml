@@ -1,3 +1,5 @@
 projects:
   gqlt:
-    schema: gqlt/**/*.graphql
+    schema: "tests/*.graphql"
+  gqlparser:
+    schema: "gqlparser/**/*.graphql"
