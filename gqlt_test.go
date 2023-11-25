@@ -36,7 +36,7 @@ func TestGqlt(t *testing.T) {
 	handler := &relay.Handler{Schema: schema}
 
 	clients := []gqlt.Client{
-		gqlt.GraphQLGophersClient{schema},
+		gqlt.GraphQLGophersClient{Schema: schema},
 		gqlt.HTTPClient{Handler: handler},
 	}
 
