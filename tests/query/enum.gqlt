@@ -1,0 +1,11 @@
+set namespace "animals"
+
+let kinds = query { allKinds }
+assert kinds == ["DOG", "CAT"]
+
+let [kind, ...] = kinds
+
+assert query {
+    kindToString(kind: $kind)
+} == "dog"
+

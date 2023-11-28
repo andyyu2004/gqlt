@@ -2,6 +2,7 @@ package gqlt_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/andyyu2004/gqlt"
@@ -30,6 +31,12 @@ func TestGqlt(t *testing.T) {
 				Name: "Buddy",
 			},
 		},
+		cats: []cat{
+			{
+				ID:   "1",
+				Name: "Chips",
+			},
+		},
 	}
 
 	schema := graphql.MustParseSchema(schema, q, graphql.UseFieldResolvers())
@@ -46,11 +53,25 @@ func TestGqlt(t *testing.T) {
 }
 
 type query struct {
+	cats []cat
 	dogs []dog
 }
 
-func (q query) Animals() query { return q }
-func (q query) Dogs() dogQuery { return dogQuery{q} }
+func castSlice[T, U any](xs []T) []U {
+	ys := make([]U, len(xs))
+	for i, x := range xs {
+		ys[i] = any(x).(U)
+	}
+	return ys
+}
+
+func (q query) Animals() query         { return q }
+func (q query) Dogs() dogQuery         { return dogQuery{q} }
+func (q query) Cats() catQuery         { return catQuery{q} }
+func (q query) AllKinds() []AnimalKind { return []AnimalKind{dog{}.Kind(), cat{}.Kind()} }
+func (q query) KindToString(args struct{ Kind AnimalKind }) string {
+	return strings.ToLower(string(args.Kind))
+}
 
 type dogQuery struct{ query }
 
@@ -76,3 +97,34 @@ type dog struct {
 	ID   graphql.ID
 	Name string
 }
+
+type AnimalKind string
+
+func (d dog) Kind() AnimalKind { return "DOG" }
+
+type cat struct {
+	ID   graphql.ID
+	Name string
+}
+
+type catQuery struct{ query }
+
+func (q catQuery) First() *cat {
+	if len(q.cats) > 0 {
+		return &q.cats[0]
+	}
+	return nil
+}
+
+func (q catQuery) List() []cat { return q.cats }
+
+func (q catQuery) Find(args struct{ Name string }) *cat {
+	for _, cat := range q.cats {
+		if cat.Name == args.Name {
+			return &cat
+		}
+	}
+	return nil
+}
+
+func (c cat) Kind() AnimalKind { return "CAT" }

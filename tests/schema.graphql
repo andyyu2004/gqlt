@@ -2,8 +2,22 @@ type Query {
   animals: AnimalQuery!
 }
 
+enum AnimalKind {
+  DOG
+  CAT
+}
+
+interface Animal {
+  id: ID!
+  name: String!
+  kind: AnimalKind!
+}
+
 type AnimalQuery {
   dogs: DogQuery!
+  cats: CatQuery!
+  allKinds: [AnimalKind!]!
+  kindToString(kind: AnimalKind!): String!
 }
 
 type DogQuery {
@@ -12,7 +26,20 @@ type DogQuery {
   find(name: String!): Dog
 }
 
-type Dog {
+type Dog implements Animal {
   id: ID!
   name: String!
+  kind: AnimalKind!
+}
+
+type CatQuery {
+  first: Cat
+  list: [Cat!]!
+  find(name: String!): Cat
+}
+
+type Cat implements Animal {
+  id: ID!
+  name: String!
+  kind: AnimalKind!
 }

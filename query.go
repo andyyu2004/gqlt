@@ -14,7 +14,7 @@ func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.O
 	operation := expr.Operation
 	for _, transform := range []transform{
 		namespaceTransform{ecx.settings.namespace},
-		variableTransform{scope: ecx.scope},
+		variableTransform{schema: e.schema, scope: ecx.scope},
 	} {
 		operation = transform.transformOperation(operation)
 	}
@@ -37,6 +37,7 @@ func formatOperation(operation *ast.OperationDefinition) string {
 	f.FormatQueryDocument(&ast.QueryDocument{
 		Operations: []*ast.OperationDefinition{operation},
 	})
+
 	return buf.String()
 }
 
@@ -76,8 +77,9 @@ func (t namespaceTransform) transformOperation(operation *ast.OperationDefinitio
 
 // replace all variables with their values if no explicit parameter list
 type variableTransform struct {
-	scope *scope
-	err   error
+	schema schema
+	scope  *scope
+	err    error
 }
 
 func (t variableTransform) transformOperation(operation *ast.OperationDefinition) *ast.OperationDefinition {
@@ -88,29 +90,43 @@ func (t variableTransform) transformOperation(operation *ast.OperationDefinition
 
 	// otherwise, we replace all variables with their values inline
 
+	var topLevelType typename
+	switch operation.Operation {
+	case ast.Query:
+		topLevelType = t.schema.QueryType
+	case ast.Mutation:
+		topLevelType = t.schema.MutationType
+	case ast.Subscription:
+		panic("subscriptions not supported")
+	default:
+		panic("unknown operation type")
+	}
+
 	return &ast.OperationDefinition{
 		Operation:           operation.Operation,
 		Name:                operation.Name,
 		VariableDefinitions: nil, // drop all variable definitions as they have been "inlined"
 		Directives:          operation.Directives,
-		SelectionSet:        t.transformSelectionSet(operation.SelectionSet),
+		SelectionSet:        t.transformSelectionSet(topLevelType, operation.SelectionSet),
 		Position:            operation.Position,
 		Comment:             operation.Comment,
 	}
 }
 
-func (t variableTransform) transformArgumentList(argumentList ast.ArgumentList) ast.ArgumentList {
+func (t variableTransform) transformArgumentList(argTypes map[string]typename, argumentList ast.ArgumentList) ast.ArgumentList {
 	return mapSlice(argumentList, func(argument *ast.Argument) *ast.Argument {
+		valueTy, _ := argTypes[argument.Name]
 		return &ast.Argument{
 			Name:     argument.Name,
-			Value:    t.transformValue(argument.Value),
+			Value:    t.transformValue(valueTy, argument.Value),
 			Position: argument.Position,
 			Comment:  argument.Comment,
 		}
 	})
 }
 
-func (t variableTransform) transformValue(value *ast.Value) *ast.Value {
+func (t variableTransform) transformValue(expectedType typename, value *ast.Value) *ast.Value {
+	ty, _ := t.schema.Types[expectedType]
 	switch value.Kind {
 	case ast.Variable:
 		assert(len(value.Children) == 0, "unexpected children for variable value")
@@ -129,7 +145,12 @@ func (t variableTransform) transformValue(value *ast.Value) *ast.Value {
 			out.Kind = ast.FloatValue
 			out.Raw = fmt.Sprintf("%f", val)
 		case string:
-			out.Kind = ast.StringValue
+			switch ty.Kind {
+			case ast.Enum:
+				out.Kind = ast.EnumValue
+			default:
+				out.Kind = ast.StringValue
+			}
 			out.Raw = val
 		case bool:
 			out.Kind = ast.BooleanValue
@@ -144,9 +165,10 @@ func (t variableTransform) transformValue(value *ast.Value) *ast.Value {
 		return &ast.Value{
 			Raw: value.Raw,
 			Children: mapSlice(value.Children, func(child *ast.ChildValue) *ast.ChildValue {
+				childTy, _ := ty.Fields[child.Name]
 				return &ast.ChildValue{
 					Name:     child.Name,
-					Value:    t.transformValue(child.Value),
+					Value:    t.transformValue(childTy.Type, child.Value),
 					Position: child.Position,
 					Comment:  child.Comment,
 				}
@@ -161,16 +183,17 @@ func (t variableTransform) transformValue(value *ast.Value) *ast.Value {
 	}
 }
 
-func (t variableTransform) transformSelectionSet(selectionSet ast.SelectionSet) ast.SelectionSet {
+func (t variableTransform) transformSelectionSet(ty typename, selectionSet ast.SelectionSet) ast.SelectionSet {
 	return mapSlice(selectionSet, func(selection ast.Selection) ast.Selection {
 		switch selection := selection.(type) {
 		case *ast.Field:
+			field := t.schema.Types[ty].Fields[selection.Name]
 			return &ast.Field{
 				Alias:        selection.Alias,
 				Name:         selection.Name,
-				Arguments:    t.transformArgumentList(selection.Arguments),
+				Arguments:    t.transformArgumentList(field.Args, selection.Arguments),
 				Directives:   selection.Directives,
-				SelectionSet: t.transformSelectionSet(selection.SelectionSet),
+				SelectionSet: t.transformSelectionSet(field.Type, selection.SelectionSet),
 				Position:     selection.Position,
 				Comment:      selection.Comment,
 			}
@@ -185,7 +208,7 @@ func (t variableTransform) transformSelectionSet(selectionSet ast.SelectionSet) 
 			return &ast.InlineFragment{
 				TypeCondition: selection.TypeCondition,
 				Directives:    selection.Directives,
-				SelectionSet:  t.transformSelectionSet(selection.SelectionSet),
+				SelectionSet:  t.transformSelectionSet(typename(selection.TypeCondition), selection.SelectionSet),
 				Position:      selection.Position,
 				Comment:       selection.Comment,
 			}

@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/parser"
 	"github.com/andyyu2004/gqlt/syn"
 	"github.com/bmatcuk/doublestar/v4"
@@ -28,10 +30,14 @@ type runConfig struct {
 }
 
 // A thread-safe graphql client
-type Executor struct{ client Client }
+type Executor struct {
+	client     Client
+	schemaOnce sync.Once
+	schema     schema
+}
 
 func New(client Client) *Executor {
-	return &Executor{client}
+	return &Executor{client: client}
 }
 
 type settings struct {
@@ -183,14 +189,18 @@ func (e *Executor) Run(t *testing.T, ctx context.Context, root string, opts ...O
 				t.Fatal(err)
 			}
 
-			if err := e.runFile(ctx, file); err != nil {
+			if err := e.RunFile(ctx, file); err != nil {
 				t.Fatal(err)
 			}
 		})
 	}
 }
 
-func (e *Executor) runFile(ctx context.Context, file syn.File) error {
+func (e *Executor) RunFile(ctx context.Context, file syn.File) error {
+	if err := e.prepareSchema(ctx); err != nil {
+		return err
+	}
+
 	ecx := &executionContext{
 		scope: &scope{
 			parent: builtinScope,
@@ -205,4 +215,159 @@ func (e *Executor) runFile(ctx context.Context, file syn.File) error {
 	}
 
 	return nil
+}
+
+const introspectionQuery = `
+query {
+  __schema {
+    queryType {
+      name
+    }
+    mutationType {
+      name
+    }
+    types {
+      kind
+      name
+      fields {
+        name
+        args {
+          name
+          type {
+            ...TypeRef
+          }
+        }
+        type {
+          ...TypeRef
+        }
+      }
+    }
+  }
+}
+
+fragment TypeRef on __Type {
+  kind
+  name
+  ofType {
+    kind
+    name
+    ofType {
+      kind
+      name
+      ofType {
+        kind
+        name
+        ofType {
+          kind
+          name
+          ofType {
+            kind
+            name
+            ofType {
+              kind
+              name
+              ofType {
+                kind
+                name
+                ofType {
+                  kind
+                  name
+                  ofType {
+                    kind
+                    name
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`
+
+type schema struct {
+	QueryType    typename
+	MutationType typename
+	Types        map[typename]ty
+}
+
+type typename string
+
+type ty struct {
+	Name   typename
+	Kind   ast.DefinitionKind
+	Fields map[string]field
+}
+
+type tyref struct {
+	Kind   ast.DefinitionKind
+	Name   typename
+	OfType *tyref
+}
+
+func (t tyref) LeafType() typename {
+	if t.OfType == nil {
+		assert(t.Name != "", "expected non-empty name for leaf type")
+		return t.Name
+	}
+
+	return t.OfType.LeafType()
+}
+
+type field struct {
+	Type typename
+	Args map[string]typename
+}
+
+func (e *Executor) prepareSchema(ctx context.Context) error {
+	var err error
+	e.schemaOnce.Do(func() {
+		var res struct {
+			Schema struct {
+				QueryType struct {
+					Name typename
+				}
+				MutationType struct {
+					Name typename
+				}
+				Types []struct {
+					Kind   ast.DefinitionKind
+					Name   typename
+					Fields []struct {
+						Name string
+						Args []struct {
+							Name string
+							Type tyref
+						}
+						Type tyref
+					}
+				} `json:"types"`
+			} `json:"__schema"`
+		}
+
+		err = e.client.Request(ctx, Request{Query: introspectionQuery}, &res)
+
+		// can continue even on error safely, it will just become mostly a noop
+		types := map[typename]ty{}
+		for _, t := range res.Schema.Types {
+			fields := make(map[string]field, len(t.Fields))
+			for _, f := range t.Fields {
+				args := make(map[string]typename, len(f.Args))
+				for _, arg := range f.Args {
+					args[arg.Name] = arg.Type.LeafType()
+				}
+				fields[f.Name] = field{Args: args, Type: f.Type.LeafType()}
+			}
+			types[t.Name] = ty{Name: t.Name, Kind: t.Kind, Fields: fields}
+		}
+
+		e.schema = schema{
+			QueryType:    res.Schema.QueryType.Name,
+			MutationType: res.Schema.MutationType.Name,
+			Types:        types,
+		}
+	})
+	return err
 }
