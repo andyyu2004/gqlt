@@ -9,7 +9,6 @@ let id = query ($name: String!) {
     }
 }
 
-
 assert id == "1"
 
 # also works with no parameter list
@@ -19,4 +18,15 @@ let id = query {
     }
 }
 
+set namespace "animals"
 
+let kind = "DOG"
+
+let animals = query {
+    search(filter: {
+        name: $name
+        kind: $kind
+    }) {
+        id
+    }
+}

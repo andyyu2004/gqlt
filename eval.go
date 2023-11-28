@@ -229,7 +229,13 @@ query {
     types {
       kind
       name
-      fields {
+      inputFields {
+        name
+        type {
+          ...TypeRef
+        }
+      }
+      fields(includeDeprecated: true) {
         name
         args {
           name
@@ -296,9 +302,10 @@ type schema struct {
 type typename string
 
 type ty struct {
-	Name   typename
-	Kind   ast.DefinitionKind
-	Fields map[string]field
+	Name        typename
+	Kind        ast.DefinitionKind
+	InputFields map[string]field
+	Fields      map[string]field
 }
 
 type tyref struct {
@@ -324,6 +331,14 @@ type field struct {
 func (e *Executor) prepareSchema(ctx context.Context) error {
 	var err error
 	e.schemaOnce.Do(func() {
+		type Field struct {
+			Name string
+			Args []struct {
+				Name string
+				Type tyref
+			}
+			Type tyref
+		}
 		var res struct {
 			Schema struct {
 				QueryType struct {
@@ -333,16 +348,10 @@ func (e *Executor) prepareSchema(ctx context.Context) error {
 					Name typename
 				}
 				Types []struct {
-					Kind   ast.DefinitionKind
-					Name   typename
-					Fields []struct {
-						Name string
-						Args []struct {
-							Name string
-							Type tyref
-						}
-						Type tyref
-					}
+					Kind        ast.DefinitionKind
+					Name        typename
+					Fields      []Field
+					InputFields []Field
 				} `json:"types"`
 			} `json:"__schema"`
 		}
@@ -352,15 +361,21 @@ func (e *Executor) prepareSchema(ctx context.Context) error {
 		// can continue even on error safely, it will just become mostly a noop
 		types := map[typename]ty{}
 		for _, t := range res.Schema.Types {
-			fields := make(map[string]field, len(t.Fields))
-			for _, f := range t.Fields {
-				args := make(map[string]typename, len(f.Args))
-				for _, arg := range f.Args {
-					args[arg.Name] = arg.Type.LeafType()
+			transformFields := func(fields []Field) map[string]field {
+				out := make(map[string]field, len(fields))
+				for _, f := range fields {
+					args := make(map[string]typename, len(f.Args))
+					for _, arg := range f.Args {
+						args[arg.Name] = arg.Type.LeafType()
+					}
+					out[f.Name] = field{Args: args, Type: f.Type.LeafType()}
 				}
-				fields[f.Name] = field{Args: args, Type: f.Type.LeafType()}
+				return out
 			}
-			types[t.Name] = ty{Name: t.Name, Kind: t.Kind, Fields: fields}
+
+			fields := transformFields(t.Fields)
+			inputFields := transformFields(t.InputFields)
+			types[t.Name] = ty{Name: t.Name, Kind: t.Kind, Fields: fields, InputFields: inputFields}
 		}
 
 		e.schema = schema{

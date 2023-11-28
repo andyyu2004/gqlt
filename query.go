@@ -115,10 +115,10 @@ func (t variableTransform) transformOperation(operation *ast.OperationDefinition
 
 func (t variableTransform) transformArgumentList(argTypes map[string]typename, argumentList ast.ArgumentList) ast.ArgumentList {
 	return mapSlice(argumentList, func(argument *ast.Argument) *ast.Argument {
-		valueTy, _ := argTypes[argument.Name]
+		argTy, _ := argTypes[argument.Name]
 		return &ast.Argument{
 			Name:     argument.Name,
-			Value:    t.transformValue(valueTy, argument.Value),
+			Value:    t.transformValue(argTy, argument.Value),
 			Position: argument.Position,
 			Comment:  argument.Comment,
 		}
@@ -165,7 +165,7 @@ func (t variableTransform) transformValue(expectedType typename, value *ast.Valu
 		return &ast.Value{
 			Raw: value.Raw,
 			Children: mapSlice(value.Children, func(child *ast.ChildValue) *ast.ChildValue {
-				childTy, _ := ty.Fields[child.Name]
+				childTy, _ := ty.InputFields[child.Name]
 				return &ast.ChildValue{
 					Name:     child.Name,
 					Value:    t.transformValue(childTy.Type, child.Value),

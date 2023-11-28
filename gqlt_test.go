@@ -27,14 +27,14 @@ func TestGqlt(t *testing.T) {
 	q := &query{
 		dogs: []dog{
 			{
-				ID:   "1",
-				Name: "Buddy",
+				id:   "1",
+				name: "Buddy",
 			},
 		},
 		cats: []cat{
 			{
-				ID:   "1",
-				Name: "Chips",
+				id:   "1",
+				name: "Chips",
 			},
 		},
 	}
@@ -50,6 +50,11 @@ func TestGqlt(t *testing.T) {
 	for _, client := range clients {
 		gqlt.New(client).Run(t, ctx, testpath, gqlt.WithGlob(debugGlob))
 	}
+}
+
+type AnimalFilter struct {
+	Kind *AnimalKind
+	Name *string
 }
 
 type query struct {
@@ -73,6 +78,49 @@ func (q query) KindToString(args struct{ Kind AnimalKind }) string {
 	return strings.ToLower(string(args.Kind))
 }
 
+type Animal struct {
+	animal
+}
+
+func (a Animal) ToDog() (*dog, bool) { d, ok := a.animal.(*dog); return d, ok }
+
+func (a Animal) ToCat() (*cat, bool) { c, ok := a.animal.(*cat); return c, ok }
+
+type animal interface {
+	ID() graphql.ID
+	Kind() AnimalKind
+	Name() string
+}
+
+func (q query) Search(args struct{ Filter *AnimalFilter }) []Animal {
+	var animals []Animal
+
+	for _, dog := range q.dogs {
+		if args.Filter == nil {
+			continue
+		}
+		if args.Filter.Kind == nil || *args.Filter.Kind == dog.Kind() {
+			if args.Filter.Name == nil || *args.Filter.Name == dog.Name() {
+				animals = append(animals, Animal{dog})
+			}
+		}
+	}
+
+	for _, cat := range q.cats {
+		if args.Filter == nil {
+			continue
+		}
+
+		if args.Filter.Kind == nil || *args.Filter.Kind == cat.Kind() {
+			if args.Filter.Name == nil || *args.Filter.Name == cat.Name() {
+				animals = append(animals, Animal{cat})
+			}
+		}
+	}
+
+	return animals
+}
+
 type dogQuery struct{ query }
 
 func (q dogQuery) First() *dog {
@@ -86,7 +134,7 @@ func (q dogQuery) List() []dog { return q.dogs }
 
 func (q dogQuery) Find(args struct{ Name string }) *dog {
 	for _, dog := range q.dogs {
-		if dog.Name == args.Name {
+		if dog.Name() == args.Name {
 			return &dog
 		}
 	}
@@ -94,17 +142,19 @@ func (q dogQuery) Find(args struct{ Name string }) *dog {
 }
 
 type dog struct {
-	ID   graphql.ID
-	Name string
+	id   graphql.ID
+	name string
 }
+
+func (d dog) ID() graphql.ID   { return d.id }
+func (d dog) Kind() AnimalKind { return "DOG" }
+func (d dog) Name() string     { return d.name }
 
 type AnimalKind string
 
-func (d dog) Kind() AnimalKind { return "DOG" }
-
 type cat struct {
-	ID   graphql.ID
-	Name string
+	id   graphql.ID
+	name string
 }
 
 type catQuery struct{ query }
@@ -120,11 +170,13 @@ func (q catQuery) List() []cat { return q.cats }
 
 func (q catQuery) Find(args struct{ Name string }) *cat {
 	for _, cat := range q.cats {
-		if cat.Name == args.Name {
+		if cat.Name() == args.Name {
 			return &cat
 		}
 	}
 	return nil
 }
 
+func (c cat) ID() graphql.ID   { return c.id }
 func (c cat) Kind() AnimalKind { return "CAT" }
+func (c cat) Name() string     { return c.name }

@@ -16,8 +16,14 @@ interface Animal {
 type AnimalQuery {
   dogs: DogQuery!
   cats: CatQuery!
+  search(filter: AnimalFilter): [Animal!]!
   allKinds: [AnimalKind!]!
   kindToString(kind: AnimalKind!): String!
+}
+
+input AnimalFilter {
+  name: String
+  kind: AnimalKind
 }
 
 type DogQuery {
