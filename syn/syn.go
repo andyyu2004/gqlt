@@ -3,6 +3,7 @@ package syn
 import (
 	"bytes"
 	"io"
+	"strings"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 )
@@ -29,4 +30,10 @@ func (f File) Dump(w io.Writer) {
 		stmt.Dump(w)
 		io.WriteString(w, ";\n")
 	}
+}
+
+func (f File) String() string {
+	b := strings.Builder{}
+	f.Dump(&b)
+	return b.String()
 }

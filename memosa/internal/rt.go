@@ -5,8 +5,8 @@ import (
 	"reflect"
 
 	"github.com/andyyu2004/memosa/internal/hash"
-	"github.com/andyyu2004/memosa/internal/lib"
 	"github.com/andyyu2004/memosa/internal/stack"
+	"github.com/andyyu2004/memosa/lib"
 
 	"github.com/hashicorp/golang-lru/v2/simplelru"
 )
@@ -94,8 +94,6 @@ func (ctx *Context) verifyQuery(queryType reflect.Type, key any) bool {
 	prevMaxRev := memo.deps.maxRev
 	prevValue := memo.value
 	newValue := execute(ctx, queryType, memo, key)
-
-	lib.Assert(newValue == memo.value)
 
 	if reflect.DeepEqual(newValue, prevValue) {
 		lib.Assert(memo.deps.maxRev >= prevMaxRev)
