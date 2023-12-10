@@ -62,15 +62,32 @@ func (f File) String() string {
 	return b.String()
 }
 
-func Traverse(node Node) iterator.Iterator[Child] {
+type Event interface {
+	isEvent()
+}
+
+type EnterEvent struct{ Node Node }
+
+func (EnterEvent) isEvent() {}
+
+type ExitEvent struct{ Node Node }
+
+func (ExitEvent) isEvent() {}
+
+type TokenEvent struct{ Token Token }
+
+func (TokenEvent) isEvent() {}
+
+func Traverse(node Node) iterator.Iterator[Event] {
 	type State struct {
+		node       Node
 		children   Children
 		childIndex int
 	}
 	stack := stack.Stack[*State]{}
-	stack.Push(&State{node.Children(), 0})
+	stack.Push(&State{node, node.Children(), 0})
 
-	return func() (Child, bool) {
+	return func() (Event, bool) {
 		for {
 			state, ok := stack.Peek()
 			if !ok {
@@ -81,14 +98,18 @@ func Traverse(node Node) iterator.Iterator[Child] {
 				state.childIndex++
 				switch child := child.(type) {
 				case Node:
-					stack.Push(&State{child.Children(), 0})
+					stack.Push(&State{child, child.Children(), 0})
+					return EnterEvent{child}, true
 				case lex.Token:
+					return TokenEvent{child}, true
+				default:
+					panic("unreachable")
 				}
-				return child, true
 			}
 
-			_, ok = stack.Pop()
+			s, ok := stack.Pop()
 			lib.Assert(ok)
+			return ExitEvent{s.node}, true
 		}
 	}
 }

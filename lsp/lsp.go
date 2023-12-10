@@ -15,6 +15,7 @@ import (
 var semanticTokensLegend = protocol.SemanticTokensLegend{
 	TokenTypes: []string{
 		string(protocol.SemanticTokenTypeKeyword),
+		string(protocol.SemanticTokenTypeProperty),
 		string(protocol.SemanticTokenTypeVariable),
 		string(protocol.SemanticTokenTypeString),
 		string(protocol.SemanticTokenTypeNumber),

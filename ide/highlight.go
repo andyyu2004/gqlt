@@ -8,6 +8,8 @@ import (
 	"github.com/andyyu2004/gqlt/iterator"
 	"github.com/andyyu2004/gqlt/lex"
 	"github.com/andyyu2004/gqlt/syn"
+	"github.com/andyyu2004/memosa/lib"
+	"github.com/andyyu2004/memosa/stack"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
@@ -30,30 +32,60 @@ type Highlight struct {
 
 func (ide *IDE) Highlight(path string) Highlights {
 	root := ide.Parse(path)
-	return iterator.FilterMap(traverseTokens(root), func(token syn.Token) (Highlight, bool) {
-		var kind protocol.SemanticTokenType
-		switch token.Kind {
-		case lex.Let, lex.False, lex.True, lex.Null, lex.Assert, lex.Matches:
-			kind = protocol.SemanticTokenTypeKeyword
-		case lex.Name:
-			kind = protocol.SemanticTokenTypeVariable
-		case lex.Equals:
-			kind = protocol.SemanticTokenTypeOperator
-		case lex.Int, lex.Float:
-			kind = protocol.SemanticTokenTypeNumber
-		case lex.String, lex.BlockString:
-			kind = protocol.SemanticTokenTypeString
-		default:
-			return Highlight{}, false
-		}
+	type Scope int
+	const (
+		ScopeObject Scope = iota
+	)
+	scopes := stack.Stack[Scope]{}
+	return iterator.FilterMap(syn.Traverse(root), func(event syn.Event) (Highlight, bool) {
+		switch event := event.(type) {
+		case syn.TokenEvent:
+			var kind protocol.SemanticTokenType
+			switch event.Token.Kind {
+			case lex.Let, lex.False, lex.True, lex.Null, lex.Assert, lex.Matches:
+				kind = protocol.SemanticTokenTypeKeyword
+			case lex.Name:
+				scope, ok := scopes.Peek()
+				if ok {
+					switch scope {
+					case ScopeObject:
+						kind = protocol.SemanticTokenTypeProperty
+					default:
+						kind = protocol.SemanticTokenTypeVariable
+					}
+				} else {
+					kind = protocol.SemanticTokenTypeVariable
+				}
 
-		return Highlight{Pos: token.Position, TokenKind: kind}, true
+			case lex.Equals:
+				kind = protocol.SemanticTokenTypeOperator
+			case lex.Int, lex.Float:
+				kind = protocol.SemanticTokenTypeNumber
+			case lex.String, lex.BlockString:
+				kind = protocol.SemanticTokenTypeString
+			default:
+				return Highlight{}, false
+			}
+
+			return Highlight{Pos: event.Token.Position, TokenKind: kind}, true
+		case syn.EnterEvent:
+			switch event.Node.(type) {
+			case *syn.ObjectExpr, *syn.ObjectPat:
+				scopes.Push(ScopeObject)
+			}
+		case syn.ExitEvent:
+			switch event.Node.(type) {
+			case *syn.ObjectExpr, *syn.ObjectPat:
+				lib.Assert(scopes.MustPop() == ScopeObject)
+			}
+		}
+		return Highlight{}, false
 	}).Collect()
 }
 
 func traverseTokens(node syn.Node) iterator.Iterator[syn.Token] {
-	return iterator.FilterMap(syn.Traverse(node), func(child syn.Child) (syn.Token, bool) {
-		token, ok := child.(syn.Token)
-		return token, ok
+	return iterator.FilterMap(syn.Traverse(node), func(child syn.Event) (syn.Token, bool) {
+		event, ok := child.(syn.TokenEvent)
+		return event.Token, ok
 	})
 }
