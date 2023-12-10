@@ -22,7 +22,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			return nil, err
 		}
 
-		switch expr.Op {
+		switch expr.Op.Kind {
 		case lex.Minus:
 			switch lhs := val.(type) {
 			case float64:
@@ -47,7 +47,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			return nil, err
 		}
 
-		switch expr.Op {
+		switch expr.Op.Kind {
 		case lex.Equals2:
 			return eq(lhs, rhs), nil
 		case lex.BangEqual:
@@ -65,7 +65,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 		}
 
 	case *syn.NameExpr:
-		val, ok := ecx.scope.Lookup(expr.Name)
+		val, ok := ecx.scope.Lookup(expr.Name.Value)
 		if !ok {
 			return nil, fmt.Errorf("reference to undefined variable: %s", expr.Name)
 		}
@@ -92,7 +92,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			if err != nil {
 				return nil, err
 			}
-			fields[name] = val
+			fields[name.Value] = val
 		}
 
 		return fields, nil

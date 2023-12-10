@@ -22,7 +22,7 @@ func bindPat(binder binder, pat syn.Pat, val any) error {
 		return nil
 
 	case *syn.NamePat:
-		binder.bind(pat.Name, val)
+		binder.bind(pat.Name.Value, val)
 		return nil
 
 	case *syn.ListPat:
@@ -82,7 +82,7 @@ func bindObjectPat(binder binder, pat *syn.ObjectPat, values map[string]any) err
 		name := entry.Key
 		pat := entry.Value
 
-		val, ok := values[name]
+		val, ok := values[name.Value]
 		if !ok {
 			return fmt.Errorf("object missing field specified in pattern %s", name)
 		}

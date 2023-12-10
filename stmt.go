@@ -25,13 +25,13 @@ func (e *Executor) stmt(ctx context.Context, ecx *executionContext, stmt syn.Stm
 			return err
 		}
 
-		if err := ecx.settings.Set(stmt.Key, val); err != nil {
+		if err := ecx.settings.Set(stmt.Key.Value, val); err != nil {
 			return err
 		}
 
 	case *syn.AssertStmt:
 		bin, ok := stmt.Expr.(*syn.BinaryExpr)
-		if ok && bin.Op == lex.Equals2 {
+		if ok && bin.Op.Kind == lex.Equals2 {
 			// special case for common equality assertions to have a better error message
 			lhs, err := e.eval(ctx, ecx, bin.Left)
 			if err != nil {

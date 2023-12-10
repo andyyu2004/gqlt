@@ -17,16 +17,20 @@ type Expr interface {
 
 type NameExpr struct {
 	ast.Position
-	Name string
+	Name lex.Token
 }
 
 var _ Expr = NameExpr{}
+
+func (expr NameExpr) Children() Children {
+	return Children{expr.Name}
+}
 
 func (NameExpr) isExpr() {}
 func (NameExpr) isNode() {}
 
 func (expr NameExpr) Dump(w io.Writer) {
-	io.WriteString(w, expr.Name)
+	io.WriteString(w, expr.Name.Value)
 }
 
 type OperationExpr struct {
@@ -39,6 +43,12 @@ type OperationExpr struct {
 }
 
 var _ Expr = OperationExpr{}
+
+func (expr OperationExpr) Children() Children {
+	return Children{
+		lex.Token{Kind: lex.Query, Value: expr.Query, Position: expr.Position},
+	}
+}
 
 func (OperationExpr) isExpr() {}
 func (OperationExpr) isNode() {}
@@ -55,6 +65,13 @@ type IndexExpr struct {
 
 var _ Expr = IndexExpr{}
 
+func (expr IndexExpr) Children() Children {
+	return Children{
+		expr.Expr,
+		expr.Index,
+	}
+}
+
 func (IndexExpr) isExpr() {}
 func (IndexExpr) isNode() {}
 
@@ -66,11 +83,15 @@ func (expr IndexExpr) Dump(w io.Writer) {
 }
 
 type LiteralExpr struct {
-	ast.Position
+	lex.Token
 	Value any
 }
 
 var _ Expr = LiteralExpr{}
+
+func (expr LiteralExpr) Children() Children {
+	return Children{expr.Token}
+}
 
 func (LiteralExpr) isExpr() {}
 func (LiteralExpr) isNode() {}
@@ -91,6 +112,15 @@ type CallExpr struct {
 }
 
 var _ Expr = CallExpr{}
+
+func (expr CallExpr) Children() Children {
+	children := make(Children, 0, len(expr.Args)+1)
+	children = append(children, expr.Fn)
+	for _, arg := range expr.Args {
+		children = append(children, arg)
+	}
+	return children
+}
 
 func (CallExpr) isExpr() {}
 func (CallExpr) isNode() {}
@@ -116,6 +146,10 @@ type MatchesExpr struct {
 
 var _ Expr = MatchesExpr{}
 
+func (expr MatchesExpr) Children() Children {
+	return Children{expr.Expr, expr.Pat}
+}
+
 func (MatchesExpr) isExpr() {}
 func (MatchesExpr) isNode() {}
 
@@ -131,6 +165,14 @@ type ListExpr struct {
 }
 
 var _ Expr = ListExpr{}
+
+func (expr ListExpr) Children() Children {
+	children := make(Children, len(expr.Exprs))
+	for i, expr := range expr.Exprs {
+		children[i] = expr
+	}
+	return children
+}
 
 func (ListExpr) isExpr() {}
 func (ListExpr) isNode() {}
@@ -150,10 +192,18 @@ func (expr ListExpr) Dump(w io.Writer) {
 
 type ObjectExpr struct {
 	ast.Position
-	Fields *orderedmap.OrderedMap[string, Expr]
+	Fields *orderedmap.OrderedMap[lex.Token, Expr]
 }
 
 var _ Expr = ObjectExpr{}
+
+func (expr ObjectExpr) Children() Children {
+	children := make(Children, 0, expr.Fields.Len()*2)
+	for entry := expr.Fields.Oldest(); entry != nil; entry = entry.Next() {
+		children = append(children, entry.Key, entry.Value)
+	}
+	return children
+}
 
 func (ObjectExpr) isExpr() {}
 func (ObjectExpr) isNode() {}
@@ -163,7 +213,7 @@ func (expr ObjectExpr) Dump(w io.Writer) {
 
 	for entry := expr.Fields.Oldest(); entry != nil; entry = entry.Next() {
 		io.WriteString(w, " ")
-		io.WriteString(w, entry.Key)
+		io.WriteString(w, entry.Key.Value)
 		io.WriteString(w, ": ")
 		entry.Value.Dump(w)
 	}
@@ -173,12 +223,16 @@ func (expr ObjectExpr) Dump(w io.Writer) {
 
 type BinaryExpr struct {
 	ast.Position
-	Op    lex.TokenKind
+	Op    lex.Token
 	Left  Expr
 	Right Expr
 }
 
 var _ Expr = BinaryExpr{}
+
+func (expr BinaryExpr) Children() Children {
+	return Children{expr.Left, expr.Op, expr.Right}
+}
 
 func (BinaryExpr) isExpr() {}
 func (BinaryExpr) isNode() {}
@@ -193,11 +247,15 @@ func (expr BinaryExpr) Dump(w io.Writer) {
 
 type UnaryExpr struct {
 	ast.Position
-	Op   lex.TokenKind
+	Op   lex.Token
 	Expr Expr
 }
 
 var _ Expr = UnaryExpr{}
+
+func (expr UnaryExpr) Children() Children {
+	return Children{expr.Op, expr.Expr}
+}
 
 func (UnaryExpr) isExpr() {}
 func (UnaryExpr) isNode() {}

@@ -135,6 +135,8 @@ type Token struct {
 	ast.Position
 }
 
+func (Token) IsChild() {}
+
 type TokenKind lexer.Type
 
 const (

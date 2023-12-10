@@ -15,14 +15,22 @@ func Dump(node Node) string {
 }
 
 type Node interface {
-	ast.HasPosition
+	Child
 	isNode()
 
 	Dump(io.Writer)
+	Children() Children
 }
 
 type File struct {
 	Stmts []Stmt
+}
+
+type Children []Child
+
+// Node | Token
+type Child interface {
+	ast.HasPosition
 }
 
 func (f File) Dump(w io.Writer) {

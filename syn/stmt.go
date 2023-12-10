@@ -4,6 +4,7 @@ import (
 	"io"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/lex"
 )
 
 type Stmt interface {
@@ -18,6 +19,10 @@ type ExprStmt struct {
 
 var _ Stmt = ExprStmt{}
 
+func (stmt ExprStmt) Children() Children {
+	return Children{stmt.Expr}
+}
+
 func (ExprStmt) isStmt() {}
 func (ExprStmt) isNode() {}
 
@@ -27,18 +32,22 @@ func (stmt ExprStmt) Dump(w io.Writer) {
 
 type SetStmt struct {
 	ast.Position
-	Key   string
+	Key   lex.Token
 	Value Expr
 }
 
 var _ Stmt = SetStmt{}
+
+func (stmt SetStmt) Children() Children {
+	return Children{stmt.Key, stmt.Value}
+}
 
 func (SetStmt) isStmt() {}
 func (SetStmt) isNode() {}
 
 func (stmt SetStmt) Dump(w io.Writer) {
 	io.WriteString(w, "set ")
-	io.WriteString(w, stmt.Key)
+	io.WriteString(w, stmt.Key.Value)
 	io.WriteString(w, " ")
 	stmt.Value.Dump(w)
 }
@@ -49,6 +58,10 @@ type AssertStmt struct {
 }
 
 var _ Stmt = AssertStmt{}
+
+func (stmt AssertStmt) Children() Children {
+	return Children{stmt.Expr}
+}
 
 func (AssertStmt) isStmt() {}
 func (AssertStmt) isNode() {}
@@ -65,6 +78,10 @@ type LetStmt struct {
 }
 
 var _ Stmt = LetStmt{}
+
+func (let LetStmt) Children() Children {
+	return Children{let.Pat, let.Expr}
+}
 
 func (LetStmt) isStmt() {}
 func (LetStmt) isNode() {}

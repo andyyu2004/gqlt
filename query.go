@@ -7,6 +7,7 @@ import (
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/formatter"
+	"github.com/andyyu2004/gqlt/slice"
 	"github.com/andyyu2004/gqlt/syn"
 )
 
@@ -114,8 +115,8 @@ func (t variableTransform) transformOperation(operation *ast.OperationDefinition
 }
 
 func (t variableTransform) transformArgumentList(argTypes map[string]typename, argumentList ast.ArgumentList) ast.ArgumentList {
-	return mapSlice(argumentList, func(argument *ast.Argument) *ast.Argument {
-		argTy, _ := argTypes[argument.Name]
+	return slice.Map(argumentList, func(argument *ast.Argument) *ast.Argument {
+		argTy := argTypes[argument.Name]
 		return &ast.Argument{
 			Name:     argument.Name,
 			Value:    t.transformValue(argTy, argument.Value),
@@ -126,7 +127,7 @@ func (t variableTransform) transformArgumentList(argTypes map[string]typename, a
 }
 
 func (t variableTransform) transformValue(expectedType typename, value *ast.Value) *ast.Value {
-	ty, _ := t.schema.Types[expectedType]
+	ty := t.schema.Types[expectedType]
 	switch value.Kind {
 	case ast.Variable:
 		assert(len(value.Children) == 0, "unexpected children for variable value")
@@ -164,8 +165,8 @@ func (t variableTransform) transformValue(expectedType typename, value *ast.Valu
 	default:
 		return &ast.Value{
 			Raw: value.Raw,
-			Children: mapSlice(value.Children, func(child *ast.ChildValue) *ast.ChildValue {
-				childTy, _ := ty.InputFields[child.Name]
+			Children: slice.Map(value.Children, func(child *ast.ChildValue) *ast.ChildValue {
+				childTy := ty.InputFields[child.Name]
 				return &ast.ChildValue{
 					Name:     child.Name,
 					Value:    t.transformValue(childTy.Type, child.Value),
@@ -184,7 +185,7 @@ func (t variableTransform) transformValue(expectedType typename, value *ast.Valu
 }
 
 func (t variableTransform) transformSelectionSet(ty typename, selectionSet ast.SelectionSet) ast.SelectionSet {
-	return mapSlice(selectionSet, func(selection ast.Selection) ast.Selection {
+	return slice.Map(selectionSet, func(selection ast.Selection) ast.Selection {
 		switch selection := selection.(type) {
 		case *ast.Field:
 			field := t.schema.Types[ty].Fields[selection.Name]
@@ -238,12 +239,4 @@ func flatten(data any) any {
 	default:
 		return data
 	}
-}
-
-func mapSlice[T, U any](xs []T, f func(T) U) []U {
-	ys := make([]U, len(xs))
-	for i, x := range xs {
-		ys[i] = f(x)
-	}
-	return ys
 }
