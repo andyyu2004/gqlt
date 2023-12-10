@@ -140,14 +140,15 @@ func (expr CallExpr) Dump(w io.Writer) {
 
 type MatchesExpr struct {
 	ast.Position
-	Expr Expr
-	Pat  Pat
+	Expr      Expr
+	MatchesKw lex.Token
+	Pat       Pat
 }
 
 var _ Expr = MatchesExpr{}
 
 func (expr MatchesExpr) Children() Children {
-	return Children{expr.Expr, expr.Pat}
+	return Children{expr.Expr, expr.MatchesKw, expr.Pat}
 }
 
 func (MatchesExpr) isExpr() {}

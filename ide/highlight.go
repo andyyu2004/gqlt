@@ -33,7 +33,7 @@ func (ide *IDE) Highlight(path string) Highlights {
 	return iterator.FilterMap(traverseTokens(root), func(token syn.Token) (Highlight, bool) {
 		var kind protocol.SemanticTokenType
 		switch token.Kind {
-		case lex.Let, lex.False, lex.True, lex.Null:
+		case lex.Let, lex.False, lex.True, lex.Null, lex.Assert, lex.Matches:
 			kind = protocol.SemanticTokenTypeKeyword
 		case lex.Name:
 			kind = protocol.SemanticTokenTypeVariable

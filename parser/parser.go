@@ -180,13 +180,13 @@ func (p *Parser) parseSetStmt() *syn.SetStmt {
 }
 
 func (p *Parser) parseAssertStmt() *syn.AssertStmt {
-	start := p.bump(lex.Assert)
+	assert := p.bump(lex.Assert)
 	expr := p.parseExpr()
 	if expr == nil {
 		return nil
 	}
 
-	return &syn.AssertStmt{Position: start.Merge(expr), Expr: expr}
+	return &syn.AssertStmt{Position: assert.Merge(expr), AssertKw: assert, Expr: expr}
 }
 
 func (p *Parser) parseLetStmt() *syn.LetStmt {
@@ -444,13 +444,13 @@ func (p *Parser) postfixOp() (*lex.Token, bp) {
 }
 
 func (p *Parser) parseMatchesExpr(expr syn.Expr) *syn.MatchesExpr {
-	p.bump(lex.Matches)
+	matches := p.bump(lex.Matches)
 	pat := p.parsePat(patOpts{})
 	if pat == nil {
 		return nil
 	}
 
-	return &syn.MatchesExpr{Position: expr.Pos().Merge(pat), Expr: expr, Pat: pat}
+	return &syn.MatchesExpr{Position: expr.Pos().Merge(pat), Expr: expr, MatchesKw: matches, Pat: pat}
 }
 
 func (p *Parser) parseIndexExpr(expr syn.Expr) *syn.IndexExpr {

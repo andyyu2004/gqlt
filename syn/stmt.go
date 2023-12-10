@@ -54,13 +54,14 @@ func (stmt SetStmt) Dump(w io.Writer) {
 
 type AssertStmt struct {
 	ast.Position
-	Expr Expr
+	AssertKw lex.Token
+	Expr     Expr
 }
 
 var _ Stmt = AssertStmt{}
 
 func (stmt AssertStmt) Children() Children {
-	return Children{stmt.Expr}
+	return Children{stmt.AssertKw, stmt.Expr}
 }
 
 func (AssertStmt) isStmt() {}
