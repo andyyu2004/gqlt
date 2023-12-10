@@ -161,6 +161,11 @@ internal.DidValidateMemoizedValue{memosa_test.QueryC {}}`))
 	// however, we can short circuit before we execute D again because C's output has not changed
 	fetch[QueryD](t, ctx, KeyD{}, -1, ch, expect.Expect(`
 internal.WillExecute{memosa_test.QueryC {}}
+internal.DidValidateMemoizedValue{memosa_test.QueryD {}}`))
+
+	memosa.Set[InputB](ctx, 16)
+	fetch[QueryD](t, ctx, KeyD{}, 42, ch, expect.Expect(`
+internal.WillExecute{memosa_test.QueryC {}}
 internal.WillExecute{memosa_test.QueryD {}}
 internal.DidValidateMemoizedValue{memosa_test.QueryC {}}`))
 }

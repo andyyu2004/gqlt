@@ -59,7 +59,7 @@ func (ctx *Context) verifyMemo(memo *memoized[any]) bool {
 
 	for queryType, keys := range memo.deps.inputs {
 		for _, key := range keys {
-			if !ctx.verify(queryType, key) {
+			if !ctx.verifyQuery(queryType, key) {
 				return false
 			}
 		}
@@ -70,7 +70,9 @@ func (ctx *Context) verifyMemo(memo *memoized[any]) bool {
 	return true
 }
 
-func (ctx *Context) verify(queryType reflect.Type, key any) bool {
+// verifyQuery that the memoized value for the given key is up-to-date, and reexecutes (recursively) if necessary
+// returns true if no downstream queries need to be reexecuted
+func (ctx *Context) verifyQuery(queryType reflect.Type, key any) bool {
 	if _, ok := key.(InputKey); ok {
 		// if the key is an input key, then we just check the revision of the input
 		return ctx.rt.inputStorages[queryType].rev < ctx.rt.revision
@@ -85,7 +87,17 @@ func (ctx *Context) verify(queryType reflect.Type, key any) bool {
 		return true
 	}
 
-	execute(ctx, queryType, memo, key)
+	prevMaxRev := memo.deps.maxRev
+	prevValue := memo.value
+	newValue := execute(ctx, queryType, memo, key)
+	assert(newValue == memo.value)
+
+	if newValue == prevValue {
+		assert(memo.deps.maxRev >= prevMaxRev)
+		memo.deps.maxRev = prevMaxRev
+		return true
+	}
+
 	return false
 }
 
@@ -171,7 +183,7 @@ func fetch(ctx *Context, queryType reflect.Type, key any) any {
 	}
 
 	// otherwise walk the dependency graph and reexecute as necessary
-	if ctx.verify(queryType, key) {
+	if ctx.verifyQuery(queryType, key) {
 		ctx.rt.event(DidValidateMemoizedValue{queryType, key})
 	}
 
