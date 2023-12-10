@@ -10,20 +10,20 @@ type (
 	DidValidateMemoizedValue = internal.DidValidateMemoizedValue
 	WillExecute              = internal.WillExecute
 
-	Query[K comparable, V comparable] internal.Query[K, V]
-	Input[T comparable]               internal.Input[T]
-	InputKey                          = internal.InputKey
+	Query[K, V any] internal.Query[K, V]
+	Input[T any]    internal.Input[T]
+	InputKey        = internal.InputKey
 )
 
 var (
-	NewContext       = internal.NewContext
+	New              = internal.NewContext
 	WithEventHandler = internal.WithEventHandler
 )
 
-func Fetch[Q Query[K, V], K comparable, V comparable](ctx *Context, key K) V {
+func Fetch[Q Query[K, V], K, V any](ctx *Context, key K) V {
 	return internal.Fetch[Q, K, V](ctx, key)
 }
 
-func Set[I Input[T], T comparable](ctx *Context, value T) {
+func Set[I Input[T], T any](ctx *Context, value T) {
 	internal.Set[I, T](ctx, value)
 }

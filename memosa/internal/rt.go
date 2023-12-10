@@ -94,9 +94,10 @@ func (ctx *Context) verifyQuery(queryType reflect.Type, key any) bool {
 	prevMaxRev := memo.deps.maxRev
 	prevValue := memo.value
 	newValue := execute(ctx, queryType, memo, key)
+
 	lib.Assert(newValue == memo.value)
 
-	if newValue == prevValue {
+	if reflect.DeepEqual(newValue, prevValue) {
 		lib.Assert(memo.deps.maxRev >= prevMaxRev)
 		memo.deps.maxRev = prevMaxRev
 		return true
@@ -151,7 +152,7 @@ func get(ctx *Context, inputType reflect.Type) any {
 }
 
 // Set the value of an input.
-func set[I Input[T], T comparable](rt *runtime, value T) {
+func set[I Input[T], T any](rt *runtime, value T) {
 	rt.revision++
 	rt.inputStorages[lib.TypeOf[I]()] = &inputStorage{rt.revision, value}
 }

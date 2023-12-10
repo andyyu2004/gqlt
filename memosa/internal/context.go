@@ -4,12 +4,12 @@ import "github.com/andyyu2004/memosa/internal/lib"
 
 type InputKey struct{}
 
-type Input[T comparable] interface {
+type Input[T any] interface {
 	Query[InputKey, T]
 }
 
 // might be more ergonomic to have the key implement the query interface and drop the separate K
-type Query[K, V comparable] interface {
+type Query[K, V any] interface {
 	Execute(*Context, K) V
 }
 
@@ -40,10 +40,10 @@ func NewContext(opts ...Option) *Context {
 	}
 }
 
-func Set[I Input[T], T comparable](ctx *Context, value T) {
+func Set[I Input[T], T any](ctx *Context, value T) {
 	set[I, T](ctx.rt, value)
 }
 
-func Fetch[Q Query[K, V], K comparable, V comparable](ctx *Context, key K) V {
+func Fetch[Q Query[K, V], K, V any](ctx *Context, key K) V {
 	return fetch(ctx, lib.TypeOf[Q](), key).(V)
 }

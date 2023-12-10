@@ -82,7 +82,7 @@ func (QueryD) Execute(ctx *memosa.Context, key KeyD) int32 {
 
 func NewContext() (*memosa.Context, <-chan memosa.Event) {
 	ch := make(chan memosa.Event, 1000)
-	return memosa.NewContext(memosa.WithEventHandler(func(event memosa.Event) { ch <- event })), ch
+	return memosa.New(memosa.WithEventHandler(func(event memosa.Event) { ch <- event })), ch
 }
 
 func typeof[T any]() reflect.Type {
