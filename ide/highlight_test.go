@@ -42,4 +42,10 @@ func TestHighlight(t *testing.T) {
 1:15..1:16: property
 1:18..1:19: number
 `))
+
+	testHighlight(t, "literal patterns", `let 42 = 42`, expect.Expect(`1:1..1:4: keyword
+1:5..1:7: number
+1:8..1:9: operator
+1:10..1:12: number
+`))
 }

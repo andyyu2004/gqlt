@@ -259,8 +259,8 @@ func (p *Parser) parsePat(opts patOpts) syn.Pat {
 }
 
 func (p *Parser) parseLiteralPat() *syn.LiteralPat {
-	pos := p.peek().Pos()
-	return &syn.LiteralPat{Position: pos, Value: p.parseLiteral()}
+	token := p.peek()
+	return &syn.LiteralPat{Position: token.Position, Token: token, Value: p.parseLiteral()}
 }
 
 func (p *Parser) parseListPat() *syn.ListPat {
