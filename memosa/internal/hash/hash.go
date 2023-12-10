@@ -2,7 +2,7 @@ package hash
 
 import (
 	"crypto/md5"
-	"encoding/binary"
+	"encoding/json"
 
 	"github.com/andyyu2004/memosa/internal/lib"
 )
@@ -14,6 +14,8 @@ type Hashed [hashSize]byte
 func Hash(value any) Hashed {
 	hasher := md5.New()
 	lib.Assert(hasher.Size() == hashSize)
-	lib.Ensure(binary.Write(hasher, binary.NativeEndian, value))
+
+	lib.Ensure(json.NewEncoder(hasher).Encode(value))
+
 	return Hashed(hasher.Sum(nil))
 }
