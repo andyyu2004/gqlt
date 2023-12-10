@@ -6,6 +6,11 @@ import (
 	"strings"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/iterator"
+	"github.com/andyyu2004/gqlt/lex"
+	"github.com/andyyu2004/gqlt/slice"
+	"github.com/andyyu2004/memosa/lib"
+	"github.com/andyyu2004/memosa/stack"
 )
 
 func Dump(node Node) string {
@@ -13,6 +18,8 @@ func Dump(node Node) string {
 	node.Dump(&buf)
 	return buf.String()
 }
+
+type Token = lex.Token
 
 type Node interface {
 	Child
@@ -23,8 +30,17 @@ type Node interface {
 }
 
 type File struct {
+	ast.Position
 	Stmts []Stmt
 }
+
+func (f File) Children() Children {
+	return slice.Map(f.Stmts, func(stmt Stmt) Child { return stmt })
+}
+
+func (File) isNode() {}
+
+var _ Node = File{}
 
 type Children []Child
 
@@ -44,4 +60,35 @@ func (f File) String() string {
 	b := strings.Builder{}
 	f.Dump(&b)
 	return b.String()
+}
+
+func Traverse(node Node) iterator.Iterator[Child] {
+	type State struct {
+		children   Children
+		childIndex int
+	}
+	stack := stack.Stack[*State]{}
+	stack.Push(&State{node.Children(), 0})
+
+	return func() (Child, bool) {
+		for {
+			state, ok := stack.Peek()
+			if !ok {
+				return nil, false
+			}
+
+			for _, child := range state.children[state.childIndex:] {
+				state.childIndex++
+				switch child := child.(type) {
+				case Node:
+					stack.Push(&State{child.Children(), 0})
+				case lex.Token:
+				}
+				return child, true
+			}
+
+			_, ok = stack.Pop()
+			lib.Assert(ok)
+		}
+	}
 }

@@ -73,14 +73,16 @@ func (stmt AssertStmt) Dump(w io.Writer) {
 
 type LetStmt struct {
 	ast.Position
-	Pat  Pat
-	Expr Expr
+	LetKw  lex.Token
+	Pat    Pat
+	Equals lex.Token
+	Expr   Expr
 }
 
 var _ Stmt = LetStmt{}
 
 func (let LetStmt) Children() Children {
-	return Children{let.Pat, let.Expr}
+	return Children{let.LetKw, let.Pat, let.Equals, let.Expr}
 }
 
 func (LetStmt) isStmt() {}

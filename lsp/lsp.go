@@ -2,6 +2,7 @@ package lsp
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 
 	"github.com/andyyu2004/gqlt/ide"
@@ -13,7 +14,11 @@ import (
 
 var semanticTokensLegend = protocol.SemanticTokensLegend{
 	TokenTypes: []string{
-		string(protocol.SemanticTokenTypeType),
+		string(protocol.SemanticTokenTypeKeyword),
+		string(protocol.SemanticTokenTypeVariable),
+		string(protocol.SemanticTokenTypeString),
+		string(protocol.SemanticTokenTypeNumber),
+		string(protocol.SemanticTokenTypeOperator),
 	},
 }
 
@@ -32,7 +37,13 @@ type ls struct {
 	*ide.IDE
 }
 
+func trace(ctx *glsp.Context, format string, args ...any) {
+	protocol.Trace(ctx, protocol.MessageTypeError, fmt.Sprintf(format, args...))
+}
+
 func (s *ls) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (any, error) {
+	protocol.SetTraceValue(protocol.TraceValueVerbose)
+
 	return protocol.InitializeResult{
 		Capabilities: protocol.ServerCapabilities{
 			TextDocumentSync: protocol.TextDocumentSyncOptions{
@@ -81,24 +92,25 @@ func (s *ls) semanticTokens(ctx *glsp.Context, params *protocol.SemanticTokensPa
 	highlights := s.Highlight(params.TextDocument.URI)
 	tokens := []SemanticToken{}
 	for i, hl := range highlights {
-		var deltaLine, deltaStart uint32
+		var deltaLine uint32
+		// adjust for 1-indexing to 0-indexing
+		deltaStart := uint32(hl.Pos.Column - 1)
 		if i == 0 {
-			deltaLine = uint32(hl.Pos.Line)
-			deltaStart = uint32(hl.Pos.Column)
+			deltaLine = uint32(hl.Pos.Line - 1)
 		} else {
 			deltaLine = uint32(hl.Pos.Line - highlights[i-1].Pos.Line)
 			if hl.Pos.Line == highlights[i-1].Pos.Line {
 				deltaStart = uint32(hl.Pos.Column - highlights[i-1].Pos.Column)
-			} else {
-				deltaStart = uint32(hl.Pos.Column)
 			}
 		}
 
+		tokenType := slices.IndexFunc(semanticTokensLegend.TokenTypes, func(t string) bool { return t == string(hl.TokenKind) })
+		lib.Assert(tokenType != -1)
 		tokens = append(tokens, SemanticToken{
 			deltaLine:            deltaLine,
 			deltaStart:           deltaStart,
 			length:               uint32(hl.Pos.End - hl.Pos.Start),
-			tokenType:            uint32(slices.IndexFunc(semanticTokensLegend.TokenTypes, func(t string) bool { return t == string(hl.TokenKind) })),
+			tokenType:            uint32(tokenType),
 			tokenModifiersBitset: 0,
 		})
 	}

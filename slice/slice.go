@@ -7,3 +7,14 @@ func Map[T, U any](xs []T, f func(T) U) []U {
 	}
 	return ys
 }
+
+func FilterMap[T, U any](xs []T, f func(T) (U, bool)) []U {
+	ys := []U{}
+	for _, x := range xs {
+		y, ok := f(x)
+		if ok {
+			ys = append(ys, y)
+		}
+	}
+	return ys
+}

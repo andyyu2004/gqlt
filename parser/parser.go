@@ -80,7 +80,12 @@ func (p *Parser) Parse() (syn.File, error) {
 		err = p.errors
 	}
 
-	return syn.File{Stmts: p.stmts}, err
+	pos := ast.Position{Src: p.lexer.Peek().Src}
+	if len(p.stmts) > 0 {
+		pos.Start = p.stmts[0].Pos().Start
+		pos.End = p.stmts[len(p.stmts)-1].Pos().End
+	}
+	return syn.File{Position: pos, Stmts: p.stmts}, err
 }
 
 func (p *Parser) step() {
@@ -185,13 +190,14 @@ func (p *Parser) parseAssertStmt() *syn.AssertStmt {
 }
 
 func (p *Parser) parseLetStmt() *syn.LetStmt {
-	start := p.bump(lex.Let)
+	let := p.bump(lex.Let)
 	pat := p.parsePat(patOpts{})
 	if pat == nil {
 		return nil
 	}
 
-	if !p.expect_(lex.Equals) {
+	equals, ok := p.expect(lex.Equals)
+	if !ok {
 		return nil
 	}
 
@@ -200,7 +206,7 @@ func (p *Parser) parseLetStmt() *syn.LetStmt {
 		return nil
 	}
 
-	return &syn.LetStmt{Position: start.Merge(expr), Pat: pat, Expr: expr}
+	return &syn.LetStmt{Position: let.Merge(expr), LetKw: let, Pat: pat, Equals: equals, Expr: expr}
 }
 
 type patOpts struct {

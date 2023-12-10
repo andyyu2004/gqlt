@@ -4,10 +4,8 @@ import (
 	"maps"
 	"sync"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/syn"
 	"github.com/andyyu2004/memosa"
-	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
 type IDE struct {
@@ -48,23 +46,4 @@ func (ide *IDE) Apply(changes Changes) {
 
 func (ide *IDE) Parse(path string) syn.File {
 	return memosa.Fetch[parseQuery](ide.ctx, parseKey{path})
-}
-
-type Highlight struct {
-	Pos       ast.Position
-	TokenKind protocol.SemanticTokenType
-}
-
-type HighlightKind int
-
-const (
-	HighlightKindType HighlightKind = iota
-)
-
-func (ide *IDE) Highlight(path string) []Highlight {
-	tree := ide.Parse(path)
-	_ = tree
-	return []Highlight{
-		{ast.Position{Start: 0, End: 2, Line: 0, Column: 0}, protocol.SemanticTokenTypeType},
-	}
 }

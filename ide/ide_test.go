@@ -10,10 +10,12 @@ import (
 func TestIDE(t *testing.T) {
 	const path = "test.gqlt"
 
-	changes := ide.Changes{ide.SetFileContent{
-		Path:    path,
-		Content: "let x = 5",
-	}}
+	changes := ide.Changes{
+		ide.SetFileContent{
+			Path:    path,
+			Content: "let x = 5",
+		},
+	}
 
 	ide := ide.New()
 	ide.Apply(changes)

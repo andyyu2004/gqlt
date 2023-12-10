@@ -5,8 +5,8 @@ import (
 	"reflect"
 
 	"github.com/andyyu2004/memosa/internal/hash"
-	"github.com/andyyu2004/memosa/internal/stack"
 	"github.com/andyyu2004/memosa/lib"
+	"github.com/andyyu2004/memosa/stack"
 
 	"github.com/hashicorp/golang-lru/v2/simplelru"
 )
@@ -24,13 +24,13 @@ type deps struct {
 	maxRev rev
 }
 
-func newActiveQuery() activeQuery {
-	return activeQuery{deps{map[reflect.Type][]any{}, 0}}
+func newActiveQuery() *activeQuery {
+	return &activeQuery{deps{map[reflect.Type][]any{}, 0}}
 }
 
 func recordRead(rt *runtime, queryType reflect.Type, key any) {
-	a := rt.activeQueryStack.Peek()
-	if a != nil {
+	a, ok := rt.activeQueryStack.Peek()
+	if ok {
 		a.dependencies.inputs[queryType] = append(a.dependencies.inputs[queryType], key)
 		if input, ok := rt.inputStorages[queryType]; ok {
 			a.dependencies.maxRev = max(a.dependencies.maxRev, input.rev)
@@ -45,7 +45,7 @@ func recordRead(rt *runtime, queryType reflect.Type, key any) {
 type runtime struct {
 	eventHandler     func(Event)
 	revision         rev
-	activeQueryStack *stack.Stack[activeQuery]
+	activeQueryStack *stack.Stack[*activeQuery]
 	inputStorages    map[reflect.Type]*inputStorage
 	queryStorages    map[reflect.Type]*queryStorage
 }
@@ -132,7 +132,7 @@ func castMemoized[T any](memo *memoized[any]) *memoized[T] {
 func newRt(eventHandler func(Event)) *runtime {
 	return &runtime{
 		revision:         0,
-		activeQueryStack: new(stack.Stack[activeQuery]),
+		activeQueryStack: new(stack.Stack[*activeQuery]),
 		inputStorages:    make(map[reflect.Type]*inputStorage),
 		queryStorages:    make(map[reflect.Type]*queryStorage),
 		eventHandler:     eventHandler,
@@ -203,7 +203,7 @@ func execute(ctx *Context, queryType reflect.Type, memo *memoized[any], key any)
 	ctx.rt.activeQueryStack.Push(newActiveQuery())
 	ctx.rt.event(WillExecute{queryType, key})
 	value := reflect.New(queryType).MethodByName("Execute").Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(key)})[0].Interface()
-	activeQuery := ctx.rt.activeQueryStack.Pop()
+	activeQuery := ctx.rt.activeQueryStack.MustPop()
 
 	if memo == nil {
 		memoize(ctx.rt, activeQuery.dependencies, queryType, key, value)
