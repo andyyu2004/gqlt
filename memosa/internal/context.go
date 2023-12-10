@@ -1,5 +1,7 @@
 package internal
 
+import "github.com/andyyu2004/memosa/internal/lib"
+
 type InputKey struct{}
 
 type Input[T comparable] interface {
@@ -43,5 +45,5 @@ func Set[I Input[T], T comparable](ctx *Context, value T) {
 }
 
 func Fetch[Q Query[K, V], K comparable, V comparable](ctx *Context, key K) V {
-	return fetch(ctx, typeof[Q](), key).(V)
+	return fetch(ctx, lib.TypeOf[Q](), key).(V)
 }

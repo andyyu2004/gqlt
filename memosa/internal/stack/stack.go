@@ -1,4 +1,4 @@
-package internal
+package stack
 
 type Stack[T any] struct {
 	data []T

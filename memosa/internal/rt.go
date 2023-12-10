@@ -4,6 +4,10 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/andyyu2004/memosa/internal/hash"
+	"github.com/andyyu2004/memosa/internal/lib"
+	"github.com/andyyu2004/memosa/internal/stack"
+
 	"github.com/hashicorp/golang-lru/v2/simplelru"
 )
 
@@ -31,8 +35,8 @@ func recordRead(rt *runtime, queryType reflect.Type, key any) {
 		if input, ok := rt.inputStorages[queryType]; ok {
 			a.dependencies.maxRev = max(a.dependencies.maxRev, input.rev)
 		} else if query, ok := rt.queryStorages[queryType]; ok {
-			memo, ok := query.memoMap.Get(hash(key))
-			assert(ok)
+			memo, ok := query.memoMap.Get(hash.Hash(key))
+			lib.Assert(ok)
 			a.dependencies.maxRev = max(a.dependencies.maxRev, memo.deps.maxRev)
 		}
 	}
@@ -41,7 +45,7 @@ func recordRead(rt *runtime, queryType reflect.Type, key any) {
 type runtime struct {
 	eventHandler     func(Event)
 	revision         rev
-	activeQueryStack *Stack[activeQuery]
+	activeQueryStack *stack.Stack[activeQuery]
 	inputStorages    map[reflect.Type]*inputStorage
 	queryStorages    map[reflect.Type]*queryStorage
 }
@@ -52,7 +56,7 @@ type inputStorage struct {
 }
 
 func (ctx *Context) verifyMemo(memo *memoized[any]) bool {
-	assert(memo.verifiedAt <= ctx.rt.revision)
+	lib.Assert(memo.verifiedAt <= ctx.rt.revision)
 	if memo.verifiedAt == ctx.rt.revision {
 		return true
 	}
@@ -65,7 +69,7 @@ func (ctx *Context) verifyMemo(memo *memoized[any]) bool {
 		}
 	}
 
-	assert(memo.verifiedAt < ctx.rt.revision)
+	lib.Assert(memo.verifiedAt < ctx.rt.revision)
 	memo.verifiedAt = ctx.rt.revision
 	return true
 }
@@ -79,8 +83,8 @@ func (ctx *Context) verifyQuery(queryType reflect.Type, key any) bool {
 	}
 
 	storage := ctx.rt.queryStorages[queryType]
-	memo, ok := storage.memoMap.Get(hash(key))
-	assert(ok) // we wouldn't end up here if the key wasn't in the map
+	memo, ok := storage.memoMap.Get(hash.Hash(key))
+	lib.Assert(ok) // we wouldn't end up here if the key wasn't in the map
 
 	if ctx.verifyMemo(memo) {
 		// dependencies are up-to-date, so we don't need to reexecute
@@ -90,10 +94,10 @@ func (ctx *Context) verifyQuery(queryType reflect.Type, key any) bool {
 	prevMaxRev := memo.deps.maxRev
 	prevValue := memo.value
 	newValue := execute(ctx, queryType, memo, key)
-	assert(newValue == memo.value)
+	lib.Assert(newValue == memo.value)
 
 	if newValue == prevValue {
-		assert(memo.deps.maxRev >= prevMaxRev)
+		lib.Assert(memo.deps.maxRev >= prevMaxRev)
 		memo.deps.maxRev = prevMaxRev
 		return true
 	}
@@ -110,7 +114,7 @@ func (rt *runtime) event(event Event) {
 // storage for a particular query
 type queryStorage struct {
 	// a lru cache from hashed key to value
-	memoMap *simplelru.LRU[hashed, *memoized[any]]
+	memoMap *simplelru.LRU[hash.Hashed, *memoized[any]]
 }
 
 type memoized[T any] struct {
@@ -129,7 +133,7 @@ func castMemoized[T any](memo *memoized[any]) *memoized[T] {
 func newRt(eventHandler func(Event)) *runtime {
 	return &runtime{
 		revision:         0,
-		activeQueryStack: new(Stack[activeQuery]),
+		activeQueryStack: new(stack.Stack[activeQuery]),
 		inputStorages:    make(map[reflect.Type]*inputStorage),
 		queryStorages:    make(map[reflect.Type]*queryStorage),
 		eventHandler:     eventHandler,
@@ -149,14 +153,14 @@ func get(ctx *Context, inputType reflect.Type) any {
 // Set the value of an input.
 func set[I Input[T], T comparable](rt *runtime, value T) {
 	rt.revision++
-	rt.inputStorages[typeof[I]()] = &inputStorage{rt.revision, value}
+	rt.inputStorages[lib.TypeOf[I]()] = &inputStorage{rt.revision, value}
 }
 
 func tryGet(ctx *Context, queryType reflect.Type) (any, bool) {
 	method, ok := queryType.MethodByName("Execute")
-	assert(ok)
+	lib.Assert(ok)
 
-	if method.Type.In(2) == typeof[InputKey]() {
+	if method.Type.In(2) == lib.TypeOf[InputKey]() {
 		return get(ctx, queryType), true
 	}
 
@@ -193,7 +197,7 @@ func fetch(ctx *Context, queryType reflect.Type, key any) any {
 func execute(ctx *Context, queryType reflect.Type, memo *memoized[any], key any) any {
 	if value, ok := tryGet(ctx, queryType); ok {
 		// input queries should not have an associated memo
-		assert(memo == nil)
+		lib.Assert(memo == nil)
 		return value
 	}
 
@@ -222,7 +226,7 @@ func tryFetchMemoized(rt *runtime, queryType reflect.Type, key any) (*memoized[a
 		return nil, false
 	}
 
-	memo, ok := storage.memoMap.Get(hash(key))
+	memo, ok := storage.memoMap.Get(hash.Hash(key))
 	if !ok {
 		return nil, false
 	}
@@ -239,9 +243,9 @@ const lruSize = 128
 func memoize(rt *runtime, deps deps, queryType reflect.Type, key any, value any) {
 	storage, ok := rt.queryStorages[queryType]
 	if !ok {
-		storage = &queryStorage{memoMap: must(simplelru.NewLRU[hashed, *memoized[any]](lruSize, nil))}
+		storage = &queryStorage{memoMap: lib.Must(simplelru.NewLRU[hash.Hashed, *memoized[any]](lruSize, nil))}
 		rt.queryStorages[queryType] = storage
 	}
 
-	storage.memoMap.Add(hash(key), &memoized[any]{rt.revision, deps, value})
+	storage.memoMap.Add(hash.Hash(key), &memoized[any]{rt.revision, deps, value})
 }
