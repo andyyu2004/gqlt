@@ -1,4 +1,4 @@
-package gqlt
+package internal
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 	"github.com/andyyu2004/gqlt/gqlparser/formatter"
 	"github.com/andyyu2004/gqlt/slice"
 	"github.com/andyyu2004/gqlt/syn"
+	"github.com/andyyu2004/memosa/lib"
 )
 
 func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.OperationExpr) (any, error) {
@@ -130,7 +131,8 @@ func (t variableTransform) transformValue(expectedType typename, value *ast.Valu
 	ty := t.schema.Types[expectedType]
 	switch value.Kind {
 	case ast.Variable:
-		assert(len(value.Children) == 0, "unexpected children for variable value")
+		//  unexpected children for variable value
+		lib.Assert(len(value.Children) == 0)
 		val, ok := t.scope.Lookup(value.Raw)
 		if !ok {
 			t.err = fmt.Errorf("reference to undefined variable in graphql query: %s", value.Raw)

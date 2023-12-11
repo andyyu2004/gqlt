@@ -1,4 +1,4 @@
-package gqlt
+package internal
 
 import (
 	"fmt"

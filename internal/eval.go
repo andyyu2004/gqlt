@@ -1,4 +1,4 @@
-package gqlt
+package internal
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/parser"
 	"github.com/andyyu2004/gqlt/syn"
+	"github.com/andyyu2004/memosa/lib"
 	"github.com/bmatcuk/doublestar/v4"
 )
 
@@ -316,7 +317,8 @@ type tyref struct {
 
 func (t tyref) LeafType() typename {
 	if t.OfType == nil {
-		assert(t.Name != "", "expected non-empty name for leaf type")
+		// leaf-types should have a non-empty name
+		lib.Assert(t.Name != "")
 		return t.Name
 	}
 
