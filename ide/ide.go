@@ -2,19 +2,19 @@ package ide
 
 import (
 	"maps"
-	"sync"
 
 	"github.com/andyyu2004/gqlt/syn"
 	"github.com/andyyu2004/memosa"
 )
 
 type IDE struct {
-	ctx  *memosa.Context
-	once sync.Once
+	ctx *memosa.Context
 }
 
 func New() *IDE {
-	return &IDE{ctx: memosa.New()}
+	ctx := memosa.New()
+	memosa.Set[inputQuery](ctx, Input{make(map[string]string)})
+	return &IDE{ctx}
 }
 
 type Changes []Change
@@ -35,8 +35,6 @@ func (s SetFileContent) Apply(input *Input) {
 }
 
 func (ide *IDE) Apply(changes Changes) {
-	ide.once.Do(func() { memosa.Set[inputQuery](ide.ctx, Input{make(map[string]string)}) })
-
 	input := Input{maps.Clone(memosa.Fetch[inputQuery](ide.ctx, memosa.InputKey{}).Sources)}
 	for _, change := range changes {
 		change.Apply(&input)

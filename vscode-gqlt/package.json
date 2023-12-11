@@ -1,0 +1,99 @@
+{
+  "name": "gqlt",
+  "displayName": "gqlt",
+  "description": "",
+  "version": "0.0.1",
+  "publisher": "andyyu2004",
+  "icon": "assets/graphql.png",
+  "repository": {
+    "url": "https://github.com/andyyu2004/gqlt",
+    "type": "git"
+  },
+  "engines": {
+    "vscode": "^1.66.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "gqlt",
+      "properties": {
+        "gqlt.path": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "scope": "machine-overridable",
+          "default": null,
+          "markdownDescription": "Path to `gqlt` executable"
+        },
+        "gqlt.env": {
+          "type": [
+            "object"
+          ],
+          "scope": "machine-overridable",
+          "default": {},
+          "markdownDescription": "Environment variables for `gqlt`"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "gqlt.restart-server",
+        "title": "Restart Server",
+        "category": "gqlt"
+      },
+      {
+        "command": "gqlt.syntax-tree",
+        "title": "Show Syntax Tree",
+        "category": "gqlt"
+      }
+    ],
+    "languages": [
+      {
+        "id": "gqlt",
+        "extensions": [
+          ".gqlt"
+        ],
+        "aliases": [
+          "GraphQL Test",
+          "gqlt"
+        ],
+        "configuration": "./language/language-configuration.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.2.0",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "14.x",
+    "@types/vscode": "^1.66.0",
+    "@typescript-eslint/eslint-plugin": "^5.16.0",
+    "@typescript-eslint/parser": "^5.16.0",
+    "@vscode/test-electron": "^2.1.3",
+    "eslint": "^8.11.0",
+    "glob": "^7.2.0",
+    "mocha": "^9.2.2",
+    "ts-loader": "^9.2.8",
+    "typescript": "^4.5.5",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^7.0.0"
+  }
+}
