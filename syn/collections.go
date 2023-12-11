@@ -1,4 +1,4 @@
-package ast
+package syn
 
 type FieldList []*FieldDefinition
 

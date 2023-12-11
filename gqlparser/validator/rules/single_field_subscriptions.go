@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/syn"
 
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
@@ -12,8 +13,8 @@ import (
 
 func init() {
 	AddRule("SingleFieldSubscriptions", func(observers *Events, addError AddErrFunc) {
-		observers.OnOperation(func(walker *Walker, operation *ast.OperationDefinition) {
-			if walker.Schema.Subscription == nil || operation.Operation != ast.Subscription {
+		observers.OnOperation(func(walker *Walker, operation *syn.OperationDefinition) {
+			if walker.Schema.Subscription == nil || operation.Operation != syn.Subscription {
 				return
 			}
 
@@ -48,21 +49,21 @@ type topField struct {
 	position *ast.Position
 }
 
-func retrieveTopFieldNames(selectionSet ast.SelectionSet) []*topField {
+func retrieveTopFieldNames(selectionSet syn.SelectionSet) []*topField {
 	fields := []*topField{}
 	inFragmentRecursive := map[string]bool{}
-	var walk func(selectionSet ast.SelectionSet)
-	walk = func(selectionSet ast.SelectionSet) {
+	var walk func(selectionSet syn.SelectionSet)
+	walk = func(selectionSet syn.SelectionSet) {
 		for _, selection := range selectionSet {
 			switch selection := selection.(type) {
-			case *ast.Field:
+			case *syn.Field:
 				fields = append(fields, &topField{
 					name:     selection.Name,
 					position: selection.GetPosition(),
 				})
-			case *ast.InlineFragment:
+			case *syn.InlineFragment:
 				walk(selection.SelectionSet)
-			case *ast.FragmentSpread:
+			case *syn.FragmentSpread:
 				if selection.Definition == nil {
 					return
 				}

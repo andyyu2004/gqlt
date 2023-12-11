@@ -1,16 +1,15 @@
 package validator
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
 	AddRule("KnownArgumentNames", func(observers *Events, addError AddErrFunc) {
 		// A GraphQL field is only valid if all supplied arguments are defined by that field.
-		observers.OnField(func(walker *Walker, field *ast.Field) {
+		observers.OnField(func(walker *Walker, field *syn.Field) {
 			if field.Definition == nil || field.ObjectDefinition == nil {
 				return
 			}
@@ -33,7 +32,7 @@ func init() {
 			}
 		})
 
-		observers.OnDirective(func(walker *Walker, directive *ast.Directive) {
+		observers.OnDirective(func(walker *Walker, directive *syn.Directive) {
 			if directive.Definition == nil {
 				return
 			}

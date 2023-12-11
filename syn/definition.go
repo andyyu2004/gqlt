@@ -1,4 +1,6 @@
-package ast
+package syn
+
+import "github.com/andyyu2004/gqlt/gqlparser/ast"
 
 type DefinitionKind string
 
@@ -29,8 +31,8 @@ type Definition struct {
 	Types       []string      // union
 	EnumValues  EnumValueList // enum
 
-	Position *Position `dump:"-"`
-	BuiltIn  bool      `dump:"-"`
+	Position *ast.Position `dump:"-"`
+	BuiltIn  bool          `dump:"-"`
 
 	BeforeDescriptionComment *CommentGroup
 	AfterDescriptionComment  *CommentGroup
@@ -69,7 +71,7 @@ type FieldDefinition struct {
 	DefaultValue *Value                 // only for input objects
 	Type         *Type
 	Directives   DirectiveList
-	Position     *Position `dump:"-"`
+	Position     *ast.Position `dump:"-"`
 
 	BeforeDescriptionComment *CommentGroup
 	AfterDescriptionComment  *CommentGroup
@@ -81,7 +83,7 @@ type ArgumentDefinition struct {
 	DefaultValue *Value
 	Type         *Type
 	Directives   DirectiveList
-	Position     *Position `dump:"-"`
+	Position     *ast.Position `dump:"-"`
 
 	BeforeDescriptionComment *CommentGroup
 	AfterDescriptionComment  *CommentGroup
@@ -91,7 +93,7 @@ type EnumValueDefinition struct {
 	Description string
 	Name        string
 	Directives  DirectiveList
-	Position    *Position `dump:"-"`
+	Position    *ast.Position `dump:"-"`
 
 	BeforeDescriptionComment *CommentGroup
 	AfterDescriptionComment  *CommentGroup
@@ -103,7 +105,7 @@ type DirectiveDefinition struct {
 	Arguments    ArgumentDefinitionList
 	Locations    []DirectiveLocation
 	IsRepeatable bool
-	Position     *Position `dump:"-"`
+	Position     *ast.Position `dump:"-"`
 
 	BeforeDescriptionComment *CommentGroup
 	AfterDescriptionComment  *CommentGroup

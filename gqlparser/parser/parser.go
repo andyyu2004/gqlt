@@ -6,6 +6,7 @@ import (
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
 	"github.com/andyyu2004/gqlt/gqlparser/lexer"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 // Commas exist in the lexer for use by the gqlt parser.
@@ -45,7 +46,7 @@ type parser struct {
 
 	prev lexer.Token
 
-	comment          *ast.CommentGroup
+	comment          *syn.CommentGroup
 	commentConsuming bool
 }
 
@@ -53,7 +54,7 @@ func (p *parser) Err() error {
 	return p.err
 }
 
-func (p *parser) consumeComment() (*ast.Comment, bool) {
+func (p *parser) consumeComment() (*syn.Comment, bool) {
 	if p.err != nil {
 		return nil, false
 	}
@@ -62,7 +63,7 @@ func (p *parser) consumeComment() (*ast.Comment, bool) {
 		return nil, false
 	}
 	p.next()
-	return &ast.Comment{
+	return &syn.Comment{
 		Value:    tok.Value,
 		Position: &tok.Pos,
 	}, true
@@ -77,7 +78,7 @@ func (p *parser) consumeCommentGroup() {
 	}
 	p.commentConsuming = true
 
-	var comments []*ast.Comment
+	var comments []*syn.Comment
 	for {
 		comment, ok := p.consumeComment()
 		if !ok {
@@ -86,7 +87,7 @@ func (p *parser) consumeCommentGroup() {
 		comments = append(comments, comment)
 	}
 
-	p.comment = &ast.CommentGroup{List: comments}
+	p.comment = &syn.CommentGroup{List: comments}
 	p.commentConsuming = false
 }
 
@@ -139,7 +140,7 @@ func (p *parser) next() lexer.Token {
 	return p.prev
 }
 
-func (p *parser) expectKeyword(value string) (lexer.Token, *ast.CommentGroup) {
+func (p *parser) expectKeyword(value string) (lexer.Token, *syn.CommentGroup) {
 	tok := p.peek()
 	comment := p.comment
 	if tok.Kind == lexer.Name && tok.Value == value {
@@ -150,7 +151,7 @@ func (p *parser) expectKeyword(value string) (lexer.Token, *ast.CommentGroup) {
 	return tok, comment
 }
 
-func (p *parser) expect(kind lexer.Type) (lexer.Token, *ast.CommentGroup) {
+func (p *parser) expect(kind lexer.Type) (lexer.Token, *syn.CommentGroup) {
 	tok := p.peek()
 	comment := p.comment
 	if tok.Kind == kind {
@@ -195,7 +196,7 @@ func (p *parser) many(start lexer.Type, end lexer.Type, cb func()) {
 	p.next()
 }
 
-func (p *parser) some(start lexer.Type, end lexer.Type, cb func()) *ast.CommentGroup {
+func (p *parser) some(start lexer.Type, end lexer.Type, cb func()) *syn.CommentGroup {
 	hasDef := p.skip(start)
 	if !hasDef {
 		return nil

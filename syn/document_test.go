@@ -1,4 +1,4 @@
-package ast_test
+package syn_test
 
 import (
 	"testing"
@@ -6,12 +6,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	. "github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/parser"
+	. "github.com/andyyu2004/gqlt/syn"
 )
 
 func TestQueryDocMethods(t *testing.T) {
-	doc, err := parser.ParseQuery(&Source{Input: `
+	doc, err := parser.ParseQuery(&ast.Source{Input: `
 		query Bob { foo { ...Frag } }
 		fragment Frag on Foo {
 			bar

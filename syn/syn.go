@@ -1,7 +1,6 @@
 package syn
 
 import (
-	"bytes"
 	"io"
 	"strings"
 
@@ -13,11 +12,11 @@ import (
 	"github.com/andyyu2004/memosa/stack"
 )
 
-func Dump(node Node) string {
-	var buf bytes.Buffer
-	node.Dump(&buf)
-	return buf.String()
-}
+// func Dump(node Node) string {
+// 	var buf bytes.Buffer
+// 	node.Dump(&buf)
+// 	return buf.String()
+// }
 
 type Token = lex.Token
 

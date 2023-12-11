@@ -3,15 +3,14 @@ package validator
 import (
 	"fmt"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
 	AddRule("FragmentsOnCompositeTypes", func(observers *Events, addError AddErrFunc) {
-		observers.OnInlineFragment(func(walker *Walker, inlineFragment *ast.InlineFragment) {
+		observers.OnInlineFragment(func(walker *Walker, inlineFragment *syn.InlineFragment) {
 			fragmentType := walker.Schema.Types[inlineFragment.TypeCondition]
 			if fragmentType == nil || fragmentType.IsCompositeType() {
 				return
@@ -25,7 +24,7 @@ func init() {
 			)
 		})
 
-		observers.OnFragment(func(walker *Walker, fragment *ast.FragmentDefinition) {
+		observers.OnFragment(func(walker *Walker, fragment *syn.FragmentDefinition) {
 			if fragment.Definition == nil || fragment.TypeCondition == "" || fragment.Definition.IsCompositeType() {
 				return
 			}

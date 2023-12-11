@@ -3,24 +3,23 @@ package validator
 import (
 	"fmt"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
 	AddRule("KnownRootType", func(observers *Events, addError AddErrFunc) {
 		// A query's root must be a valid type.  Surprisingly, this isn't
 		// checked anywhere else!
-		observers.OnOperation(func(walker *Walker, operation *ast.OperationDefinition) {
-			var def *ast.Definition
+		observers.OnOperation(func(walker *Walker, operation *syn.OperationDefinition) {
+			var def *syn.Definition
 			switch operation.Operation {
-			case ast.Query, "":
+			case syn.Query, "":
 				def = walker.Schema.Query
-			case ast.Mutation:
+			case syn.Mutation:
 				def = walker.Schema.Mutation
-			case ast.Subscription:
+			case syn.Subscription:
 				def = walker.Schema.Subscription
 			default:
 				// This shouldn't even parse; if it did we probably need to

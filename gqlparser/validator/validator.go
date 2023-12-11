@@ -2,8 +2,8 @@ package validator
 
 import (
 	//nolint:revive
-	. "github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
+	. "github.com/andyyu2004/gqlt/syn"
 )
 
 type AddErrFunc func(options ...ErrorOption)

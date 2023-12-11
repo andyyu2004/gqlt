@@ -1,15 +1,14 @@
 package validator
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
 	AddRule("ScalarLeafs", func(observers *Events, addError AddErrFunc) {
-		observers.OnField(func(walker *Walker, field *ast.Field) {
+		observers.OnField(func(walker *Walker, field *syn.Field) {
 			if field.Definition == nil {
 				return
 			}

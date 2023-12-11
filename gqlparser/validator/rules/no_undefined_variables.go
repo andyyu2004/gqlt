@@ -1,16 +1,15 @@
 package validator
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
 	AddRule("NoUndefinedVariables", func(observers *Events, addError AddErrFunc) {
-		observers.OnValue(func(walker *Walker, value *ast.Value) {
-			if walker.CurrentOperation == nil || value.Kind != ast.Variable || value.VariableDefinition != nil {
+		observers.OnValue(func(walker *Walker, value *syn.Value) {
+			if walker.CurrentOperation == nil || value.Kind != syn.Variable || value.VariableDefinition != nil {
 				return
 			}
 

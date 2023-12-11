@@ -13,7 +13,7 @@ import (
 type Error struct {
 	Err        error                  `json:"-"`
 	Message    string                 `json:"message"`
-	Path       ast.Path               `json:"path,omitempty"`
+	Path       string                 `json:"path,omitempty"`
 	Locations  []Location             `json:"locations,omitempty"`
 	Extensions map[string]interface{} `json:"extensions,omitempty"`
 	Rule       string                 `json:"-"`
@@ -54,7 +54,7 @@ func (err *Error) Error() string {
 	}
 
 	res.WriteString(": ")
-	if ps := err.pathString(); ps != "" {
+	if ps := err.Path; ps != "" {
 		res.WriteString(ps)
 		res.WriteByte(' ')
 	}
@@ -62,10 +62,6 @@ func (err *Error) Error() string {
 	res.WriteString(err.Message)
 
 	return res.String()
-}
-
-func (err *Error) pathString() string {
-	return err.Path.String()
 }
 
 func (err *Error) Unwrap() error {
@@ -106,14 +102,14 @@ func (errs List) As(target interface{}) bool {
 	return false
 }
 
-func WrapPath(path ast.Path, err error) *Error {
+func WrapPath(path fmt.Stringer, err error) *Error {
 	if err == nil {
 		return nil
 	}
 	return &Error{
 		Err:     err,
 		Message: err.Error(),
-		Path:    path,
+		Path:    path.String(),
 	}
 }
 
@@ -146,10 +142,10 @@ func Errorf(message string, args ...interface{}) *Error {
 	}
 }
 
-func ErrorPathf(path ast.Path, message string, args ...interface{}) *Error {
+func ErrorPathf(path fmt.Stringer, message string, args ...interface{}) *Error {
 	return &Error{
 		Message: fmt.Sprintf(message, args...),
-		Path:    path,
+		Path:    path.String(),
 	}
 }
 

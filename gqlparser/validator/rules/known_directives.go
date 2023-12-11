@@ -1,10 +1,9 @@
 package validator
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
@@ -15,7 +14,7 @@ func init() {
 			Column int
 		}
 		seen := map[mayNotBeUsedDirective]bool{}
-		observers.OnDirective(func(walker *Walker, directive *ast.Directive) {
+		observers.OnDirective(func(walker *Walker, directive *syn.Directive) {
 			if directive.Definition == nil {
 				addError(
 					Message(`Unknown directive "@%s".`, directive.Name),

@@ -1,18 +1,20 @@
-package ast
+package syn
 
-func NonNullNamedType(named string, pos *Position) *Type {
+import "github.com/andyyu2004/gqlt/gqlparser/ast"
+
+func NonNullNamedType(named string, pos *ast.Position) *Type {
 	return &Type{NamedType: named, NonNull: true, Position: pos}
 }
 
-func NamedType(named string, pos *Position) *Type {
+func NamedType(named string, pos *ast.Position) *Type {
 	return &Type{NamedType: named, NonNull: false, Position: pos}
 }
 
-func NonNullListType(elem *Type, pos *Position) *Type {
+func NonNullListType(elem *Type, pos *ast.Position) *Type {
 	return &Type{Elem: elem, NonNull: true, Position: pos}
 }
 
-func ListType(elem *Type, pos *Position) *Type {
+func ListType(elem *Type, pos *ast.Position) *Type {
 	return &Type{Elem: elem, NonNull: false, Position: pos}
 }
 
@@ -20,7 +22,7 @@ type Type struct {
 	NamedType string
 	Elem      *Type
 	NonNull   bool
-	Position  *Position `dump:"-"`
+	Position  *ast.Position `dump:"-"`
 }
 
 func (t *Type) Name() string {

@@ -7,23 +7,23 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 var ErrUnexpectedType = fmt.Errorf("unexpected type")
 
 // VariableValues coerces and validates variable values
-func VariableValues(schema *ast.Schema, op *ast.OperationDefinition, variables map[string]interface{}) (map[string]interface{}, error) {
+func VariableValues(schema *syn.Schema, op *syn.OperationDefinition, variables map[string]interface{}) (map[string]interface{}, error) {
 	coercedVars := map[string]interface{}{}
 
 	validator := varValidator{
-		path:   ast.Path{ast.PathName("variable")},
+		path:   syn.Path{syn.PathName("variable")},
 		schema: schema,
 	}
 
 	for _, v := range op.VariableDefinitions {
-		validator.path = append(validator.path, ast.PathName(v.Variable))
+		validator.path = append(validator.path, syn.PathName(v.Variable))
 
 		if !v.Definition.IsInputType() {
 			return nil, gqlerror.ErrorPathf(validator.path, "must an input type")
@@ -88,11 +88,11 @@ func VariableValues(schema *ast.Schema, op *ast.OperationDefinition, variables m
 }
 
 type varValidator struct {
-	path   ast.Path
-	schema *ast.Schema
+	path   syn.Path
+	schema *syn.Schema
 }
 
-func (v *varValidator) validateVarType(typ *ast.Type, val reflect.Value) (reflect.Value, *gqlerror.Error) {
+func (v *varValidator) validateVarType(typ *syn.Type, val reflect.Value) (reflect.Value, *gqlerror.Error) {
 	currentPath := v.path
 	resetPath := func() {
 		v.path = currentPath
@@ -108,7 +108,7 @@ func (v *varValidator) validateVarType(typ *ast.Type, val reflect.Value) (reflec
 		}
 		for i := 0; i < val.Len(); i++ {
 			resetPath()
-			v.path = append(v.path, ast.PathIndex(i))
+			v.path = append(v.path, syn.PathIndex(i))
 			field := val.Index(i)
 			if field.Kind() == reflect.Ptr || field.Kind() == reflect.Interface {
 				if typ.Elem.NonNull && field.IsNil() {
@@ -134,7 +134,7 @@ func (v *varValidator) validateVarType(typ *ast.Type, val reflect.Value) (reflec
 	}
 
 	switch def.Kind {
-	case ast.Enum:
+	case syn.Enum:
 		kind := val.Type().Kind()
 		if kind != reflect.Int && kind != reflect.Int32 && kind != reflect.Int64 && kind != reflect.String {
 			return val, gqlerror.ErrorPathf(v.path, "enums must be ints or strings")
@@ -149,7 +149,7 @@ func (v *varValidator) validateVarType(typ *ast.Type, val reflect.Value) (reflec
 			return val, gqlerror.ErrorPathf(v.path, "%s is not a valid %s", val.String(), def.Name)
 		}
 		return val, nil
-	case ast.Scalar:
+	case syn.Scalar:
 		kind := val.Type().Kind()
 		switch typ.NamedType {
 		case "Int":
@@ -179,7 +179,7 @@ func (v *varValidator) validateVarType(typ *ast.Type, val reflect.Value) (reflec
 			return val, nil
 		}
 		return val, gqlerror.ErrorPathf(v.path, "cannot use %s as %s", kind.String(), typ.NamedType)
-	case ast.InputObject:
+	case syn.InputObject:
 		if val.Kind() != reflect.Map {
 			return val, gqlerror.ErrorPathf(v.path, "must be a %s", def.Name)
 		}
@@ -189,7 +189,7 @@ func (v *varValidator) validateVarType(typ *ast.Type, val reflect.Value) (reflec
 			val.MapIndex(name)
 			fieldDef := def.Fields.ForName(name.String())
 			resetPath()
-			v.path = append(v.path, ast.PathName(name.String()))
+			v.path = append(v.path, syn.PathName(name.String()))
 
 			switch {
 			case name.String() == "__typename":
@@ -201,7 +201,7 @@ func (v *varValidator) validateVarType(typ *ast.Type, val reflect.Value) (reflec
 
 		for _, fieldDef := range def.Fields {
 			resetPath()
-			v.path = append(v.path, ast.PathName(fieldDef.Name))
+			v.path = append(v.path, syn.PathName(fieldDef.Name))
 
 			field := val.MapIndex(reflect.ValueOf(fieldDef.Name))
 			if !field.IsValid() {

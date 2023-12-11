@@ -1,10 +1,10 @@
-package gqlerror
+package gqlerror_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,10 +21,10 @@ var (
 		"Underlying error",
 	}
 
-	error1 = &Error{
+	error1 = &gqlerror.Error{
 		Message: "Some error 1",
 	}
-	error2 = &Error{
+	error2 = &gqlerror.Error{
 		Err:     underlyingError,
 		Message: "Some error 2",
 	}
@@ -32,23 +32,17 @@ var (
 
 func TestErrorFormatting(t *testing.T) {
 	t.Run("without filename", func(t *testing.T) {
-		err := ErrorLocf("", 66, 2, "kabloom")
+		err := gqlerror.ErrorLocf("", 66, 2, "kabloom")
 
 		require.Equal(t, `input:66: kabloom`, err.Error())
 		require.Equal(t, nil, err.Extensions["file"])
 	})
 
 	t.Run("with filename", func(t *testing.T) {
-		err := ErrorLocf("schema.graphql", 66, 2, "kabloom")
+		err := gqlerror.ErrorLocf("schema.graphql", 66, 2, "kabloom")
 
 		require.Equal(t, `schema.graphql:66: kabloom`, err.Error())
 		require.Equal(t, "schema.graphql", err.Extensions["file"])
-	})
-
-	t.Run("with path", func(t *testing.T) {
-		err := ErrorPathf(ast.Path{ast.PathName("a"), ast.PathIndex(1), ast.PathName("b")}, "kabloom")
-
-		require.Equal(t, `input: a[1].b kabloom`, err.Error())
 	})
 }
 
@@ -57,32 +51,32 @@ func TestList_As(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		errs        List
+		errs        gqlerror.List
 		target      any
 		wantsTarget any
 		targetFound bool
 	}{
 		{
 			name: "Empty list",
-			errs: List{},
+			errs: gqlerror.List{},
 		},
 		{
 			name:        "List with one error",
-			errs:        List{error1},
-			target:      new(*Error),
+			errs:        gqlerror.List{error1},
+			target:      new(*gqlerror.Error),
 			wantsTarget: &error1,
 			targetFound: true,
 		},
 		{
 			name:        "List with multiple errors 1",
-			errs:        List{error1, error2},
-			target:      new(*Error),
+			errs:        gqlerror.List{error1, error2},
+			target:      new(*gqlerror.Error),
 			wantsTarget: &error1,
 			targetFound: true,
 		},
 		{
 			name:        "List with multiple errors 2",
-			errs:        List{error1, error2},
+			errs:        gqlerror.List{error1, error2},
 			target:      new(testError),
 			wantsTarget: &underlyingError,
 			targetFound: true,
@@ -113,19 +107,19 @@ func TestList_Is(t *testing.T) {
 
 	tests := []struct {
 		name             string
-		errs             List
+		errs             gqlerror.List
 		target           error
 		hasMatchingError bool
 	}{
 		{
 			name:             "Empty list",
-			errs:             List{},
-			target:           new(Error),
+			errs:             gqlerror.List{},
+			target:           new(gqlerror.Error),
 			hasMatchingError: false,
 		},
 		{
 			name: "List with one error",
-			errs: List{
+			errs: gqlerror.List{
 				error1,
 			},
 			target:           error1,
@@ -133,7 +127,7 @@ func TestList_Is(t *testing.T) {
 		},
 		{
 			name: "List with multiple errors 1",
-			errs: List{
+			errs: gqlerror.List{
 				error1,
 				error2,
 			},
@@ -142,7 +136,7 @@ func TestList_Is(t *testing.T) {
 		},
 		{
 			name: "List with multiple errors 2",
-			errs: List{
+			errs: gqlerror.List{
 				error1,
 				error2,
 			},

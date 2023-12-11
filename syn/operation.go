@@ -1,6 +1,10 @@
-package ast
+package syn
 
-import "io"
+import (
+	"io"
+
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
+)
 
 type Operation string
 
@@ -16,11 +20,11 @@ type OperationDefinition struct {
 	VariableDefinitions VariableDefinitionList
 	Directives          DirectiveList
 	SelectionSet        SelectionSet
-	Position            *Position `dump:"-"`
+	Position            *ast.Position `dump:"-"`
 	Comment             *CommentGroup
 }
 
-func (op OperationDefinition) Pos() Position {
+func (op OperationDefinition) Pos() ast.Position {
 	return *op.Position
 }
 
@@ -35,7 +39,7 @@ type VariableDefinition struct {
 	Type         *Type
 	DefaultValue *Value
 	Directives   DirectiveList
-	Position     *Position `dump:"-"`
+	Position     *ast.Position `dump:"-"`
 	Comment      *CommentGroup
 
 	// Requires validation

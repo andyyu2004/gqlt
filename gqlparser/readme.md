@@ -12,5 +12,5 @@ Guiding principles:
 - well tested: It shouldn't need a graphql server to validate itself. Changes to this repo should be self contained.
 - server agnostic: It should be usable by any of the graphql server implementations, and any graphql client tooling.
 - idiomatic & stable api: It should follow go best practices, especially around forwards compatibility.
-- fast: Where it doesn't impact on the above it should be fast. Avoid unnecessary allocs in hot paths.
+- fast: Where it doesn't impact on the above it should be fsyn. Avoid unnecessary allocs in hot paths.
 - close to reference: Where it doesn't impact on the above, it should stay close to the [graphql/graphql-js](https://github.com/graphql/graphql-js) reference implementation.

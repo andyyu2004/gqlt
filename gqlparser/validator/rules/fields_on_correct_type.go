@@ -5,15 +5,14 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
 	AddRule("FieldsOnCorrectType", func(observers *Events, addError AddErrFunc) {
-		observers.OnField(func(walker *Walker, field *ast.Field) {
+		observers.OnField(func(walker *Walker, field *syn.Field) {
 			if field.ObjectDefinition == nil || field.Definition != nil {
 				return
 			}
@@ -38,7 +37,7 @@ func init() {
 // that they implement. If any of those types include the provided field,
 // suggest them, sorted by how often the type is referenced,  starting
 // with Interfaces.
-func getSuggestedTypeNames(walker *Walker, parent *ast.Definition, name string) []string {
+func getSuggestedTypeNames(walker *Walker, parent *syn.Definition, name string) []string {
 	if !parent.IsAbstractType() {
 		return nil
 	}
@@ -83,8 +82,8 @@ func getSuggestedTypeNames(walker *Walker, parent *ast.Definition, name string) 
 
 // For the field name provided, determine if there are any similar field names
 // that may be the result of a typo.
-func getSuggestedFieldNames(parent *ast.Definition, name string) []string {
-	if parent.Kind != ast.Object && parent.Kind != ast.Interface {
+func getSuggestedFieldNames(parent *syn.Definition, name string) []string {
+	if parent.Kind != syn.Object && parent.Kind != syn.Interface {
 		return nil
 	}
 

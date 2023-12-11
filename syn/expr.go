@@ -39,7 +39,7 @@ type OperationExpr struct {
 	// useful for pretty printing without formatting
 	Query string
 	// parsed graphql ast
-	Operation *ast.OperationDefinition
+	Operation *OperationDefinition
 }
 
 var _ Expr = OperationExpr{}

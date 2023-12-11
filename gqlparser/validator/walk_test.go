@@ -5,6 +5,7 @@ import (
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/parser"
+	"github.com/andyyu2004/gqlt/syn"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,7 +17,7 @@ func TestWalker(t *testing.T) {
 
 	called := false
 	observers := &Events{}
-	observers.OnField(func(_ *Walker, field *ast.Field) {
+	observers.OnField(func(_ *Walker, field *syn.Field) {
 		called = true
 
 		require.Equal(t, "name", field.Name)
@@ -38,7 +39,7 @@ func TestWalkInlineFragment(t *testing.T) {
 
 	called := false
 	observers := &Events{}
-	observers.OnField(func(_ *Walker, field *ast.Field) {
+	observers.OnField(func(_ *Walker, field *syn.Field) {
 		called = true
 
 		require.Equal(t, "name", field.Name)
