@@ -40,13 +40,13 @@ func (d *dumper) dump(v reflect.Value) {
 			d.WriteString("false")
 		}
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		d.WriteString(fmt.Sprintf("%d", v.Int()))
+		fmt.Fprintf(d, "%d", v.Int())
 
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		d.WriteString(fmt.Sprintf("%d", v.Uint()))
+		fmt.Fprintf(d, "%d", v.Uint())
 
 	case reflect.Float32, reflect.Float64:
-		d.WriteString(fmt.Sprintf("%.2f", v.Float()))
+		fmt.Fprintf(d, "%.2f", v.Float())
 
 	case reflect.String:
 		if v.Type().Name() != "string" {

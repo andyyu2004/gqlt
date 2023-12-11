@@ -126,11 +126,6 @@ func (p *Parser) bump(kind lex.TokenKind) lex.Token {
 	return tok
 }
 
-func (p *Parser) expect_(kind lex.TokenKind) bool {
-	_, ok := p.expect(kind)
-	return ok
-}
-
 func (p *Parser) expect(kind lex.TokenKind) (lex.Token, bool) {
 	if tok, ok := p.eat(kind); ok {
 		return tok, true

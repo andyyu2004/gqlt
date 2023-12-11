@@ -1,5 +1,7 @@
 package ast
 
+import "io"
+
 type Operation string
 
 const (
@@ -17,6 +19,16 @@ type OperationDefinition struct {
 	Position            *Position `dump:"-"`
 	Comment             *CommentGroup
 }
+
+func (op OperationDefinition) Pos() Position {
+	return *op.Position
+}
+
+func (OperationDefinition) IsNode() {}
+
+func (OperationDefinition) Dump(io.Writer) {}
+
+func (OperationDefinition) Children() {}
 
 type VariableDefinition struct {
 	Variable     string

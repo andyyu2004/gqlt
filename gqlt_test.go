@@ -62,14 +62,6 @@ type query struct {
 	dogs []dog
 }
 
-func castSlice[T, U any](xs []T) []U {
-	ys := make([]U, len(xs))
-	for i, x := range xs {
-		ys[i] = any(x).(U)
-	}
-	return ys
-}
-
 func (q query) Animals() query         { return q }
 func (q query) Dogs() dogQuery         { return dogQuery{q} }
 func (q query) Cats() catQuery         { return catQuery{q} }

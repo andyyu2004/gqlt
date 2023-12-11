@@ -24,7 +24,7 @@ func (stmt ExprStmt) Children() Children {
 }
 
 func (ExprStmt) isStmt() {}
-func (ExprStmt) isNode() {}
+func (ExprStmt) IsNode() {}
 
 func (stmt ExprStmt) Dump(w io.Writer) {
 	stmt.Expr.Dump(w)
@@ -43,7 +43,7 @@ func (stmt SetStmt) Children() Children {
 }
 
 func (SetStmt) isStmt() {}
-func (SetStmt) isNode() {}
+func (SetStmt) IsNode() {}
 
 func (stmt SetStmt) Dump(w io.Writer) {
 	io.WriteString(w, "set ")
@@ -65,7 +65,7 @@ func (stmt AssertStmt) Children() Children {
 }
 
 func (AssertStmt) isStmt() {}
-func (AssertStmt) isNode() {}
+func (AssertStmt) IsNode() {}
 
 func (stmt AssertStmt) Dump(w io.Writer) {
 	io.WriteString(w, "assert ")
@@ -87,7 +87,7 @@ func (let LetStmt) Children() Children {
 }
 
 func (LetStmt) isStmt() {}
-func (LetStmt) isNode() {}
+func (LetStmt) IsNode() {}
 
 func (let LetStmt) Dump(w io.Writer) {
 	io.WriteString(w, "let ")

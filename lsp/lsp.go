@@ -39,7 +39,7 @@ type ls struct {
 }
 
 func trace(ctx *glsp.Context, format string, args ...any) {
-	protocol.Trace(ctx, protocol.MessageTypeError, fmt.Sprintf(format, args...))
+	_ = protocol.Trace(ctx, protocol.MessageTypeError, fmt.Sprintf(format, args...))
 }
 
 func (s *ls) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (any, error) {

@@ -82,10 +82,3 @@ func (ide *IDE) Highlight(path string) Highlights {
 		return Highlight{}, false
 	}).Collect()
 }
-
-func traverseTokens(node syn.Node) iterator.Iterator[syn.Token] {
-	return iterator.FilterMap(syn.Traverse(node), func(child syn.Event) (syn.Token, bool) {
-		event, ok := child.(syn.TokenEvent)
-		return event.Token, ok
-	})
-}

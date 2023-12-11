@@ -23,7 +23,7 @@ type Token = lex.Token
 
 type Node interface {
 	Child
-	isNode()
+	IsNode()
 
 	Dump(io.Writer)
 	Children() Children
@@ -38,7 +38,7 @@ func (f File) Children() Children {
 	return slice.Map(f.Stmts, func(stmt Stmt) Child { return stmt })
 }
 
-func (File) isNode() {}
+func (File) IsNode() {}
 
 var _ Node = File{}
 
@@ -88,28 +88,26 @@ func Traverse(node Node) iterator.Iterator[Event] {
 	stack.Push(&State{node, node.Children(), 0})
 
 	return func() (Event, bool) {
-		for {
-			state, ok := stack.Peek()
-			if !ok {
-				return nil, false
-			}
-
-			for _, child := range state.children[state.childIndex:] {
-				state.childIndex++
-				switch child := child.(type) {
-				case Node:
-					stack.Push(&State{child, child.Children(), 0})
-					return EnterEvent{child}, true
-				case lex.Token:
-					return TokenEvent{child}, true
-				default:
-					panic("unreachable")
-				}
-			}
-
-			s, ok := stack.Pop()
-			lib.Assert(ok)
-			return ExitEvent{s.node}, true
+		state, ok := stack.Peek()
+		if !ok {
+			return nil, false
 		}
+
+		for _, child := range state.children[state.childIndex:] {
+			state.childIndex++
+			switch child := child.(type) {
+			case Node:
+				stack.Push(&State{child, child.Children(), 0})
+				return EnterEvent{child}, true
+			case lex.Token:
+				return TokenEvent{child}, true
+			default:
+				panic("unreachable")
+			}
+		}
+
+		s, ok := stack.Pop()
+		lib.Assert(ok)
+		return ExitEvent{s.node}, true
 	}
 }

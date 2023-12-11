@@ -27,10 +27,10 @@ func (expr NameExpr) Children() Children {
 }
 
 func (NameExpr) isExpr() {}
-func (NameExpr) isNode() {}
+func (NameExpr) IsNode() {}
 
 func (expr NameExpr) Dump(w io.Writer) {
-	io.WriteString(w, expr.Name.Value)
+	_, _ = io.WriteString(w, expr.Name.Value)
 }
 
 type OperationExpr struct {
@@ -51,10 +51,10 @@ func (expr OperationExpr) Children() Children {
 }
 
 func (OperationExpr) isExpr() {}
-func (OperationExpr) isNode() {}
+func (OperationExpr) IsNode() {}
 
 func (expr OperationExpr) Dump(w io.Writer) {
-	io.WriteString(w, expr.Query)
+	_, _ = io.WriteString(w, expr.Query)
 }
 
 type IndexExpr struct {
@@ -73,7 +73,7 @@ func (expr IndexExpr) Children() Children {
 }
 
 func (IndexExpr) isExpr() {}
-func (IndexExpr) isNode() {}
+func (IndexExpr) IsNode() {}
 
 func (expr IndexExpr) Dump(w io.Writer) {
 	expr.Expr.Dump(w)
@@ -94,7 +94,7 @@ func (expr LiteralExpr) Children() Children {
 }
 
 func (LiteralExpr) isExpr() {}
-func (LiteralExpr) isNode() {}
+func (LiteralExpr) IsNode() {}
 
 func (expr LiteralExpr) Dump(w io.Writer) {
 	switch expr.Value.(type) {
@@ -123,7 +123,7 @@ func (expr CallExpr) Children() Children {
 }
 
 func (CallExpr) isExpr() {}
-func (CallExpr) isNode() {}
+func (CallExpr) IsNode() {}
 
 func (expr CallExpr) Dump(w io.Writer) {
 	expr.Fn.Dump(w)
@@ -152,7 +152,7 @@ func (expr MatchesExpr) Children() Children {
 }
 
 func (MatchesExpr) isExpr() {}
-func (MatchesExpr) isNode() {}
+func (MatchesExpr) IsNode() {}
 
 func (expr MatchesExpr) Dump(w io.Writer) {
 	expr.Expr.Dump(w)
@@ -176,7 +176,7 @@ func (expr ListExpr) Children() Children {
 }
 
 func (ListExpr) isExpr() {}
-func (ListExpr) isNode() {}
+func (ListExpr) IsNode() {}
 
 func (expr ListExpr) Dump(w io.Writer) {
 	io.WriteString(w, "[")
@@ -207,7 +207,7 @@ func (expr ObjectExpr) Children() Children {
 }
 
 func (ObjectExpr) isExpr() {}
-func (ObjectExpr) isNode() {}
+func (ObjectExpr) IsNode() {}
 
 func (expr ObjectExpr) Dump(w io.Writer) {
 	io.WriteString(w, "{")
@@ -236,7 +236,7 @@ func (expr BinaryExpr) Children() Children {
 }
 
 func (BinaryExpr) isExpr() {}
-func (BinaryExpr) isNode() {}
+func (BinaryExpr) IsNode() {}
 
 func (expr BinaryExpr) Dump(w io.Writer) {
 	expr.Left.Dump(w)
@@ -259,7 +259,7 @@ func (expr UnaryExpr) Children() Children {
 }
 
 func (UnaryExpr) isExpr() {}
-func (UnaryExpr) isNode() {}
+func (UnaryExpr) IsNode() {}
 
 func (expr UnaryExpr) Dump(w io.Writer) {
 	io.WriteString(w, expr.Op.String())
