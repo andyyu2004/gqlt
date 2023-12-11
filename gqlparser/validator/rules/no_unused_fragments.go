@@ -1,10 +1,9 @@
 package validator
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
@@ -12,13 +11,13 @@ func init() {
 		inFragmentDefinition := false
 		fragmentNameUsed := make(map[string]bool)
 
-		observers.OnFragmentSpread(func(walker *Walker, fragmentSpread *ast.FragmentSpread) {
+		observers.OnFragmentSpread(func(walker *Walker, fragmentSpread *syn.FragmentSpread) {
 			if !inFragmentDefinition {
 				fragmentNameUsed[fragmentSpread.Name] = true
 			}
 		})
 
-		observers.OnFragment(func(walker *Walker, fragment *ast.FragmentDefinition) {
+		observers.OnFragment(func(walker *Walker, fragment *syn.FragmentDefinition) {
 			inFragmentDefinition = true
 			if !fragmentNameUsed[fragment.Name] {
 				addError(

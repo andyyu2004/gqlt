@@ -6,13 +6,13 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 type Formatter interface {
-	FormatSchema(schema *ast.Schema)
-	FormatSchemaDocument(doc *ast.SchemaDocument)
-	FormatQueryDocument(doc *ast.QueryDocument)
+	FormatSchema(schema *syn.Schema)
+	FormatSchemaDocument(doc *syn.SchemaDocument)
+	FormatQueryDocument(doc *syn.QueryDocument)
 }
 
 //nolint:revive // Ignore "stuttering" name format.FormatterOption
@@ -144,7 +144,7 @@ func (f *formatter) NeedPadding() *formatter {
 	return f
 }
 
-func (f *formatter) FormatSchema(schema *ast.Schema) {
+func (f *formatter) FormatSchema(schema *syn.Schema) {
 	if schema == nil {
 		return
 	}
@@ -199,7 +199,7 @@ func (f *formatter) FormatSchema(schema *ast.Schema) {
 	}
 }
 
-func (f *formatter) FormatSchemaDocument(doc *ast.SchemaDocument) {
+func (f *formatter) FormatSchemaDocument(doc *syn.SchemaDocument) {
 	// TODO emit by position based order
 
 	if doc == nil {
@@ -218,7 +218,7 @@ func (f *formatter) FormatSchemaDocument(doc *ast.SchemaDocument) {
 	f.FormatCommentGroup(doc.Comment)
 }
 
-func (f *formatter) FormatQueryDocument(doc *ast.QueryDocument) {
+func (f *formatter) FormatQueryDocument(doc *syn.QueryDocument) {
 	// TODO emit by position based order
 
 	if doc == nil {
@@ -231,15 +231,15 @@ func (f *formatter) FormatQueryDocument(doc *ast.QueryDocument) {
 	f.FormatFragmentDefinitionList(doc.Fragments)
 }
 
-func (f *formatter) FormatSchemaDefinitionList(lists ast.SchemaDefinitionList, extension bool) {
+func (f *formatter) FormatSchemaDefinitionList(lists syn.SchemaDefinitionList, extension bool) {
 	if len(lists) == 0 {
 		return
 	}
 
 	var (
-		beforeDescComment      = new(ast.CommentGroup)
-		afterDescComment       = new(ast.CommentGroup)
-		endOfDefinitionComment = new(ast.CommentGroup)
+		beforeDescComment      = new(syn.CommentGroup)
+		afterDescComment       = new(syn.CommentGroup)
+		endOfDefinitionComment = new(syn.CommentGroup)
 		description            string
 	)
 
@@ -276,26 +276,26 @@ func (f *formatter) FormatSchemaDefinitionList(lists ast.SchemaDefinitionList, e
 	f.WriteString("}").WriteNewline()
 }
 
-func (f *formatter) FormatSchemaDefinition(def *ast.SchemaDefinition) {
+func (f *formatter) FormatSchemaDefinition(def *syn.SchemaDefinition) {
 	f.FormatDirectiveList(def.Directives)
 
 	f.FormatOperationTypeDefinitionList(def.OperationTypes)
 }
 
-func (f *formatter) FormatOperationTypeDefinitionList(lists ast.OperationTypeDefinitionList) {
+func (f *formatter) FormatOperationTypeDefinitionList(lists syn.OperationTypeDefinitionList) {
 	for _, def := range lists {
 		f.FormatOperationTypeDefinition(def)
 	}
 }
 
-func (f *formatter) FormatOperationTypeDefinition(def *ast.OperationTypeDefinition) {
+func (f *formatter) FormatOperationTypeDefinition(def *syn.OperationTypeDefinition) {
 	f.FormatCommentGroup(def.Comment)
 	f.WriteWord(string(def.Operation)).NoPadding().WriteString(":").NeedPadding()
 	f.WriteWord(def.Type)
 	f.WriteNewline()
 }
 
-func (f *formatter) FormatFieldList(fieldList ast.FieldList, endOfDefComment *ast.CommentGroup) {
+func (f *formatter) FormatFieldList(fieldList syn.FieldList, endOfDefComment *syn.CommentGroup) {
 	if len(fieldList) == 0 {
 		return
 	}
@@ -313,7 +313,7 @@ func (f *formatter) FormatFieldList(fieldList ast.FieldList, endOfDefComment *as
 	f.WriteString("}")
 }
 
-func (f *formatter) FormatFieldDefinition(field *ast.FieldDefinition) {
+func (f *formatter) FormatFieldDefinition(field *syn.FieldDefinition) {
 	if !f.emitBuiltin && strings.HasPrefix(field.Name, "__") {
 		return
 	}
@@ -339,7 +339,7 @@ func (f *formatter) FormatFieldDefinition(field *ast.FieldDefinition) {
 	f.WriteNewline()
 }
 
-func (f *formatter) FormatArgumentDefinitionList(lists ast.ArgumentDefinitionList) {
+func (f *formatter) FormatArgumentDefinitionList(lists syn.ArgumentDefinitionList) {
 	if len(lists) == 0 {
 		return
 	}
@@ -357,7 +357,7 @@ func (f *formatter) FormatArgumentDefinitionList(lists ast.ArgumentDefinitionLis
 	f.NoPadding().WriteString(")").NeedPadding()
 }
 
-func (f *formatter) FormatArgumentDefinition(def *ast.ArgumentDefinition) {
+func (f *formatter) FormatArgumentDefinition(def *syn.ArgumentDefinition) {
 	f.FormatCommentGroup(def.BeforeDescriptionComment)
 
 	if def.Description != "" {
@@ -383,11 +383,11 @@ func (f *formatter) FormatArgumentDefinition(def *ast.ArgumentDefinition) {
 	}
 }
 
-func (f *formatter) FormatDirectiveLocation(location ast.DirectiveLocation) {
+func (f *formatter) FormatDirectiveLocation(location syn.DirectiveLocation) {
 	f.WriteWord(string(location))
 }
 
-func (f *formatter) FormatDirectiveDefinitionList(lists ast.DirectiveDefinitionList) {
+func (f *formatter) FormatDirectiveDefinitionList(lists syn.DirectiveDefinitionList) {
 	if len(lists) == 0 {
 		return
 	}
@@ -397,7 +397,7 @@ func (f *formatter) FormatDirectiveDefinitionList(lists ast.DirectiveDefinitionL
 	}
 }
 
-func (f *formatter) FormatDirectiveDefinition(def *ast.DirectiveDefinition) {
+func (f *formatter) FormatDirectiveDefinition(def *syn.DirectiveDefinition) {
 	if !f.emitBuiltin {
 		if def.Position.Src.BuiltIn {
 			return
@@ -436,7 +436,7 @@ func (f *formatter) FormatDirectiveDefinition(def *ast.DirectiveDefinition) {
 	f.WriteNewline()
 }
 
-func (f *formatter) FormatDefinitionList(lists ast.DefinitionList, extend bool) {
+func (f *formatter) FormatDefinitionList(lists syn.DefinitionList, extend bool) {
 	if len(lists) == 0 {
 		return
 	}
@@ -446,7 +446,7 @@ func (f *formatter) FormatDefinitionList(lists ast.DefinitionList, extend bool) 
 	}
 }
 
-func (f *formatter) FormatDefinition(def *ast.Definition, extend bool) {
+func (f *formatter) FormatDefinition(def *syn.Definition, extend bool) {
 	if !f.emitBuiltin && def.BuiltIn {
 		return
 	}
@@ -462,22 +462,22 @@ func (f *formatter) FormatDefinition(def *ast.Definition, extend bool) {
 	}
 
 	switch def.Kind {
-	case ast.Scalar:
+	case syn.Scalar:
 		f.WriteWord("scalar").WriteWord(def.Name)
 
-	case ast.Object:
+	case syn.Object:
 		f.WriteWord("type").WriteWord(def.Name)
 
-	case ast.Interface:
+	case syn.Interface:
 		f.WriteWord("interface").WriteWord(def.Name)
 
-	case ast.Union:
+	case syn.Union:
 		f.WriteWord("union").WriteWord(def.Name)
 
-	case ast.Enum:
+	case syn.Enum:
 		f.WriteWord("enum").WriteWord(def.Name)
 
-	case ast.InputObject:
+	case syn.InputObject:
 		f.WriteWord("input").WriteWord(def.Name)
 	}
 
@@ -498,7 +498,7 @@ func (f *formatter) FormatDefinition(def *ast.Definition, extend bool) {
 	f.WriteNewline()
 }
 
-func (f *formatter) FormatEnumValueList(lists ast.EnumValueList, endOfDefComment *ast.CommentGroup) {
+func (f *formatter) FormatEnumValueList(lists syn.EnumValueList, endOfDefComment *syn.CommentGroup) {
 	if len(lists) == 0 {
 		return
 	}
@@ -516,7 +516,7 @@ func (f *formatter) FormatEnumValueList(lists ast.EnumValueList, endOfDefComment
 	f.WriteString("}")
 }
 
-func (f *formatter) FormatEnumValueDefinition(def *ast.EnumValueDefinition) {
+func (f *formatter) FormatEnumValueDefinition(def *syn.EnumValueDefinition) {
 	f.FormatCommentGroup(def.BeforeDescriptionComment)
 
 	f.WriteDescription(def.Description)
@@ -529,13 +529,13 @@ func (f *formatter) FormatEnumValueDefinition(def *ast.EnumValueDefinition) {
 	f.WriteNewline()
 }
 
-func (f *formatter) FormatOperationList(lists ast.OperationList) {
+func (f *formatter) FormatOperationList(lists syn.OperationList) {
 	for _, def := range lists {
 		f.FormatOperationDefinition(def)
 	}
 }
 
-func (f *formatter) FormatOperationDefinition(def *ast.OperationDefinition) {
+func (f *formatter) FormatOperationDefinition(def *syn.OperationDefinition) {
 	f.FormatCommentGroup(def.Comment)
 
 	f.WriteWord(string(def.Operation))
@@ -551,7 +551,7 @@ func (f *formatter) FormatOperationDefinition(def *ast.OperationDefinition) {
 	}
 }
 
-func (f *formatter) FormatDirectiveList(lists ast.DirectiveList) {
+func (f *formatter) FormatDirectiveList(lists syn.DirectiveList) {
 	if len(lists) == 0 {
 		return
 	}
@@ -561,12 +561,12 @@ func (f *formatter) FormatDirectiveList(lists ast.DirectiveList) {
 	}
 }
 
-func (f *formatter) FormatDirective(dir *ast.Directive) {
+func (f *formatter) FormatDirective(dir *syn.Directive) {
 	f.WriteString("@").WriteWord(dir.Name)
 	f.FormatArgumentList(dir.Arguments)
 }
 
-func (f *formatter) FormatArgumentList(lists ast.ArgumentList) {
+func (f *formatter) FormatArgumentList(lists syn.ArgumentList) {
 	if len(lists) == 0 {
 		return
 	}
@@ -581,20 +581,20 @@ func (f *formatter) FormatArgumentList(lists ast.ArgumentList) {
 	f.WriteString(")").NeedPadding()
 }
 
-func (f *formatter) FormatArgument(arg *ast.Argument) {
+func (f *formatter) FormatArgument(arg *syn.Argument) {
 	f.FormatCommentGroup(arg.Comment)
 
 	f.WriteWord(arg.Name).NoPadding().WriteString(":").NeedPadding()
 	f.WriteString(arg.Value.String())
 }
 
-func (f *formatter) FormatFragmentDefinitionList(lists ast.FragmentDefinitionList) {
+func (f *formatter) FormatFragmentDefinitionList(lists syn.FragmentDefinitionList) {
 	for _, def := range lists {
 		f.FormatFragmentDefinition(def)
 	}
 }
 
-func (f *formatter) FormatFragmentDefinition(def *ast.FragmentDefinition) {
+func (f *formatter) FormatFragmentDefinition(def *syn.FragmentDefinition) {
 	f.FormatCommentGroup(def.Comment)
 
 	f.WriteWord("fragment").WriteWord(def.Name)
@@ -608,7 +608,7 @@ func (f *formatter) FormatFragmentDefinition(def *ast.FragmentDefinition) {
 	}
 }
 
-func (f *formatter) FormatVariableDefinitionList(lists ast.VariableDefinitionList) {
+func (f *formatter) FormatVariableDefinitionList(lists syn.VariableDefinitionList) {
 	if len(lists) == 0 {
 		return
 	}
@@ -624,7 +624,7 @@ func (f *formatter) FormatVariableDefinitionList(lists ast.VariableDefinitionLis
 	f.NoPadding().WriteString(")").NeedPadding()
 }
 
-func (f *formatter) FormatVariableDefinition(def *ast.VariableDefinition) {
+func (f *formatter) FormatVariableDefinition(def *syn.VariableDefinition) {
 	f.FormatCommentGroup(def.Comment)
 
 	f.WriteString("$").WriteWord(def.Variable).NoPadding().WriteString(":").NeedPadding()
@@ -639,7 +639,7 @@ func (f *formatter) FormatVariableDefinition(def *ast.VariableDefinition) {
 	//   VariableDefinition : Variable : Type DefaultValue? Directives[Const]?
 }
 
-func (f *formatter) FormatSelectionSet(sets ast.SelectionSet) {
+func (f *formatter) FormatSelectionSet(sets syn.SelectionSet) {
 	if len(sets) == 0 {
 		return
 	}
@@ -655,15 +655,15 @@ func (f *formatter) FormatSelectionSet(sets ast.SelectionSet) {
 	f.WriteString("}")
 }
 
-func (f *formatter) FormatSelection(selection ast.Selection) {
+func (f *formatter) FormatSelection(selection syn.Selection) {
 	switch v := selection.(type) {
-	case *ast.Field:
+	case *syn.Field:
 		f.FormatField(v)
 
-	case *ast.FragmentSpread:
+	case *syn.FragmentSpread:
 		f.FormatFragmentSpread(v)
 
-	case *ast.InlineFragment:
+	case *syn.InlineFragment:
 		f.FormatInlineFragment(v)
 
 	default:
@@ -673,7 +673,7 @@ func (f *formatter) FormatSelection(selection ast.Selection) {
 	f.WriteNewline()
 }
 
-func (f *formatter) FormatField(field *ast.Field) {
+func (f *formatter) FormatField(field *syn.Field) {
 	f.FormatCommentGroup(field.Comment)
 
 	if field.Alias != "" && field.Alias != field.Name {
@@ -692,7 +692,7 @@ func (f *formatter) FormatField(field *ast.Field) {
 	f.FormatSelectionSet(field.SelectionSet)
 }
 
-func (f *formatter) FormatFragmentSpread(spread *ast.FragmentSpread) {
+func (f *formatter) FormatFragmentSpread(spread *syn.FragmentSpread) {
 	f.FormatCommentGroup(spread.Comment)
 
 	f.WriteWord("...").WriteWord(spread.Name)
@@ -700,7 +700,7 @@ func (f *formatter) FormatFragmentSpread(spread *ast.FragmentSpread) {
 	f.FormatDirectiveList(spread.Directives)
 }
 
-func (f *formatter) FormatInlineFragment(inline *ast.InlineFragment) {
+func (f *formatter) FormatInlineFragment(inline *syn.InlineFragment) {
 	f.FormatCommentGroup(inline.Comment)
 
 	f.WriteWord("...")
@@ -713,17 +713,17 @@ func (f *formatter) FormatInlineFragment(inline *ast.InlineFragment) {
 	f.FormatSelectionSet(inline.SelectionSet)
 }
 
-func (f *formatter) FormatType(t *ast.Type) {
+func (f *formatter) FormatType(t *syn.Type) {
 	f.WriteWord(t.String())
 }
 
-func (f *formatter) FormatValue(value *ast.Value) {
+func (f *formatter) FormatValue(value *syn.Value) {
 	f.FormatCommentGroup(value.Comment)
 
 	f.WriteString(value.String())
 }
 
-func (f *formatter) FormatCommentGroup(group *ast.CommentGroup) {
+func (f *formatter) FormatCommentGroup(group *syn.CommentGroup) {
 	if !f.emitComments || group == nil {
 		return
 	}
@@ -732,7 +732,7 @@ func (f *formatter) FormatCommentGroup(group *ast.CommentGroup) {
 	}
 }
 
-func (f *formatter) FormatComment(comment *ast.Comment) {
+func (f *formatter) FormatComment(comment *syn.Comment) {
 	if !f.emitComments || comment == nil {
 		return
 	}

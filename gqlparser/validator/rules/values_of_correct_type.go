@@ -5,27 +5,26 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
 	AddRule("ValuesOfCorrectType", func(observers *Events, addError AddErrFunc) {
-		observers.OnValue(func(walker *Walker, value *ast.Value) {
+		observers.OnValue(func(walker *Walker, value *syn.Value) {
 			if value.Definition == nil || value.ExpectedType == nil {
 				return
 			}
 
-			if value.Kind == ast.NullValue && value.ExpectedType.NonNull {
+			if value.Kind == syn.NullValue && value.ExpectedType.NonNull {
 				addError(
 					Message(`Expected value of type "%s", found %s.`, value.ExpectedType.String(), value.String()),
 					At(value.Position),
 				)
 			}
 
-			if value.Definition.Kind == ast.Scalar {
+			if value.Definition.Kind == syn.Scalar {
 				// Skip custom validating scalars
 				if !value.Definition.OneOf("Int", "Float", "String", "Boolean", "ID") {
 					return
@@ -33,7 +32,7 @@ func init() {
 			}
 
 			var possibleEnums []string
-			if value.Definition.Kind == ast.Enum {
+			if value.Definition.Kind == syn.Enum {
 				for _, val := range value.Definition.EnumValues {
 					possibleEnums = append(possibleEnums, val.Name)
 				}
@@ -45,26 +44,26 @@ func init() {
 			}
 
 			switch value.Kind {
-			case ast.NullValue:
+			case syn.NullValue:
 				return
-			case ast.ListValue:
+			case syn.ListValue:
 				if value.ExpectedType.Elem == nil {
 					unexpectedTypeMessage(addError, value)
 					return
 				}
 
-			case ast.IntValue:
+			case syn.IntValue:
 				if !value.Definition.OneOf("Int", "Float", "ID") {
 					unexpectedTypeMessage(addError, value)
 				}
 
-			case ast.FloatValue:
+			case syn.FloatValue:
 				if !value.Definition.OneOf("Float") {
 					unexpectedTypeMessage(addError, value)
 				}
 
-			case ast.StringValue, ast.BlockValue:
-				if value.Definition.Kind == ast.Enum {
+			case syn.StringValue, syn.BlockValue:
+				if value.Definition.Kind == syn.Enum {
 					rawValStr := fmt.Sprint(rawVal)
 					addError(
 						Message(`Enum "%s" cannot represent non-enum value: %s.`, value.ExpectedType.String(), value.String()),
@@ -75,8 +74,8 @@ func init() {
 					unexpectedTypeMessage(addError, value)
 				}
 
-			case ast.EnumValue:
-				if value.Definition.Kind != ast.Enum {
+			case syn.EnumValue:
+				if value.Definition.Kind != syn.Enum {
 					rawValStr := fmt.Sprint(rawVal)
 					addError(
 						unexpectedTypeMessageOnly(value),
@@ -92,12 +91,12 @@ func init() {
 					)
 				}
 
-			case ast.BooleanValue:
+			case syn.BooleanValue:
 				if !value.Definition.OneOf("Boolean") {
 					unexpectedTypeMessage(addError, value)
 				}
 
-			case ast.ObjectValue:
+			case syn.ObjectValue:
 
 				for _, field := range value.Definition.Fields {
 					if field.Type.NonNull {
@@ -127,7 +126,7 @@ func init() {
 					}
 				}
 
-			case ast.Variable:
+			case syn.Variable:
 				return
 
 			default:
@@ -137,14 +136,14 @@ func init() {
 	})
 }
 
-func unexpectedTypeMessage(addError AddErrFunc, v *ast.Value) {
+func unexpectedTypeMessage(addError AddErrFunc, v *syn.Value) {
 	addError(
 		unexpectedTypeMessageOnly(v),
 		At(v.Position),
 	)
 }
 
-func unexpectedTypeMessageOnly(v *ast.Value) ErrorOption {
+func unexpectedTypeMessageOnly(v *syn.Value) ErrorOption {
 	switch v.ExpectedType.String() {
 	case "Int", "Int!":
 		if _, err := strconv.ParseInt(v.Raw, 10, 32); err != nil && errors.Is(err, strconv.ErrRange) {
@@ -162,7 +161,7 @@ func unexpectedTypeMessageOnly(v *ast.Value) ErrorOption {
 	// case "Enum":
 	//		return Message(`Enum "%s" cannot represent non-enum value: %s`, v.ExpectedType.String(), v.String())
 	default:
-		if v.Definition.Kind == ast.Enum {
+		if v.Definition.Kind == syn.Enum {
 			return Message(`Enum "%s" cannot represent non-enum value: %s.`, v.ExpectedType.String(), v.String())
 		}
 		return Message(`Expected value of type "%s", found %s.`, v.ExpectedType.String(), v.String())

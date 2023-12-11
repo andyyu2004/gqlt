@@ -1,25 +1,24 @@
 package validator
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
 	AddRule("UniqueArgumentNames", func(observers *Events, addError AddErrFunc) {
-		observers.OnField(func(walker *Walker, field *ast.Field) {
+		observers.OnField(func(walker *Walker, field *syn.Field) {
 			checkUniqueArgs(field.Arguments, addError)
 		})
 
-		observers.OnDirective(func(walker *Walker, directive *ast.Directive) {
+		observers.OnDirective(func(walker *Walker, directive *syn.Directive) {
 			checkUniqueArgs(directive.Arguments, addError)
 		})
 	})
 }
 
-func checkUniqueArgs(args ast.ArgumentList, addError AddErrFunc) {
+func checkUniqueArgs(args syn.ArgumentList, addError AddErrFunc) {
 	knownArgNames := map[string]int{}
 
 	for _, arg := range args {

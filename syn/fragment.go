@@ -1,4 +1,6 @@
-package ast
+package syn
+
+import "github.com/andyyu2004/gqlt/gqlparser/ast"
 
 type FragmentSpread struct {
 	Name       string
@@ -8,7 +10,7 @@ type FragmentSpread struct {
 	ObjectDefinition *Definition
 	Definition       *FragmentDefinition
 
-	Position *Position `dump:"-"`
+	Position *ast.Position `dump:"-"`
 	Comment  *CommentGroup
 }
 
@@ -20,7 +22,7 @@ type InlineFragment struct {
 	// Require validation
 	ObjectDefinition *Definition
 
-	Position *Position `dump:"-"`
+	Position *ast.Position `dump:"-"`
 	Comment  *CommentGroup
 }
 
@@ -36,6 +38,6 @@ type FragmentDefinition struct {
 	// Require validation
 	Definition *Definition
 
-	Position *Position `dump:"-"`
+	Position *ast.Position `dump:"-"`
 	Comment  *CommentGroup
 }

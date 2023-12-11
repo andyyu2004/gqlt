@@ -1,9 +1,11 @@
-package ast
+package syn
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
 )
 
 type ValueKind int
@@ -25,7 +27,7 @@ type Value struct {
 	Raw      string
 	Children ChildValueList
 	Kind     ValueKind
-	Position *Position `dump:"-"`
+	Position *ast.Position `dump:"-"`
 	Comment  *CommentGroup
 
 	// Require validation
@@ -37,7 +39,7 @@ type Value struct {
 type ChildValue struct {
 	Name     string
 	Value    *Value
-	Position *Position `dump:"-"`
+	Position *ast.Position `dump:"-"`
 	Comment  *CommentGroup
 }
 

@@ -1,4 +1,6 @@
-package ast
+package syn
+
+import "github.com/andyyu2004/gqlt/gqlparser/ast"
 
 type DirectiveLocation string
 
@@ -30,7 +32,7 @@ const (
 type Directive struct {
 	Name      string
 	Arguments ArgumentList
-	Position  *Position `dump:"-"`
+	Position  *ast.Position `dump:"-"`
 
 	// Requires validation
 	ParentDefinition *Definition

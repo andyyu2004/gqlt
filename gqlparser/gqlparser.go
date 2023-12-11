@@ -5,12 +5,13 @@ import (
 	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
 	"github.com/andyyu2004/gqlt/gqlparser/parser"
 	"github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 
 	// Blank import is used to load up the validator rules.
 	_ "github.com/andyyu2004/gqlt/gqlparser/validator/rules"
 )
 
-func LoadSchema(str ...*ast.Source) (*ast.Schema, error) {
+func LoadSchema(str ...*ast.Source) (*syn.Schema, error) {
 	schema, err := validator.LoadSchema(append([]*ast.Source{validator.Prelude}, str...)...)
 	gqlErr, ok := err.(*gqlerror.Error)
 	if ok {
@@ -22,7 +23,7 @@ func LoadSchema(str ...*ast.Source) (*ast.Schema, error) {
 	return schema, nil
 }
 
-func MustLoadSchema(str ...*ast.Source) *ast.Schema {
+func MustLoadSchema(str ...*ast.Source) *syn.Schema {
 	s, err := validator.LoadSchema(append([]*ast.Source{validator.Prelude}, str...)...)
 	if err != nil {
 		panic(err)
@@ -30,7 +31,7 @@ func MustLoadSchema(str ...*ast.Source) *ast.Schema {
 	return s
 }
 
-func LoadQuery(schema *ast.Schema, str string) (*ast.QueryDocument, gqlerror.List) {
+func LoadQuery(schema *syn.Schema, str string) (*syn.QueryDocument, gqlerror.List) {
 	query, err := parser.ParseQuery(&ast.Source{Input: str})
 	if err != nil {
 		gqlErr, ok := err.(*gqlerror.Error)
@@ -47,7 +48,7 @@ func LoadQuery(schema *ast.Schema, str string) (*ast.QueryDocument, gqlerror.Lis
 	return query, nil
 }
 
-func MustLoadQuery(schema *ast.Schema, str string) *ast.QueryDocument {
+func MustLoadQuery(schema *syn.Schema, str string) *syn.QueryDocument {
 	q, err := LoadQuery(schema, str)
 	if err != nil {
 		panic(err)

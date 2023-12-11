@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/formatter"
 	"github.com/andyyu2004/gqlt/slice"
 	"github.com/andyyu2004/gqlt/syn"
@@ -33,11 +32,11 @@ func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.O
 	return flatten(data), nil
 }
 
-func formatOperation(operation *ast.OperationDefinition) string {
+func formatOperation(operation *syn.OperationDefinition) string {
 	buf := bytes.NewBufferString("")
 	f := formatter.NewFormatter(buf, formatter.WithIndent("  "))
-	f.FormatQueryDocument(&ast.QueryDocument{
-		Operations: []*ast.OperationDefinition{operation},
+	f.FormatQueryDocument(&syn.QueryDocument{
+		Operations: []*syn.OperationDefinition{operation},
 	})
 
 	return buf.String()
@@ -47,7 +46,7 @@ type transform interface {
 	// Create a new operation definition that is a transformation of the given operation.
 	// The original operation definition must not be mutated.
 	// However, it is not required to make a deep copy.
-	transformOperation(*ast.OperationDefinition) *ast.OperationDefinition
+	transformOperation(*syn.OperationDefinition) *syn.OperationDefinition
 }
 
 // add a namespace to the operation
@@ -57,16 +56,16 @@ type namespaceTransform struct {
 	namespace []string
 }
 
-func (t namespaceTransform) transformOperation(operation *ast.OperationDefinition) *ast.OperationDefinition {
+func (t namespaceTransform) transformOperation(operation *syn.OperationDefinition) *syn.OperationDefinition {
 	selectionSet := operation.SelectionSet
 	// iterate in reverse order to build up the selection set from the inside out
 	for i := len(t.namespace) - 1; i >= 0; i-- {
-		selectionSet = ast.SelectionSet{
-			&ast.Field{Alias: t.namespace[i], Name: t.namespace[i], SelectionSet: selectionSet},
+		selectionSet = syn.SelectionSet{
+			&syn.Field{Alias: t.namespace[i], Name: t.namespace[i], SelectionSet: selectionSet},
 		}
 	}
 
-	return &ast.OperationDefinition{
+	return &syn.OperationDefinition{
 		Operation:           operation.Operation,
 		Name:                operation.Name,
 		VariableDefinitions: operation.VariableDefinitions,
@@ -84,7 +83,7 @@ type variableTransform struct {
 	err    error
 }
 
-func (t variableTransform) transformOperation(operation *ast.OperationDefinition) *ast.OperationDefinition {
+func (t variableTransform) transformOperation(operation *syn.OperationDefinition) *syn.OperationDefinition {
 	// if there are variable defined then we pass the variables through as graphql variables
 	if len(operation.VariableDefinitions) > 0 {
 		return operation
@@ -94,17 +93,17 @@ func (t variableTransform) transformOperation(operation *ast.OperationDefinition
 
 	var topLevelType typename
 	switch operation.Operation {
-	case ast.Query:
+	case syn.Query:
 		topLevelType = t.schema.QueryType
-	case ast.Mutation:
+	case syn.Mutation:
 		topLevelType = t.schema.MutationType
-	case ast.Subscription:
+	case syn.Subscription:
 		panic("subscriptions not supported")
 	default:
 		panic("unknown operation type")
 	}
 
-	return &ast.OperationDefinition{
+	return &syn.OperationDefinition{
 		Operation:           operation.Operation,
 		Name:                operation.Name,
 		VariableDefinitions: nil, // drop all variable definitions as they have been "inlined"
@@ -115,10 +114,10 @@ func (t variableTransform) transformOperation(operation *ast.OperationDefinition
 	}
 }
 
-func (t variableTransform) transformArgumentList(argTypes map[string]typename, argumentList ast.ArgumentList) ast.ArgumentList {
-	return slice.Map(argumentList, func(argument *ast.Argument) *ast.Argument {
+func (t variableTransform) transformArgumentList(argTypes map[string]typename, argumentList syn.ArgumentList) syn.ArgumentList {
+	return slice.Map(argumentList, func(argument *syn.Argument) *syn.Argument {
 		argTy := argTypes[argument.Name]
-		return &ast.Argument{
+		return &syn.Argument{
 			Name:     argument.Name,
 			Value:    t.transformValue(argTy, argument.Value),
 			Position: argument.Position,
@@ -127,10 +126,10 @@ func (t variableTransform) transformArgumentList(argTypes map[string]typename, a
 	})
 }
 
-func (t variableTransform) transformValue(expectedType typename, value *ast.Value) *ast.Value {
+func (t variableTransform) transformValue(expectedType typename, value *syn.Value) *syn.Value {
 	ty := t.schema.Types[expectedType]
 	switch value.Kind {
-	case ast.Variable:
+	case syn.Variable:
 		//  unexpected children for variable value
 		lib.Assert(len(value.Children) == 0)
 		val, ok := t.scope.Lookup(value.Raw)
@@ -139,37 +138,37 @@ func (t variableTransform) transformValue(expectedType typename, value *ast.Valu
 			return value
 		}
 
-		out := &ast.Value{Position: value.Position, Comment: value.Comment}
+		out := &syn.Value{Position: value.Position, Comment: value.Comment}
 		switch val := val.(type) {
 		case int:
-			out.Kind = ast.IntValue
+			out.Kind = syn.IntValue
 			out.Raw = fmt.Sprintf("%d", val)
 		case float64:
-			out.Kind = ast.FloatValue
+			out.Kind = syn.FloatValue
 			out.Raw = fmt.Sprintf("%f", val)
 		case string:
 			switch ty.Kind {
-			case ast.Enum:
-				out.Kind = ast.EnumValue
+			case syn.Enum:
+				out.Kind = syn.EnumValue
 			default:
-				out.Kind = ast.StringValue
+				out.Kind = syn.StringValue
 			}
 			out.Raw = val
 		case bool:
-			out.Kind = ast.BooleanValue
+			out.Kind = syn.BooleanValue
 			out.Raw = fmt.Sprintf("%t", val)
 		case nil:
-			out.Kind = ast.NullValue
+			out.Kind = syn.NullValue
 			out.Raw = "null"
 		}
 
 		return out
 	default:
-		return &ast.Value{
+		return &syn.Value{
 			Raw: value.Raw,
-			Children: slice.Map(value.Children, func(child *ast.ChildValue) *ast.ChildValue {
+			Children: slice.Map(value.Children, func(child *syn.ChildValue) *syn.ChildValue {
 				childTy := ty.InputFields[child.Name]
-				return &ast.ChildValue{
+				return &syn.ChildValue{
 					Name:     child.Name,
 					Value:    t.transformValue(childTy.Type, child.Value),
 					Position: child.Position,
@@ -186,12 +185,12 @@ func (t variableTransform) transformValue(expectedType typename, value *ast.Valu
 	}
 }
 
-func (t variableTransform) transformSelectionSet(ty typename, selectionSet ast.SelectionSet) ast.SelectionSet {
-	return slice.Map(selectionSet, func(selection ast.Selection) ast.Selection {
+func (t variableTransform) transformSelectionSet(ty typename, selectionSet syn.SelectionSet) syn.SelectionSet {
+	return slice.Map(selectionSet, func(selection syn.Selection) syn.Selection {
 		switch selection := selection.(type) {
-		case *ast.Field:
+		case *syn.Field:
 			field := t.schema.Types[ty].Fields[selection.Name]
-			return &ast.Field{
+			return &syn.Field{
 				Alias:        selection.Alias,
 				Name:         selection.Name,
 				Arguments:    t.transformArgumentList(field.Args, selection.Arguments),
@@ -200,15 +199,15 @@ func (t variableTransform) transformSelectionSet(ty typename, selectionSet ast.S
 				Position:     selection.Position,
 				Comment:      selection.Comment,
 			}
-		case *ast.FragmentSpread:
-			return &ast.FragmentSpread{
+		case *syn.FragmentSpread:
+			return &syn.FragmentSpread{
 				Name:       selection.Name,
 				Directives: selection.Directives,
 				Position:   selection.Position,
 				Comment:    selection.Comment,
 			}
-		case *ast.InlineFragment:
-			return &ast.InlineFragment{
+		case *syn.InlineFragment:
+			return &syn.InlineFragment{
 				TypeCondition: selection.TypeCondition,
 				Directives:    selection.Directives,
 				SelectionSet:  t.transformSelectionSet(typename(selection.TypeCondition), selection.SelectionSet),

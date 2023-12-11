@@ -1,9 +1,10 @@
-package lexer
+package lexer_test
 
 import (
 	"testing"
 
 	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
+	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/parser/testrunner"
@@ -11,7 +12,7 @@ import (
 
 func TestLexer(t *testing.T) {
 	testrunner.Test(t, "lexer_test.yml", func(_ *testing.T, input string) testrunner.Spec {
-		l := New(&ast.Source{Input: input, Name: "spec"})
+		l := lexer.New(&ast.Source{Input: input, Name: "spec"})
 
 		ret := testrunner.Spec{}
 		for {
@@ -21,7 +22,7 @@ func TestLexer(t *testing.T) {
 				break
 			}
 
-			if tok.Kind == EOF {
+			if tok.Kind == lexer.EOF {
 				break
 			}
 

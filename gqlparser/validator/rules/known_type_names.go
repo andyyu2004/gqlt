@@ -1,15 +1,14 @@
 package validator
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
 	AddRule("KnownTypeNames", func(observers *Events, addError AddErrFunc) {
-		observers.OnVariable(func(walker *Walker, variable *ast.VariableDefinition) {
+		observers.OnVariable(func(walker *Walker, variable *syn.VariableDefinition) {
 			typeName := variable.Type.Name()
 			typdef := walker.Schema.Types[typeName]
 			if typdef != nil {
@@ -22,7 +21,7 @@ func init() {
 			)
 		})
 
-		observers.OnInlineFragment(func(walker *Walker, inlineFragment *ast.InlineFragment) {
+		observers.OnInlineFragment(func(walker *Walker, inlineFragment *syn.InlineFragment) {
 			typedName := inlineFragment.TypeCondition
 			if typedName == "" {
 				return
@@ -39,7 +38,7 @@ func init() {
 			)
 		})
 
-		observers.OnFragment(func(walker *Walker, fragment *ast.FragmentDefinition) {
+		observers.OnFragment(func(walker *Walker, fragment *syn.FragmentDefinition) {
 			typeName := fragment.TypeCondition
 			def := walker.Schema.Types[typeName]
 			if def != nil {

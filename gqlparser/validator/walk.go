@@ -4,58 +4,58 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 type Events struct {
-	operationVisitor []func(walker *Walker, operation *ast.OperationDefinition)
-	field            []func(walker *Walker, field *ast.Field)
-	fragment         []func(walker *Walker, fragment *ast.FragmentDefinition)
-	inlineFragment   []func(walker *Walker, inlineFragment *ast.InlineFragment)
-	fragmentSpread   []func(walker *Walker, fragmentSpread *ast.FragmentSpread)
-	directive        []func(walker *Walker, directive *ast.Directive)
-	directiveList    []func(walker *Walker, directives []*ast.Directive)
-	value            []func(walker *Walker, value *ast.Value)
-	variable         []func(walker *Walker, variable *ast.VariableDefinition)
+	operationVisitor []func(walker *Walker, operation *syn.OperationDefinition)
+	field            []func(walker *Walker, field *syn.Field)
+	fragment         []func(walker *Walker, fragment *syn.FragmentDefinition)
+	inlineFragment   []func(walker *Walker, inlineFragment *syn.InlineFragment)
+	fragmentSpread   []func(walker *Walker, fragmentSpread *syn.FragmentSpread)
+	directive        []func(walker *Walker, directive *syn.Directive)
+	directiveList    []func(walker *Walker, directives []*syn.Directive)
+	value            []func(walker *Walker, value *syn.Value)
+	variable         []func(walker *Walker, variable *syn.VariableDefinition)
 }
 
-func (o *Events) OnOperation(f func(walker *Walker, operation *ast.OperationDefinition)) {
+func (o *Events) OnOperation(f func(walker *Walker, operation *syn.OperationDefinition)) {
 	o.operationVisitor = append(o.operationVisitor, f)
 }
 
-func (o *Events) OnField(f func(walker *Walker, field *ast.Field)) {
+func (o *Events) OnField(f func(walker *Walker, field *syn.Field)) {
 	o.field = append(o.field, f)
 }
 
-func (o *Events) OnFragment(f func(walker *Walker, fragment *ast.FragmentDefinition)) {
+func (o *Events) OnFragment(f func(walker *Walker, fragment *syn.FragmentDefinition)) {
 	o.fragment = append(o.fragment, f)
 }
 
-func (o *Events) OnInlineFragment(f func(walker *Walker, inlineFragment *ast.InlineFragment)) {
+func (o *Events) OnInlineFragment(f func(walker *Walker, inlineFragment *syn.InlineFragment)) {
 	o.inlineFragment = append(o.inlineFragment, f)
 }
 
-func (o *Events) OnFragmentSpread(f func(walker *Walker, fragmentSpread *ast.FragmentSpread)) {
+func (o *Events) OnFragmentSpread(f func(walker *Walker, fragmentSpread *syn.FragmentSpread)) {
 	o.fragmentSpread = append(o.fragmentSpread, f)
 }
 
-func (o *Events) OnDirective(f func(walker *Walker, directive *ast.Directive)) {
+func (o *Events) OnDirective(f func(walker *Walker, directive *syn.Directive)) {
 	o.directive = append(o.directive, f)
 }
 
-func (o *Events) OnDirectiveList(f func(walker *Walker, directives []*ast.Directive)) {
+func (o *Events) OnDirectiveList(f func(walker *Walker, directives []*syn.Directive)) {
 	o.directiveList = append(o.directiveList, f)
 }
 
-func (o *Events) OnValue(f func(walker *Walker, value *ast.Value)) {
+func (o *Events) OnValue(f func(walker *Walker, value *syn.Value)) {
 	o.value = append(o.value, f)
 }
 
-func (o *Events) OnVariable(f func(walker *Walker, variable *ast.VariableDefinition)) {
+func (o *Events) OnVariable(f func(walker *Walker, variable *syn.VariableDefinition)) {
 	o.variable = append(o.variable, f)
 }
 
-func Walk(schema *ast.Schema, document *ast.QueryDocument, observers *Events) {
+func Walk(schema *syn.Schema, document *syn.QueryDocument, observers *Events) {
 	w := Walker{
 		Observers: observers,
 		Schema:    schema,
@@ -68,11 +68,11 @@ func Walk(schema *ast.Schema, document *ast.QueryDocument, observers *Events) {
 type Walker struct {
 	Context   context.Context
 	Observers *Events
-	Schema    *ast.Schema
-	Document  *ast.QueryDocument
+	Schema    *syn.Schema
+	Document  *syn.QueryDocument
 
 	validatedFragmentSpreads map[string]bool
-	CurrentOperation         *ast.OperationDefinition
+	CurrentOperation         *syn.OperationDefinition
 }
 
 func (w *Walker) walk() {
@@ -86,7 +86,7 @@ func (w *Walker) walk() {
 	}
 }
 
-func (w *Walker) walkOperation(operation *ast.OperationDefinition) {
+func (w *Walker) walkOperation(operation *syn.OperationDefinition) {
 	w.CurrentOperation = operation
 	for _, varDef := range operation.VariableDefinitions {
 		varDef.Definition = w.Schema.Types[varDef.Type.Name()]
@@ -99,25 +99,25 @@ func (w *Walker) walkOperation(operation *ast.OperationDefinition) {
 		}
 	}
 
-	var def *ast.Definition
-	var loc ast.DirectiveLocation
+	var def *syn.Definition
+	var loc syn.DirectiveLocation
 	switch operation.Operation {
-	case ast.Query, "":
+	case syn.Query, "":
 		def = w.Schema.Query
-		loc = ast.LocationQuery
-	case ast.Mutation:
+		loc = syn.LocationQuery
+	case syn.Mutation:
 		def = w.Schema.Mutation
-		loc = ast.LocationMutation
-	case ast.Subscription:
+		loc = syn.LocationMutation
+	case syn.Subscription:
 		def = w.Schema.Subscription
-		loc = ast.LocationSubscription
+		loc = syn.LocationSubscription
 	}
 
 	for _, varDef := range operation.VariableDefinitions {
 		if varDef.DefaultValue != nil {
 			w.walkValue(varDef.DefaultValue)
 		}
-		w.walkDirectives(varDef.Definition, varDef.Directives, ast.LocationVariableDefinition)
+		w.walkDirectives(varDef.Definition, varDef.Directives, syn.LocationVariableDefinition)
 	}
 
 	w.walkDirectives(def, operation.Directives, loc)
@@ -129,12 +129,12 @@ func (w *Walker) walkOperation(operation *ast.OperationDefinition) {
 	w.CurrentOperation = nil
 }
 
-func (w *Walker) walkFragment(it *ast.FragmentDefinition) {
+func (w *Walker) walkFragment(it *syn.FragmentDefinition) {
 	def := w.Schema.Types[it.TypeCondition]
 
 	it.Definition = def
 
-	w.walkDirectives(def, it.Directives, ast.LocationFragmentDefinition)
+	w.walkDirectives(def, it.Directives, syn.LocationFragmentDefinition)
 	w.walkSelectionSet(def, it.SelectionSet)
 
 	for _, v := range w.Observers.fragment {
@@ -142,7 +142,7 @@ func (w *Walker) walkFragment(it *ast.FragmentDefinition) {
 	}
 }
 
-func (w *Walker) walkDirectives(parentDef *ast.Definition, directives []*ast.Directive, location ast.DirectiveLocation) {
+func (w *Walker) walkDirectives(parentDef *syn.Definition, directives []*syn.Directive, location syn.DirectiveLocation) {
 	for _, dir := range directives {
 		def := w.Schema.Directives[dir.Name]
 		dir.Definition = def
@@ -150,7 +150,7 @@ func (w *Walker) walkDirectives(parentDef *ast.Definition, directives []*ast.Dir
 		dir.Location = location
 
 		for _, arg := range dir.Arguments {
-			var argDef *ast.ArgumentDefinition
+			var argDef *syn.ArgumentDefinition
 			if def != nil {
 				argDef = def.Arguments.ForName(arg.Name)
 			}
@@ -168,15 +168,15 @@ func (w *Walker) walkDirectives(parentDef *ast.Definition, directives []*ast.Dir
 	}
 }
 
-func (w *Walker) walkValue(value *ast.Value) {
-	if value.Kind == ast.Variable && w.CurrentOperation != nil {
+func (w *Walker) walkValue(value *syn.Value) {
+	if value.Kind == syn.Variable && w.CurrentOperation != nil {
 		value.VariableDefinition = w.CurrentOperation.VariableDefinitions.ForName(value.Raw)
 		if value.VariableDefinition != nil {
 			value.VariableDefinition.Used = true
 		}
 	}
 
-	if value.Kind == ast.ObjectValue {
+	if value.Kind == syn.ObjectValue {
 		for _, child := range value.Children {
 			if value.Definition != nil {
 				fieldDef := value.Definition.Fields.ForName(child.Name)
@@ -189,7 +189,7 @@ func (w *Walker) walkValue(value *ast.Value) {
 		}
 	}
 
-	if value.Kind == ast.ListValue {
+	if value.Kind == syn.ListValue {
 		for _, child := range value.Children {
 			if value.ExpectedType != nil && value.ExpectedType.Elem != nil {
 				child.Value.ExpectedType = value.ExpectedType.Elem
@@ -205,7 +205,7 @@ func (w *Walker) walkValue(value *ast.Value) {
 	}
 }
 
-func (w *Walker) walkArgument(argDef *ast.ArgumentDefinition, arg *ast.Argument) {
+func (w *Walker) walkArgument(argDef *syn.ArgumentDefinition, arg *syn.Argument) {
 	if argDef != nil {
 		arg.Value.ExpectedType = argDef.Type
 		arg.Value.Definition = w.Schema.Types[argDef.Type.Name()]
@@ -214,20 +214,20 @@ func (w *Walker) walkArgument(argDef *ast.ArgumentDefinition, arg *ast.Argument)
 	w.walkValue(arg.Value)
 }
 
-func (w *Walker) walkSelectionSet(parentDef *ast.Definition, it ast.SelectionSet) {
+func (w *Walker) walkSelectionSet(parentDef *syn.Definition, it syn.SelectionSet) {
 	for _, child := range it {
 		w.walkSelection(parentDef, child)
 	}
 }
 
-func (w *Walker) walkSelection(parentDef *ast.Definition, it ast.Selection) {
+func (w *Walker) walkSelection(parentDef *syn.Definition, it syn.Selection) {
 	switch it := it.(type) {
-	case *ast.Field:
-		var def *ast.FieldDefinition
+	case *syn.Field:
+		var def *syn.FieldDefinition
 		if it.Name == "__typename" {
-			def = &ast.FieldDefinition{
+			def = &syn.FieldDefinition{
 				Name: "__typename",
-				Type: ast.NamedType("String", nil),
+				Type: syn.NamedType("String", nil),
 			}
 		} else if parentDef != nil {
 			def = parentDef.Fields.ForName(it.Name)
@@ -236,13 +236,13 @@ func (w *Walker) walkSelection(parentDef *ast.Definition, it ast.Selection) {
 		it.Definition = def
 		it.ObjectDefinition = parentDef
 
-		var nextParentDef *ast.Definition
+		var nextParentDef *syn.Definition
 		if def != nil {
 			nextParentDef = w.Schema.Types[def.Type.Name()]
 		}
 
 		for _, arg := range it.Arguments {
-			var argDef *ast.ArgumentDefinition
+			var argDef *syn.ArgumentDefinition
 			if def != nil {
 				argDef = def.Arguments.ForName(arg.Name)
 			}
@@ -250,14 +250,14 @@ func (w *Walker) walkSelection(parentDef *ast.Definition, it ast.Selection) {
 			w.walkArgument(argDef, arg)
 		}
 
-		w.walkDirectives(nextParentDef, it.Directives, ast.LocationField)
+		w.walkDirectives(nextParentDef, it.Directives, syn.LocationField)
 		w.walkSelectionSet(nextParentDef, it.SelectionSet)
 
 		for _, v := range w.Observers.field {
 			v(w, it)
 		}
 
-	case *ast.InlineFragment:
+	case *syn.InlineFragment:
 		it.ObjectDefinition = parentDef
 
 		nextParentDef := parentDef
@@ -265,24 +265,24 @@ func (w *Walker) walkSelection(parentDef *ast.Definition, it ast.Selection) {
 			nextParentDef = w.Schema.Types[it.TypeCondition]
 		}
 
-		w.walkDirectives(nextParentDef, it.Directives, ast.LocationInlineFragment)
+		w.walkDirectives(nextParentDef, it.Directives, syn.LocationInlineFragment)
 		w.walkSelectionSet(nextParentDef, it.SelectionSet)
 
 		for _, v := range w.Observers.inlineFragment {
 			v(w, it)
 		}
 
-	case *ast.FragmentSpread:
+	case *syn.FragmentSpread:
 		def := w.Document.Fragments.ForName(it.Name)
 		it.Definition = def
 		it.ObjectDefinition = parentDef
 
-		var nextParentDef *ast.Definition
+		var nextParentDef *syn.Definition
 		if def != nil {
 			nextParentDef = w.Schema.Types[def.TypeCondition]
 		}
 
-		w.walkDirectives(nextParentDef, it.Directives, ast.LocationFragmentSpread)
+		w.walkDirectives(nextParentDef, it.Directives, syn.LocationFragmentSpread)
 
 		if def != nil && !w.validatedFragmentSpreads[def.Name] {
 			// prevent infinite recursion

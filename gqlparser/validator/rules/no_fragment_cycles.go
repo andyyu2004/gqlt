@@ -4,22 +4,21 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
 	AddRule("NoFragmentCycles", func(observers *Events, addError AddErrFunc) {
 		visitedFrags := make(map[string]bool)
 
-		observers.OnFragment(func(walker *Walker, fragment *ast.FragmentDefinition) {
-			var spreadPath []*ast.FragmentSpread
+		observers.OnFragment(func(walker *Walker, fragment *syn.FragmentDefinition) {
+			var spreadPath []*syn.FragmentSpread
 			spreadPathIndexByName := make(map[string]int)
 
-			var recursive func(fragment *ast.FragmentDefinition)
-			recursive = func(fragment *ast.FragmentDefinition) {
+			var recursive func(fragment *syn.FragmentDefinition)
+			recursive = func(fragment *syn.FragmentDefinition) {
 				if visitedFrags[fragment.Name] {
 					return
 				}
@@ -70,10 +69,10 @@ func init() {
 	})
 }
 
-func getFragmentSpreads(node ast.SelectionSet) []*ast.FragmentSpread {
-	var spreads []*ast.FragmentSpread
+func getFragmentSpreads(node syn.SelectionSet) []*syn.FragmentSpread {
+	var spreads []*syn.FragmentSpread
 
-	setsToVisit := []ast.SelectionSet{node}
+	setsToVisit := []syn.SelectionSet{node}
 
 	for len(setsToVisit) != 0 {
 		set := setsToVisit[len(setsToVisit)-1]
@@ -81,11 +80,11 @@ func getFragmentSpreads(node ast.SelectionSet) []*ast.FragmentSpread {
 
 		for _, selection := range set {
 			switch selection := selection.(type) {
-			case *ast.FragmentSpread:
+			case *syn.FragmentSpread:
 				spreads = append(spreads, selection)
-			case *ast.Field:
+			case *syn.Field:
 				setsToVisit = append(setsToVisit, selection.SelectionSet)
-			case *ast.InlineFragment:
+			case *syn.InlineFragment:
 				setsToVisit = append(setsToVisit, selection.SelectionSet)
 			}
 		}

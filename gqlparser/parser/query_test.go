@@ -8,6 +8,7 @@ import (
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
 	"github.com/andyyu2004/gqlt/gqlparser/parser/testrunner"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func TestQueryDocument(t *testing.T) {
@@ -17,11 +18,11 @@ func TestQueryDocument(t *testing.T) {
 			gqlErr := err.(*gqlerror.Error)
 			return testrunner.Spec{
 				Error: gqlErr,
-				AST:   ast.Dump(doc),
+				AST:   syn.Dump(doc),
 			}
 		}
 		return testrunner.Spec{
-			AST: ast.Dump(doc),
+			AST: syn.Dump(doc),
 		}
 	})
 }

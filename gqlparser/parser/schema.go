@@ -2,11 +2,12 @@ package parser
 
 import (
 	//nolint:revive
-	. "github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/lexer"
+	. "github.com/andyyu2004/gqlt/syn"
 )
 
-func ParseSchemas(inputs ...*Source) (*SchemaDocument, error) {
+func ParseSchemas(inputs ...*ast.Source) (*SchemaDocument, error) {
 	sd := &SchemaDocument{}
 	for _, input := range inputs {
 		inputAst, err := ParseSchema(input)
@@ -18,7 +19,7 @@ func ParseSchemas(inputs ...*Source) (*SchemaDocument, error) {
 	return sd, nil
 }
 
-func ParseSchema(source *Source) (*SchemaDocument, error) {
+func ParseSchema(source *ast.Source) (*SchemaDocument, error) {
 	p := New(lexer.New(source))
 	sd, err := p.parseSchemaDocument(), p.err
 	if err != nil {

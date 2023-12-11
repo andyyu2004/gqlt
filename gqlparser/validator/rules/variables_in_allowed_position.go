@@ -1,16 +1,15 @@
 package validator
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
 	AddRule("VariablesInAllowedPosition", func(observers *Events, addError AddErrFunc) {
-		observers.OnValue(func(walker *Walker, value *ast.Value) {
-			if value.Kind != ast.Variable || value.ExpectedType == nil || value.VariableDefinition == nil || walker.CurrentOperation == nil {
+		observers.OnValue(func(walker *Walker, value *syn.Value) {
+			if value.Kind != syn.Variable || value.ExpectedType == nil || value.VariableDefinition == nil || walker.CurrentOperation == nil {
 				return
 			}
 
@@ -18,7 +17,7 @@ func init() {
 
 			// todo: move me into walk
 			// If there is a default non nullable types can be null
-			if value.VariableDefinition.DefaultValue != nil && value.VariableDefinition.DefaultValue.Kind != ast.NullValue {
+			if value.VariableDefinition.DefaultValue != nil && value.VariableDefinition.DefaultValue.Kind != syn.NullValue {
 				if value.ExpectedType.NonNull {
 					tmp.NonNull = false
 				}

@@ -1,15 +1,14 @@
 package validator
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
 	AddRule("NoUnusedVariables", func(observers *Events, addError AddErrFunc) {
-		observers.OnOperation(func(walker *Walker, operation *ast.OperationDefinition) {
+		observers.OnOperation(func(walker *Walker, operation *syn.OperationDefinition) {
 			for _, varDef := range operation.VariableDefinitions {
 				if varDef.Used {
 					continue

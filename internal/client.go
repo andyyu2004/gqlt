@@ -10,7 +10,7 @@ import (
 	"net/http/httptest"
 	"strings"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/syn"
 	"github.com/graph-gophers/graphql-go"
 )
 
@@ -101,7 +101,7 @@ type GraphqlErrors []GraphqlError
 
 type GraphqlError struct {
 	Message string   `json:"message"`
-	Path    ast.Path `json:"path,omitempty"`
+	Path    syn.Path `json:"path,omitempty"`
 }
 
 func (e GraphqlErrors) Error() string {

@@ -8,7 +8,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/parser"
 	"github.com/andyyu2004/gqlt/syn"
 	"github.com/andyyu2004/memosa/lib"
@@ -304,13 +303,13 @@ type typename string
 
 type ty struct {
 	Name        typename
-	Kind        ast.DefinitionKind
+	Kind        syn.DefinitionKind
 	InputFields map[string]field
 	Fields      map[string]field
 }
 
 type tyref struct {
-	Kind   ast.DefinitionKind
+	Kind   syn.DefinitionKind
 	Name   typename
 	OfType *tyref
 }
@@ -350,7 +349,7 @@ func (e *Executor) prepareSchema(ctx context.Context) error {
 					Name typename
 				}
 				Types []struct {
-					Kind        ast.DefinitionKind
+					Kind        syn.DefinitionKind
 					Name        typename
 					Fields      []Field
 					InputFields []Field

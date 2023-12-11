@@ -5,7 +5,6 @@ package lex
 import (
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/lexer"
-	"github.com/andyyu2004/gqlt/gqlparser/parser"
 )
 
 type Lexer struct {
@@ -21,8 +20,6 @@ func (l *Lexer) ReadToken() (lexer.Token, error) {
 
 	return tok, nil
 }
-
-var _ parser.Lexer = new(Lexer)
 
 func New(src *ast.Source) (Lexer, error) {
 	// Read all the tokens eagerly to save us error handling on `ReadToken` later.

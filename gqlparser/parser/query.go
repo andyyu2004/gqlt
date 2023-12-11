@@ -1,13 +1,14 @@
 package parser
 
 import (
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 
 	//nolint:revive
-	. "github.com/andyyu2004/gqlt/gqlparser/ast"
+	. "github.com/andyyu2004/gqlt/syn"
 )
 
-func ParseQuery(source *Source) (*QueryDocument, error) {
+func ParseQuery(source *ast.Source) (*QueryDocument, error) {
 	p := New(lexer.New(source))
 	return p.parseQueryDocument(), p.err
 }

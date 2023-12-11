@@ -6,12 +6,13 @@ import (
 	"strings"
 
 	//nolint:revive
-	. "github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
 	"github.com/andyyu2004/gqlt/gqlparser/parser"
+	. "github.com/andyyu2004/gqlt/syn"
 )
 
-func LoadSchema(inputs ...*Source) (*Schema, error) {
+func LoadSchema(inputs ...*ast.Source) (*Schema, error) {
 	sd, err := parser.ParseSchemas(inputs...)
 	if err != nil {
 		return nil, gqlerror.WrapIfUnwrapped(err)
@@ -504,7 +505,7 @@ func isCovariant(schema *Schema, required *Type, actual *Type) bool {
 	return isCovariant(schema, required.Elem, actual.Elem)
 }
 
-func validateName(pos *Position, name string) *gqlerror.Error {
+func validateName(pos *ast.Position, name string) *gqlerror.Error {
 	if strings.HasPrefix(name, "__") {
 		return gqlerror.ErrorPosf(pos, `Name "%s" must not begin with "__", which is reserved by GraphQL introspection.`, name)
 	}

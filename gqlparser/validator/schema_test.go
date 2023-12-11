@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
+	"github.com/andyyu2004/gqlt/syn"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/parser/testrunner"
@@ -18,7 +19,7 @@ func TestLoadSchema(t *testing.T) {
 
 		boolDef := s.Types["Boolean"]
 		require.Equal(t, "Boolean", boolDef.Name)
-		require.Equal(t, ast.Scalar, boolDef.Kind)
+		require.Equal(t, syn.Scalar, boolDef.Kind)
 		require.Equal(t, "The `Boolean` scalar type represents `true` or `false`.", boolDef.Description)
 
 		deferDef := s.Directives["defer"]

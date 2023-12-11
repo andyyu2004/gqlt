@@ -13,6 +13,7 @@ import (
 	"github.com/andyyu2004/gqlt/gqlparser"
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
+	"github.com/andyyu2004/gqlt/syn"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 )
@@ -43,7 +44,7 @@ func TestValidation(t *testing.T) {
 		d.pattern = regexp.MustCompile("^" + d.Rule + "$")
 	}
 
-	schemas := make([]*ast.Schema, 0, len(rawSchemas))
+	schemas := make([]*syn.Schema, 0, len(rawSchemas))
 	for i, schema := range rawSchemas {
 		schema, err := gqlparser.LoadSchema(&ast.Source{Input: schema, Name: fmt.Sprintf("schemas.yml[%d]", i)})
 		if err != nil {
@@ -63,7 +64,7 @@ func TestValidation(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func runSpec(t *testing.T, schemas []*ast.Schema, deviations []*Deviation, filename string) {
+func runSpec(t *testing.T, schemas []*syn.Schema, deviations []*Deviation, filename string) {
 	ruleName := strings.TrimSuffix(filepath.Base(filename), ".spec.yml")
 
 	var specs []Spec
@@ -86,7 +87,7 @@ func runSpec(t *testing.T, schemas []*ast.Schema, deviations []*Deviation, filen
 				}
 
 				// idx := spec.Schema
-				var schema *ast.Schema
+				var schema *syn.Schema
 				if idx, err := strconv.Atoi(spec.Schema); err != nil {
 					var gqlErr error
 					schema, gqlErr = gqlparser.LoadSchema(&ast.Source{Input: spec.Schema, Name: spec.Name})

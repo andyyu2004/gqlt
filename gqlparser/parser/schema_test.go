@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
+	"github.com/andyyu2004/gqlt/syn"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
@@ -16,11 +17,11 @@ func TestSchemaDocument(t *testing.T) {
 		if err != nil {
 			return testrunner.Spec{
 				Error: err.(*gqlerror.Error),
-				AST:   ast.Dump(doc),
+				AST:   syn.Dump(doc),
 			}
 		}
 		return testrunner.Spec{
-			AST: ast.Dump(doc),
+			AST: syn.Dump(doc),
 		}
 	})
 }

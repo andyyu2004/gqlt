@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/syn"
 
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
@@ -72,14 +73,14 @@ func init() {
 			comparedFragmentPairs: pairSet{data: make(map[string]map[string]bool)},
 		}
 
-		observers.OnOperation(func(walker *Walker, operation *ast.OperationDefinition) {
+		observers.OnOperation(func(walker *Walker, operation *syn.OperationDefinition) {
 			m.walker = walker
 			conflicts := m.findConflictsWithinSelectionSet(operation.SelectionSet)
 			for _, conflict := range conflicts {
 				conflict.addFieldsConflictMessage(addError)
 			}
 		})
-		observers.OnField(func(walker *Walker, field *ast.Field) {
+		observers.OnField(func(walker *Walker, field *syn.Field) {
 			if walker.CurrentOperation == nil {
 				// When checking both Operation and Fragment, errors are duplicated when processing FragmentDefinition referenced from Operation
 				return
@@ -90,14 +91,14 @@ func init() {
 				conflict.addFieldsConflictMessage(addError)
 			}
 		})
-		observers.OnInlineFragment(func(walker *Walker, inlineFragment *ast.InlineFragment) {
+		observers.OnInlineFragment(func(walker *Walker, inlineFragment *syn.InlineFragment) {
 			m.walker = walker
 			conflicts := m.findConflictsWithinSelectionSet(inlineFragment.SelectionSet)
 			for _, conflict := range conflicts {
 				conflict.addFieldsConflictMessage(addError)
 			}
 		})
-		observers.OnFragment(func(walker *Walker, fragment *ast.FragmentDefinition) {
+		observers.OnFragment(func(walker *Walker, fragment *syn.FragmentDefinition) {
 			m.walker = walker
 			conflicts := m.findConflictsWithinSelectionSet(fragment.SelectionSet)
 			for _, conflict := range conflicts {
@@ -111,8 +112,8 @@ type pairSet struct {
 	data map[string]map[string]bool
 }
 
-func (pairSet *pairSet) Add(a *ast.FragmentSpread, b *ast.FragmentSpread, areMutuallyExclusive bool) {
-	add := func(a *ast.FragmentSpread, b *ast.FragmentSpread) {
+func (pairSet *pairSet) Add(a *syn.FragmentSpread, b *syn.FragmentSpread, areMutuallyExclusive bool) {
+	add := func(a *syn.FragmentSpread, b *syn.FragmentSpread) {
 		m := pairSet.data[a.Name]
 		if m == nil {
 			m = make(map[string]bool)
@@ -124,7 +125,7 @@ func (pairSet *pairSet) Add(a *ast.FragmentSpread, b *ast.FragmentSpread, areMut
 	add(b, a)
 }
 
-func (pairSet *pairSet) Has(a *ast.FragmentSpread, b *ast.FragmentSpread, areMutuallyExclusive bool) bool {
+func (pairSet *pairSet) Has(a *syn.FragmentSpread, b *syn.FragmentSpread, areMutuallyExclusive bool) bool {
 	am, ok := pairSet.data[a.Name]
 	if !ok {
 		return false
@@ -145,17 +146,17 @@ func (pairSet *pairSet) Has(a *ast.FragmentSpread, b *ast.FragmentSpread, areMut
 }
 
 type sequentialFieldsMap struct {
-	// We can't use map[string][]*ast.Field. because map is not stable...
+	// We can't use map[string][]*syn.Field. because map is not stable...
 	seq  []string
-	data map[string][]*ast.Field
+	data map[string][]*syn.Field
 }
 
 type fieldIterateEntry struct {
 	ResponseName string
-	Fields       []*ast.Field
+	Fields       []*syn.Field
 }
 
-func (m *sequentialFieldsMap) Push(responseName string, field *ast.Field) {
+func (m *sequentialFieldsMap) Push(responseName string, field *syn.Field) {
 	fields, ok := m.data[responseName]
 	if !ok {
 		m.seq = append(m.seq, responseName)
@@ -164,13 +165,13 @@ func (m *sequentialFieldsMap) Push(responseName string, field *ast.Field) {
 	m.data[responseName] = fields
 }
 
-func (m *sequentialFieldsMap) Get(responseName string) ([]*ast.Field, bool) {
+func (m *sequentialFieldsMap) Get(responseName string) ([]*syn.Field, bool) {
 	fields, ok := m.data[responseName]
 	return fields, ok
 }
 
-func (m *sequentialFieldsMap) Iterator() [][]*ast.Field {
-	fieldsList := make([][]*ast.Field, 0, len(m.seq))
+func (m *sequentialFieldsMap) Iterator() [][]*syn.Field {
+	fieldsList := make([][]*syn.Field, 0, len(m.seq))
 	for _, responseName := range m.seq {
 		fields := m.data[responseName]
 		fieldsList = append(fieldsList, fields)
@@ -239,7 +240,7 @@ type overlappingFieldsCanBeMergedManager struct {
 	comparedFragments map[string]bool
 }
 
-func (m *overlappingFieldsCanBeMergedManager) findConflictsWithinSelectionSet(selectionSet ast.SelectionSet) []*ConflictMessage {
+func (m *overlappingFieldsCanBeMergedManager) findConflictsWithinSelectionSet(selectionSet syn.SelectionSet) []*ConflictMessage {
 	if len(selectionSet) == 0 {
 		return nil
 	}
@@ -270,7 +271,7 @@ func (m *overlappingFieldsCanBeMergedManager) findConflictsWithinSelectionSet(se
 	return conflicts.Conflicts
 }
 
-func (m *overlappingFieldsCanBeMergedManager) collectConflictsBetweenFieldsAndFragment(conflicts *conflictMessageContainer, areMutuallyExclusive bool, fieldsMap *sequentialFieldsMap, fragmentSpread *ast.FragmentSpread) {
+func (m *overlappingFieldsCanBeMergedManager) collectConflictsBetweenFieldsAndFragment(conflicts *conflictMessageContainer, areMutuallyExclusive bool, fieldsMap *sequentialFieldsMap, fragmentSpread *syn.FragmentSpread) {
 	if m.comparedFragments[fragmentSpread.Name] {
 		return
 	}
@@ -302,9 +303,9 @@ func (m *overlappingFieldsCanBeMergedManager) collectConflictsBetweenFieldsAndFr
 	}
 }
 
-func (m *overlappingFieldsCanBeMergedManager) collectConflictsBetweenFragments(conflicts *conflictMessageContainer, areMutuallyExclusive bool, fragmentSpreadA *ast.FragmentSpread, fragmentSpreadB *ast.FragmentSpread) {
-	var check func(fragmentSpreadA *ast.FragmentSpread, fragmentSpreadB *ast.FragmentSpread)
-	check = func(fragmentSpreadA *ast.FragmentSpread, fragmentSpreadB *ast.FragmentSpread) {
+func (m *overlappingFieldsCanBeMergedManager) collectConflictsBetweenFragments(conflicts *conflictMessageContainer, areMutuallyExclusive bool, fragmentSpreadA *syn.FragmentSpread, fragmentSpreadB *syn.FragmentSpread) {
+	var check func(fragmentSpreadA *syn.FragmentSpread, fragmentSpreadB *syn.FragmentSpread)
+	check = func(fragmentSpreadA *syn.FragmentSpread, fragmentSpreadB *syn.FragmentSpread) {
 		if fragmentSpreadA.Name == fragmentSpreadB.Name {
 			return
 		}
@@ -343,7 +344,7 @@ func (m *overlappingFieldsCanBeMergedManager) collectConflictsBetweenFragments(c
 	check(fragmentSpreadA, fragmentSpreadB)
 }
 
-func (m *overlappingFieldsCanBeMergedManager) findConflictsBetweenSubSelectionSets(areMutuallyExclusive bool, selectionSetA ast.SelectionSet, selectionSetB ast.SelectionSet) *conflictMessageContainer {
+func (m *overlappingFieldsCanBeMergedManager) findConflictsBetweenSubSelectionSets(areMutuallyExclusive bool, selectionSetA syn.SelectionSet, selectionSetB syn.SelectionSet) *conflictMessageContainer {
 	var conflicts conflictMessageContainer
 
 	fieldsMapA, fragmentSpreadsA := getFieldsAndFragmentNames(selectionSetA)
@@ -412,7 +413,7 @@ func (m *overlappingFieldsCanBeMergedManager) collectConflictsBetween(conflicts 
 	}
 }
 
-func (m *overlappingFieldsCanBeMergedManager) findConflict(parentFieldsAreMutuallyExclusive bool, fieldA *ast.Field, fieldB *ast.Field) *ConflictMessage {
+func (m *overlappingFieldsCanBeMergedManager) findConflict(parentFieldsAreMutuallyExclusive bool, fieldA *syn.Field, fieldB *syn.Field) *ConflictMessage {
 	if fieldA.ObjectDefinition == nil || fieldB.ObjectDefinition == nil {
 		return nil
 	}
@@ -420,8 +421,8 @@ func (m *overlappingFieldsCanBeMergedManager) findConflict(parentFieldsAreMutual
 	areMutuallyExclusive := parentFieldsAreMutuallyExclusive
 	if !areMutuallyExclusive {
 		tmp := fieldA.ObjectDefinition.Name != fieldB.ObjectDefinition.Name
-		tmp = tmp && fieldA.ObjectDefinition.Kind == ast.Object
-		tmp = tmp && fieldB.ObjectDefinition.Kind == ast.Object
+		tmp = tmp && fieldA.ObjectDefinition.Kind == syn.Object
+		tmp = tmp && fieldB.ObjectDefinition.Kind == syn.Object
 		tmp = tmp && fieldA.Definition != nil && fieldB.Definition != nil
 		areMutuallyExclusive = tmp
 	}
@@ -473,7 +474,7 @@ func (m *overlappingFieldsCanBeMergedManager) findConflict(parentFieldsAreMutual
 	}
 }
 
-func sameArguments(args1 []*ast.Argument, args2 []*ast.Argument) bool {
+func sameArguments(args1 []*syn.Argument, args2 []*syn.Argument) bool {
 	if len(args1) != len(args2) {
 		return false
 	}
@@ -492,7 +493,7 @@ func sameArguments(args1 []*ast.Argument, args2 []*ast.Argument) bool {
 	return true
 }
 
-func sameValue(value1 *ast.Value, value2 *ast.Value) bool {
+func sameValue(value1 *syn.Value, value2 *syn.Value) bool {
 	if value1.Kind != value2.Kind {
 		return false
 	}
@@ -502,7 +503,7 @@ func sameValue(value1 *ast.Value, value2 *ast.Value) bool {
 	return true
 }
 
-func doTypesConflict(walker *Walker, type1 *ast.Type, type2 *ast.Type) bool {
+func doTypesConflict(walker *Walker, type1 *syn.Type, type2 *syn.Type) bool {
 	if type1.Elem != nil {
 		if type2.Elem != nil {
 			return doTypesConflict(walker, type1.Elem, type2.Elem)
@@ -521,34 +522,34 @@ func doTypesConflict(walker *Walker, type1 *ast.Type, type2 *ast.Type) bool {
 
 	t1 := walker.Schema.Types[type1.NamedType]
 	t2 := walker.Schema.Types[type2.NamedType]
-	if (t1.Kind == ast.Scalar || t1.Kind == ast.Enum) && (t2.Kind == ast.Scalar || t2.Kind == ast.Enum) {
+	if (t1.Kind == syn.Scalar || t1.Kind == syn.Enum) && (t2.Kind == syn.Scalar || t2.Kind == syn.Enum) {
 		return t1.Name != t2.Name
 	}
 
 	return false
 }
 
-func getFieldsAndFragmentNames(selectionSet ast.SelectionSet) (*sequentialFieldsMap, []*ast.FragmentSpread) {
+func getFieldsAndFragmentNames(selectionSet syn.SelectionSet) (*sequentialFieldsMap, []*syn.FragmentSpread) {
 	fieldsMap := sequentialFieldsMap{
-		data: make(map[string][]*ast.Field),
+		data: make(map[string][]*syn.Field),
 	}
-	var fragmentSpreads []*ast.FragmentSpread
+	var fragmentSpreads []*syn.FragmentSpread
 
-	var walk func(selectionSet ast.SelectionSet)
-	walk = func(selectionSet ast.SelectionSet) {
+	var walk func(selectionSet syn.SelectionSet)
+	walk = func(selectionSet syn.SelectionSet) {
 		for _, selection := range selectionSet {
 			switch selection := selection.(type) {
-			case *ast.Field:
+			case *syn.Field:
 				responseName := selection.Name
 				if selection.Alias != "" {
 					responseName = selection.Alias
 				}
 				fieldsMap.Push(responseName, selection)
 
-			case *ast.InlineFragment:
+			case *syn.InlineFragment:
 				walk(selection.SelectionSet)
 
-			case *ast.FragmentSpread:
+			case *syn.FragmentSpread:
 				fragmentSpreads = append(fragmentSpreads, selection)
 			}
 		}

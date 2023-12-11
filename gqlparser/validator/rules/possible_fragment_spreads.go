@@ -1,24 +1,23 @@
 package validator
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-
 	//nolint:revive // Validator rules each use dot imports for convenience.
 	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func init() {
 	AddRule("PossibleFragmentSpreads", func(observers *Events, addError AddErrFunc) {
-		validate := func(walker *Walker, parentDef *ast.Definition, fragmentName string, emitError func()) {
+		validate := func(walker *Walker, parentDef *syn.Definition, fragmentName string, emitError func()) {
 			if parentDef == nil {
 				return
 			}
 
-			var parentDefs []*ast.Definition
+			var parentDefs []*syn.Definition
 			switch parentDef.Kind {
-			case ast.Object:
-				parentDefs = []*ast.Definition{parentDef}
-			case ast.Interface, ast.Union:
+			case syn.Object:
+				parentDefs = []*syn.Definition{parentDef}
+			case syn.Interface, syn.Union:
 				parentDefs = walker.Schema.GetPossibleTypes(parentDef)
 			default:
 				return
@@ -45,7 +44,7 @@ func init() {
 			emitError()
 		}
 
-		observers.OnInlineFragment(func(walker *Walker, inlineFragment *ast.InlineFragment) {
+		observers.OnInlineFragment(func(walker *Walker, inlineFragment *syn.InlineFragment) {
 			validate(walker, inlineFragment.ObjectDefinition, inlineFragment.TypeCondition, func() {
 				addError(
 					Message(`Fragment cannot be spread here as objects of type "%s" can never be of type "%s".`, inlineFragment.ObjectDefinition.Name, inlineFragment.TypeCondition),
@@ -54,7 +53,7 @@ func init() {
 			})
 		})
 
-		observers.OnFragmentSpread(func(walker *Walker, fragmentSpread *ast.FragmentSpread) {
+		observers.OnFragmentSpread(func(walker *Walker, fragmentSpread *syn.FragmentSpread) {
 			if fragmentSpread.Definition == nil {
 				return
 			}

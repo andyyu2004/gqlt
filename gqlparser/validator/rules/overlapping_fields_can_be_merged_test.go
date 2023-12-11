@@ -4,25 +4,26 @@ import (
 	"testing"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/syn"
 )
 
 func Test_sameArguments(t *testing.T) {
 	tests := map[string]struct {
-		args   func() (args1, args2 []*ast.Argument)
+		args   func() (args1, args2 []*syn.Argument)
 		result bool
 	}{
 		"both argument lists empty": {
-			args: func() (args1 []*ast.Argument, args2 []*ast.Argument) {
+			args: func() (args1 []*syn.Argument, args2 []*syn.Argument) {
 				return nil, nil
 			},
 			result: true,
 		},
 		"args 1 empty, args 2 not": {
-			args: func() (args1 []*ast.Argument, args2 []*ast.Argument) {
-				return nil, []*ast.Argument{
+			args: func() (args1 []*syn.Argument, args2 []*syn.Argument) {
+				return nil, []*syn.Argument{
 					{
 						Name:     "thing",
-						Value:    &ast.Value{Raw: "a thing"},
+						Value:    &syn.Value{Raw: "a thing"},
 						Position: &ast.Position{},
 					},
 				}
@@ -30,11 +31,11 @@ func Test_sameArguments(t *testing.T) {
 			result: false,
 		},
 		"args 2 empty, args 1 not": {
-			args: func() (args1 []*ast.Argument, args2 []*ast.Argument) {
-				return []*ast.Argument{
+			args: func() (args1 []*syn.Argument, args2 []*syn.Argument) {
+				return []*syn.Argument{
 					{
 						Name:     "thing",
-						Value:    &ast.Value{Raw: "a thing"},
+						Value:    &syn.Value{Raw: "a thing"},
 						Position: &ast.Position{},
 					},
 				}, nil
@@ -42,18 +43,18 @@ func Test_sameArguments(t *testing.T) {
 			result: false,
 		},
 		"args 1 mismatches args 2 names": {
-			args: func() (args1 []*ast.Argument, args2 []*ast.Argument) {
-				return []*ast.Argument{
+			args: func() (args1 []*syn.Argument, args2 []*syn.Argument) {
+				return []*syn.Argument{
 						{
 							Name:     "thing1",
-							Value:    &ast.Value{Raw: "1 thing"},
+							Value:    &syn.Value{Raw: "1 thing"},
 							Position: &ast.Position{},
 						},
 					},
-					[]*ast.Argument{
+					[]*syn.Argument{
 						{
 							Name:     "thing2",
-							Value:    &ast.Value{Raw: "2 thing"},
+							Value:    &syn.Value{Raw: "2 thing"},
 							Position: &ast.Position{},
 						},
 					}
@@ -61,18 +62,18 @@ func Test_sameArguments(t *testing.T) {
 			result: false,
 		},
 		"args 1 mismatches args 2 values": {
-			args: func() (args1 []*ast.Argument, args2 []*ast.Argument) {
-				return []*ast.Argument{
+			args: func() (args1 []*syn.Argument, args2 []*syn.Argument) {
+				return []*syn.Argument{
 						{
 							Name:     "thing1",
-							Value:    &ast.Value{Raw: "1 thing"},
+							Value:    &syn.Value{Raw: "1 thing"},
 							Position: &ast.Position{},
 						},
 					},
-					[]*ast.Argument{
+					[]*syn.Argument{
 						{
 							Name:     "thing1",
-							Value:    &ast.Value{Raw: "2 thing"},
+							Value:    &syn.Value{Raw: "2 thing"},
 							Position: &ast.Position{},
 						},
 					}
@@ -80,18 +81,18 @@ func Test_sameArguments(t *testing.T) {
 			result: false,
 		},
 		"args 1 matches args 2 names and values": {
-			args: func() (args1 []*ast.Argument, args2 []*ast.Argument) {
-				return []*ast.Argument{
+			args: func() (args1 []*syn.Argument, args2 []*syn.Argument) {
+				return []*syn.Argument{
 						{
 							Name:     "thing1",
-							Value:    &ast.Value{Raw: "1 thing"},
+							Value:    &syn.Value{Raw: "1 thing"},
 							Position: &ast.Position{},
 						},
 					},
-					[]*ast.Argument{
+					[]*syn.Argument{
 						{
 							Name:     "thing1",
-							Value:    &ast.Value{Raw: "1 thing"},
+							Value:    &syn.Value{Raw: "1 thing"},
 							Position: &ast.Position{},
 						},
 					}
@@ -99,28 +100,28 @@ func Test_sameArguments(t *testing.T) {
 			result: true,
 		},
 		"args 1 matches args 2 names and values where multiple exist in various orders": {
-			args: func() (args1 []*ast.Argument, args2 []*ast.Argument) {
-				return []*ast.Argument{
+			args: func() (args1 []*syn.Argument, args2 []*syn.Argument) {
+				return []*syn.Argument{
 						{
 							Name:     "thing1",
-							Value:    &ast.Value{Raw: "1 thing"},
+							Value:    &syn.Value{Raw: "1 thing"},
 							Position: &ast.Position{},
 						},
 						{
 							Name:     "thing2",
-							Value:    &ast.Value{Raw: "2 thing"},
+							Value:    &syn.Value{Raw: "2 thing"},
 							Position: &ast.Position{},
 						},
 					},
-					[]*ast.Argument{
+					[]*syn.Argument{
 						{
 							Name:     "thing1",
-							Value:    &ast.Value{Raw: "1 thing"},
+							Value:    &syn.Value{Raw: "1 thing"},
 							Position: &ast.Position{},
 						},
 						{
 							Name:     "thing2",
-							Value:    &ast.Value{Raw: "2 thing"},
+							Value:    &syn.Value{Raw: "2 thing"},
 							Position: &ast.Position{},
 						},
 					}
