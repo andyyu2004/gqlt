@@ -58,10 +58,6 @@ func bindListPat(binder binder, listPat *syn.ListPat, values []any) error {
 	for i, pat := range listPat.Pats {
 		rest, ok := pat.(*syn.RestPat)
 		if ok {
-			if i != len(listPat.Pats)-1 {
-				return fmt.Errorf("rest pattern must be the last in list pattern")
-			}
-
 			if err := bindPat(binder, rest.Pat, values[i:]); err != nil {
 				return err
 			}
@@ -81,18 +77,12 @@ func bindListPat(binder binder, listPat *syn.ListPat, values []any) error {
 }
 
 func bindObjectPat(binder binder, objPat *syn.ObjectPat, values map[string]any) error {
-	var i int
 	for entry := objPat.Fields.Oldest(); entry != nil; entry = entry.Next() {
-		i++
 		name := entry.Key
 		pat := entry.Value
 
 		rest, ok := pat.(*syn.RestPat)
 		if ok {
-			if i != objPat.Fields.Len() {
-				return fmt.Errorf("rest pattern must be the last in object pattern")
-			}
-
 			if err := bindPat(binder, rest.Pat, values); err != nil {
 				return err
 			}

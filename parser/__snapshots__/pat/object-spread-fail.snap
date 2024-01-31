@@ -1,0 +1,7 @@
+
+[TestParser/pat/object-spread-fail - 1]
+let { ...xs, x } = {};
+#        ^^ rest pattern must be last
+
+
+---
