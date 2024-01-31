@@ -237,19 +237,20 @@ func (p *parser) ParseFragmentDefinition() *FragmentDefinition {
 		Position: onKw.Position,
 	}
 
-	def.TypeCondition = p.parseName()
+	def.TypeCondition = p.parseTypeName()
 	def.Directives = p.parseDirectives(false)
 	def.SelectionSet = p.parseRequiredSelectionSet()
 	return &def
 }
 
-func (p *parser) parseFragmentName() lexer.Token {
+func (p *parser) parseFragmentName() lex.Token {
 	if p.peek().Value == "on" {
 		p.unexpectedError()
-		return lexer.Token{}
+		return lex.Token{}
 	}
 
-	return p.parseName()
+	// treat a fragment name as a type name (for highlighting, maybe there's another more appropriate token type?)
+	return p.parseTypeName()
 }
 
 func (p *parser) parseValueLiteral(isConst bool) *Value {
@@ -385,4 +386,14 @@ func (p *parser) parseTypeReference() *Type {
 func (p *parser) parseName() lexer.Token {
 	token, _ := p.expect(lexer.Name)
 	return token
+}
+
+// same as `parseName` except hints that the name refers to a type (for highlights)
+func (p *parser) parseTypeName() lex.Token {
+	token := p.parseName()
+	return lex.Token{
+		Kind:     lex.TypeName,
+		Value:    token.Value,
+		Position: token.Position,
+	}
 }

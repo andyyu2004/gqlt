@@ -3,6 +3,8 @@
 package lex
 
 import (
+	"strconv"
+
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 )
@@ -136,6 +138,10 @@ type Token struct {
 	ast.Position
 }
 
+func (t Token) Dump() string {
+	return strconv.Quote(t.Value)
+}
+
 func (Token) IsChild() {}
 
 type TokenKind lexer.Type
@@ -188,6 +194,8 @@ const (
 	Equals2
 	BangEqual
 	Not
+
+	TypeName
 )
 
 func (t TokenKind) Name() string {

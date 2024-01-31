@@ -2,7 +2,7 @@ package syn
 
 import (
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/gqlparser/lexer"
+	"github.com/andyyu2004/gqlt/lex"
 )
 
 type FragmentSpread struct {
@@ -30,11 +30,11 @@ type InlineFragment struct {
 }
 
 type FragmentDefinition struct {
-	Name lexer.Token
+	Name lex.Token
 	// Note: fragment variable definitions are experimental and may be changed
 	// or removed in the future.
 	VariableDefinition VariableDefinitionList
-	TypeCondition      lexer.Token
+	TypeCondition      lex.Token
 	Directives         DirectiveList
 	SelectionSet       SelectionSet
 
