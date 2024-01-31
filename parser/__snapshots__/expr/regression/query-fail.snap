@@ -1,0 +1,7 @@
+
+[TestParser/expr/regression/query-fail - 1]
+query {}
+#^^^^^ expected at least one definition, found }
+
+
+---

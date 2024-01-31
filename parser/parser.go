@@ -150,7 +150,7 @@ func (p *Parser) parseStmt() syn.Stmt {
 		return p.parseFragment()
 	default:
 		expr := p.parseExpr()
-		if expr == nil {
+		if isNil(expr) {
 			return nil
 		}
 
@@ -194,7 +194,7 @@ func (p *Parser) parseSetStmt() *syn.SetStmt {
 	p.eat(lex.Equals)
 
 	expr := p.parseExpr()
-	if expr == nil {
+	if isNil(expr) {
 		return nil
 	}
 
@@ -204,7 +204,7 @@ func (p *Parser) parseSetStmt() *syn.SetStmt {
 func (p *Parser) parseAssertStmt() *syn.AssertStmt {
 	assert := p.bump(lex.Assert)
 	expr := p.parseExpr()
-	if expr == nil {
+	if isNil(expr) {
 		return nil
 	}
 
@@ -214,7 +214,7 @@ func (p *Parser) parseAssertStmt() *syn.AssertStmt {
 func (p *Parser) parseLetStmt() *syn.LetStmt {
 	let := p.bump(lex.Let)
 	pat := p.parsePat(patOpts{})
-	if pat == nil {
+	if isNil(pat) {
 		return nil
 	}
 
@@ -224,7 +224,7 @@ func (p *Parser) parseLetStmt() *syn.LetStmt {
 	}
 
 	expr := p.parseExpr()
-	if expr == nil {
+	if isNil(expr) {
 		return nil
 	}
 
@@ -257,7 +257,7 @@ func (p *Parser) parsePat(opts patOpts) syn.Pat {
 		}
 
 		pat := p.parsePat(patOpts{allowImplicitWildcard: true})
-		if pat == nil {
+		if isNil(pat) {
 			return nil
 		}
 
@@ -291,7 +291,7 @@ func (p *Parser) parseListPat() *syn.ListPat {
 	pats := []syn.Pat{}
 	for !p.at(lex.EOF) && !p.at(lex.BracketR) {
 		pat := p.parsePat(patOpts{allowSpread: true})
-		if pat == nil {
+		if isNil(pat) {
 			return nil
 		}
 
@@ -338,7 +338,7 @@ func (p *Parser) parseObjectPat() *syn.ObjectPat {
 			pat = &syn.NamePat{Name: name}
 			if p.eat_(lex.Colon) {
 				pat = p.parsePat(patOpts{})
-				if pat == nil {
+				if isNil(pat) {
 					return nil
 				}
 			}
@@ -383,7 +383,7 @@ func (p *Parser) parseExprBP(minBp bp) syn.Expr {
 	if tok, bp := p.prefixOp(); tok != nil {
 		p.bump(tok.Kind)
 		expr := p.parseExprBP(bp)
-		if expr == nil {
+		if isNil(expr) {
 			return nil
 		}
 
@@ -392,7 +392,7 @@ func (p *Parser) parseExprBP(minBp bp) syn.Expr {
 		lhs = p.parseAtomExpr()
 	}
 
-	if lhs == nil {
+	if isNil(lhs) {
 		return nil
 	}
 
@@ -432,7 +432,7 @@ func (p *Parser) parseExprBP(minBp bp) syn.Expr {
 		}
 
 		rhs := p.parseExprBP(bp)
-		if rhs == nil {
+		if isNil(rhs) {
 			return nil
 		}
 
