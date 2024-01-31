@@ -19,17 +19,17 @@ func init() {
 
 			var recursive func(fragment *syn.FragmentDefinition)
 			recursive = func(fragment *syn.FragmentDefinition) {
-				if visitedFrags[fragment.Name] {
+				if visitedFrags[fragment.Name.Value] {
 					return
 				}
 
-				visitedFrags[fragment.Name] = true
+				visitedFrags[fragment.Name.Value] = true
 
 				spreadNodes := getFragmentSpreads(fragment.SelectionSet)
 				if len(spreadNodes) == 0 {
 					return
 				}
-				spreadPathIndexByName[fragment.Name] = len(spreadPath)
+				spreadPathIndexByName[fragment.Name.Value] = len(spreadPath)
 
 				for _, spreadNode := range spreadNodes {
 					spreadName := spreadNode.Name
@@ -61,7 +61,7 @@ func init() {
 					spreadPath = spreadPath[:len(spreadPath)-1]
 				}
 
-				delete(spreadPathIndexByName, fragment.Name)
+				delete(spreadPathIndexByName, fragment.Name.Value)
 			}
 
 			recursive(fragment)

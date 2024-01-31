@@ -68,8 +68,8 @@ func retrieveTopFieldNames(selectionSet syn.SelectionSet) []*topField {
 					return
 				}
 				fragment := selection.Definition.Name
-				if !inFragmentRecursive[fragment] {
-					inFragmentRecursive[fragment] = true
+				if !inFragmentRecursive[fragment.Value] {
+					inFragmentRecursive[fragment.Value] = true
 					walk(selection.Definition.SelectionSet)
 				}
 			}

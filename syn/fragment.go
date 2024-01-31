@@ -1,6 +1,9 @@
 package syn
 
-import "github.com/andyyu2004/gqlt/gqlparser/ast"
+import (
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/lexer"
+)
 
 type FragmentSpread struct {
 	Name       string
@@ -27,7 +30,7 @@ type InlineFragment struct {
 }
 
 type FragmentDefinition struct {
-	Name string
+	Name lexer.Token
 	// Note: fragment variable definitions are experimental and may be changed
 	// or removed in the future.
 	VariableDefinition VariableDefinitionList

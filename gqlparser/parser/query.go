@@ -116,7 +116,7 @@ func (p *parser) parseVariableDefinition() *VariableDefinition {
 
 func (p *parser) parseVariable() string {
 	p.expect(lexer.Dollar)
-	return p.parseName()
+	return p.parseName().Value
 }
 
 func (p *parser) parseOptionalSelectionSet() SelectionSet {
@@ -153,10 +153,10 @@ func (p *parser) parseField() *Field {
 	var field Field
 	field.Position = p.peekPos()
 	field.Comment = p.comment
-	field.Alias = p.parseName()
+	field.Alias = p.parseName().Value
 
 	if p.skip(lexer.Colon) {
-		field.Name = p.parseName()
+		field.Name = p.parseName().Value
 	} else {
 		field.Name = field.Alias
 	}
@@ -183,7 +183,7 @@ func (p *parser) parseArgument(isConst bool) *Argument {
 	arg := Argument{}
 	arg.Position = p.peekPos()
 	arg.Comment = p.comment
-	arg.Name = p.parseName()
+	arg.Name = p.parseName().Value
 	p.expect(lexer.Colon)
 
 	arg.Value = p.parseValueLiteral(isConst)
@@ -197,7 +197,7 @@ func (p *parser) parseFragment() Selection {
 		return &FragmentSpread{
 			Position:   p.peekPos(),
 			Comment:    comment,
-			Name:       p.parseFragmentName(),
+			Name:       p.parseFragmentName().Value,
 			Directives: p.parseDirectives(false),
 		}
 	}
@@ -208,7 +208,7 @@ func (p *parser) parseFragment() Selection {
 	if p.peek().Value == "on" {
 		p.next() // "on"
 
-		def.TypeCondition = p.parseName()
+		def.TypeCondition = p.parseName().Value
 	}
 
 	def.Directives = p.parseDirectives(false)
@@ -232,16 +232,16 @@ func (p *parser) ParseFragmentDefinition() *FragmentDefinition {
 
 	p.expectKeyword("on")
 
-	def.TypeCondition = p.parseName()
+	def.TypeCondition = p.parseName().Value
 	def.Directives = p.parseDirectives(false)
 	def.SelectionSet = p.parseRequiredSelectionSet()
 	return &def
 }
 
-func (p *parser) parseFragmentName() string {
+func (p *parser) parseFragmentName() lexer.Token {
 	if p.peek().Value == "on" {
 		p.unexpectedError()
-		return ""
+		return lexer.Token{}
 	}
 
 	return p.parseName()
@@ -329,7 +329,7 @@ func (p *parser) parseObjectField(isConst bool) *ChildValue {
 	field := ChildValue{}
 	field.Position = p.peekPos()
 	field.Comment = p.comment
-	field.Name = p.parseName()
+	field.Name = p.parseName().Value
 
 	p.expect(lexer.Colon)
 
@@ -354,7 +354,7 @@ func (p *parser) parseDirective(isConst bool) *Directive {
 
 	return &Directive{
 		Position:  p.peekPos(),
-		Name:      p.parseName(),
+		Name:      p.parseName().Value,
 		Arguments: p.parseArguments(isConst),
 	}
 }
@@ -368,7 +368,7 @@ func (p *parser) parseTypeReference() *Type {
 		p.expect(lexer.BracketR)
 	} else {
 		typ.Position = p.peekPos()
-		typ.NamedType = p.parseName()
+		typ.NamedType = p.parseName().Value
 	}
 
 	if p.skip(lexer.Bang) {
@@ -377,8 +377,7 @@ func (p *parser) parseTypeReference() *Type {
 	return &typ
 }
 
-func (p *parser) parseName() string {
+func (p *parser) parseName() lexer.Token {
 	token, _ := p.expect(lexer.Name)
-
-	return token.Value
+	return token
 }

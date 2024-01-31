@@ -11,13 +11,13 @@ func init() {
 		seenFragments := map[string]bool{}
 
 		observers.OnFragment(func(walker *Walker, fragment *syn.FragmentDefinition) {
-			if seenFragments[fragment.Name] {
+			if seenFragments[fragment.Name.Value] {
 				addError(
-					Message(`There can be only one fragment named "%s".`, fragment.Name),
+					Message(`There can be only one fragment named "%s".`, fragment.Name.Value),
 					At(fragment.Position),
 				)
 			}
-			seenFragments[fragment.Name] = true
+			seenFragments[fragment.Name.Value] = true
 		})
 	})
 }

@@ -597,7 +597,7 @@ func (f *formatter) FormatFragmentDefinitionList(lists syn.FragmentDefinitionLis
 func (f *formatter) FormatFragmentDefinition(def *syn.FragmentDefinition) {
 	f.FormatCommentGroup(def.Comment)
 
-	f.WriteWord("fragment").WriteWord(def.Name)
+	f.WriteWord("fragment").WriteWord(def.Name.Value)
 	f.FormatVariableDefinitionList(def.VariableDefinition)
 	f.WriteWord("on").WriteWord(def.TypeCondition)
 	f.FormatDirectiveList(def.Directives)

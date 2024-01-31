@@ -26,7 +26,7 @@ func TestQueryDocMethods(t *testing.T) {
 	})
 
 	t.Run("GetFragment", func(t *testing.T) {
-		require.EqualValues(t, "Frag", doc.Fragments.ForName("Frag").Name)
+		require.EqualValues(t, "Frag", doc.Fragments.ForName("Frag").Name.Value)
 		require.Nil(t, doc.Fragments.ForName("Alice"))
 	})
 }

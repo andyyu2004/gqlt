@@ -61,7 +61,7 @@ type FragmentDefinitionList []*FragmentDefinition
 
 func (l FragmentDefinitionList) ForName(name string) *FragmentDefinition {
 	for _, it := range l {
-		if it.Name == name {
+		if it.Name.Value == name {
 			return it
 		}
 	}

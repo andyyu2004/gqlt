@@ -41,7 +41,7 @@ func (f *FragmentDefinition) UnmarshalJSON(b []byte) error {
 	for k := range tmp {
 		switch k {
 		case "Name":
-			err := json.Unmarshal(tmp[k], &f.Name)
+			err := json.Unmarshal(tmp[k], &f.Name.Value)
 			if err != nil {
 				return err
 			}

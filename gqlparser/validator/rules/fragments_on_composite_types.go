@@ -29,7 +29,7 @@ func init() {
 				return
 			}
 
-			message := fmt.Sprintf(`Fragment "%s" cannot condition on non composite type "%s".`, fragment.Name, fragment.TypeCondition)
+			message := fmt.Sprintf(`Fragment "%s" cannot condition on non composite type "%s".`, fragment.Name.Value, fragment.TypeCondition)
 
 			addError(
 				Message(message),

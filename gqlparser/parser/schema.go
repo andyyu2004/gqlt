@@ -139,7 +139,7 @@ func (p *parser) parseOperationTypeDefinition() *OperationTypeDefinition {
 	op.Comment = p.comment
 	op.Operation, _ = p.parseOperationType()
 	p.expect(lexer.Colon)
-	op.Type = p.parseName()
+	op.Type = p.parseName().Value
 	return &op
 }
 
@@ -152,7 +152,7 @@ func (p *parser) parseScalarTypeDefinition(description descriptionWithComment) *
 	def.Description = description.text
 	def.AfterDescriptionComment = comment
 	def.Kind = Scalar
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Directives = p.parseDirectives(true)
 	return &def
 }
@@ -166,7 +166,7 @@ func (p *parser) parseObjectTypeDefinition(description descriptionWithComment) *
 	def.BeforeDescriptionComment = description.comment
 	def.Description = description.text
 	def.AfterDescriptionComment = comment
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Interfaces = p.parseImplementsInterfaces()
 	def.Directives = p.parseDirectives(true)
 	def.Fields, def.EndOfDefinitionComment = p.parseFieldsDefinition()
@@ -180,9 +180,9 @@ func (p *parser) parseImplementsInterfaces() []string {
 		// optional leading ampersand
 		p.skip(lexer.Amp)
 
-		types = append(types, p.parseName())
+		types = append(types, p.parseName().Value)
 		for p.skip(lexer.Amp) && p.err == nil {
-			types = append(types, p.parseName())
+			types = append(types, p.parseName().Value)
 		}
 	}
 	return types
@@ -208,7 +208,7 @@ func (p *parser) parseFieldDefinition() *FieldDefinition {
 
 	p.peek() // peek to set p.comment
 	def.AfterDescriptionComment = p.comment
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Arguments = p.parseArgumentDefs()
 	p.expect(lexer.Colon)
 	def.Type = p.parseTypeReference()
@@ -237,7 +237,7 @@ func (p *parser) parseArgumentDef() *ArgumentDefinition {
 
 	p.peek() // peek to set p.comment
 	def.AfterDescriptionComment = p.comment
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	p.expect(lexer.Colon)
 	def.Type = p.parseTypeReference()
 	if p.skip(lexer.Equals) {
@@ -259,7 +259,7 @@ func (p *parser) parseInputValueDef() *FieldDefinition {
 
 	p.peek() // peek to set p.comment
 	def.AfterDescriptionComment = p.comment
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	p.expect(lexer.Colon)
 	def.Type = p.parseTypeReference()
 	if p.skip(lexer.Equals) {
@@ -278,7 +278,7 @@ func (p *parser) parseInterfaceTypeDefinition(description descriptionWithComment
 	def.BeforeDescriptionComment = description.comment
 	def.Description = description.text
 	def.AfterDescriptionComment = comment
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Interfaces = p.parseImplementsInterfaces()
 	def.Directives = p.parseDirectives(true)
 	def.Fields, def.EndOfDefinitionComment = p.parseFieldsDefinition()
@@ -294,7 +294,7 @@ func (p *parser) parseUnionTypeDefinition(description descriptionWithComment) *D
 	def.BeforeDescriptionComment = description.comment
 	def.Description = description.text
 	def.AfterDescriptionComment = comment
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Directives = p.parseDirectives(true)
 	def.Types = p.parseUnionMemberTypes()
 	return &def
@@ -306,9 +306,9 @@ func (p *parser) parseUnionMemberTypes() []string {
 		// optional leading pipe
 		p.skip(lexer.Pipe)
 
-		types = append(types, p.parseName())
+		types = append(types, p.parseName().Value)
 		for p.skip(lexer.Pipe) && p.err == nil {
-			types = append(types, p.parseName())
+			types = append(types, p.parseName().Value)
 		}
 	}
 	return types
@@ -323,7 +323,7 @@ func (p *parser) parseEnumTypeDefinition(description descriptionWithComment) *De
 	def.BeforeDescriptionComment = description.comment
 	def.Description = description.text
 	def.AfterDescriptionComment = comment
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Directives = p.parseDirectives(true)
 	def.EnumValues, def.EndOfDefinitionComment = p.parseEnumValuesDefinition()
 	return &def
@@ -349,7 +349,7 @@ func (p *parser) parseEnumValueDefinition() *EnumValueDefinition {
 	p.peek() // peek to set p.comment
 	def.AfterDescriptionComment = p.comment
 
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Directives = p.parseDirectives(true)
 
 	return &def
@@ -364,7 +364,7 @@ func (p *parser) parseInputObjectTypeDefinition(description descriptionWithComme
 	def.BeforeDescriptionComment = description.comment
 	def.Description = description.text
 	def.AfterDescriptionComment = comment
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Directives = p.parseDirectives(true)
 	def.Fields, def.EndOfDefinitionComment = p.parseInputFieldsDefinition()
 	return &def
@@ -424,7 +424,7 @@ func (p *parser) parseScalarTypeExtension(comment *CommentGroup) *Definition {
 	def.Position = p.peekPos()
 	def.AfterDescriptionComment = comment
 	def.Kind = Scalar
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Directives = p.parseDirectives(true)
 	if len(def.Directives) == 0 {
 		p.unexpectedError()
@@ -439,7 +439,7 @@ func (p *parser) parseObjectTypeExtension(comment *CommentGroup) *Definition {
 	def.Position = p.peekPos()
 	def.AfterDescriptionComment = comment
 	def.Kind = Object
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Interfaces = p.parseImplementsInterfaces()
 	def.Directives = p.parseDirectives(true)
 	def.Fields, def.EndOfDefinitionComment = p.parseFieldsDefinition()
@@ -456,7 +456,7 @@ func (p *parser) parseInterfaceTypeExtension(comment *CommentGroup) *Definition 
 	def.Position = p.peekPos()
 	def.AfterDescriptionComment = comment
 	def.Kind = Interface
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Directives = p.parseDirectives(true)
 	def.Fields, def.EndOfDefinitionComment = p.parseFieldsDefinition()
 	if len(def.Directives) == 0 && len(def.Fields) == 0 {
@@ -472,7 +472,7 @@ func (p *parser) parseUnionTypeExtension(comment *CommentGroup) *Definition {
 	def.Position = p.peekPos()
 	def.AfterDescriptionComment = comment
 	def.Kind = Union
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Directives = p.parseDirectives(true)
 	def.Types = p.parseUnionMemberTypes()
 
@@ -489,7 +489,7 @@ func (p *parser) parseEnumTypeExtension(comment *CommentGroup) *Definition {
 	def.Position = p.peekPos()
 	def.AfterDescriptionComment = comment
 	def.Kind = Enum
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Directives = p.parseDirectives(true)
 	def.EnumValues, def.EndOfDefinitionComment = p.parseEnumValuesDefinition()
 	if len(def.Directives) == 0 && len(def.EnumValues) == 0 {
@@ -505,7 +505,7 @@ func (p *parser) parseInputObjectTypeExtension(comment *CommentGroup) *Definitio
 	def.Position = p.peekPos()
 	def.AfterDescriptionComment = comment
 	def.Kind = InputObject
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Directives = p.parseDirectives(false)
 	def.Fields, def.EndOfDefinitionComment = p.parseInputFieldsDefinition()
 	if len(def.Directives) == 0 && len(def.Fields) == 0 {
@@ -523,7 +523,7 @@ func (p *parser) parseDirectiveDefinition(description descriptionWithComment) *D
 	def.BeforeDescriptionComment = description.comment
 	def.Description = description.text
 	def.AfterDescriptionComment = comment
-	def.Name = p.parseName()
+	def.Name = p.parseName().Value
 	def.Arguments = p.parseArgumentDefs()
 
 	if peek := p.peek(); peek.Kind == lexer.Name && peek.Value == "repeatable" {
