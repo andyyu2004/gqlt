@@ -65,7 +65,7 @@ func (p *parser) consumeComment() (*syn.Comment, bool) {
 	p.next()
 	return &syn.Comment{
 		Value:    tok.Value,
-		Position: &tok.Pos,
+		Position: &tok.Position,
 	}, true
 }
 
@@ -97,7 +97,7 @@ func (p *parser) peekPos() *ast.Position {
 	}
 
 	peek := p.peek()
-	return &peek.Pos
+	return &peek.Position
 }
 
 func (p *parser) peek() lexer.Token {
@@ -120,7 +120,7 @@ func (p *parser) error(tok lexer.Token, format string, args ...interface{}) {
 	if p.err != nil {
 		return
 	}
-	p.err = gqlerror.ErrorLocf(tok.Pos.Src.Name, tok.Pos.Line, tok.Pos.Column, format, args...)
+	p.err = gqlerror.ErrorLocf(tok.Position.Src.Name, tok.Position.Line, tok.Position.Column, format, args...)
 }
 
 func (p *parser) next() lexer.Token {

@@ -3,6 +3,7 @@ package parser
 import (
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/lexer"
+	"github.com/andyyu2004/gqlt/lex"
 
 	//nolint:revive
 	. "github.com/andyyu2004/gqlt/syn"
@@ -43,17 +44,18 @@ func (p *parser) parseQueryDocument() *QueryDocument {
 func (p *parser) ParseOperationDefinition() *OperationDefinition {
 	if p.peek().Kind == lexer.BraceL {
 		return &OperationDefinition{
-			Position:     p.peekPos(),
-			Comment:      p.comment,
-			Operation:    Query,
-			SelectionSet: p.parseRequiredSelectionSet(),
+			Position:       p.peekPos(),
+			Comment:        p.comment,
+			Operation:      Query,
+			OperationToken: nil,
+			SelectionSet:   p.parseRequiredSelectionSet(),
 		}
 	}
 
 	var od OperationDefinition
 	od.Position = p.peekPos()
 	od.Comment = p.comment
-	od.Operation = p.parseOperationType()
+	od.Operation, od.OperationToken = p.parseOperationType()
 
 	if p.peek().Kind == lexer.Name {
 		od.Name = p.next().Value
@@ -66,18 +68,22 @@ func (p *parser) ParseOperationDefinition() *OperationDefinition {
 	return &od
 }
 
-func (p *parser) parseOperationType() Operation {
+func (p *parser) parseOperationType() (Operation, *lex.Token) {
 	tok := p.next()
+	token := lex.Token{Value: tok.Value, Position: tok.Position}
 	switch tok.Value {
 	case "query":
-		return Query
+		token.Kind = lex.Query
+		return Query, &token
 	case "mutation":
-		return Mutation
+		token.Kind = lex.Mutation
+		return Mutation, &token
 	case "subscription":
-		return Subscription
+		token.Kind = lex.Subscription
+		return Subscription, &token
 	}
 	p.unexpectedToken(tok)
-	return ""
+	return "", nil
 }
 
 func (p *parser) parseVariableDefinitions() VariableDefinitionList {
@@ -215,6 +221,11 @@ func (p *parser) ParseFragmentDefinition() *FragmentDefinition {
 	def.Position = p.peekPos()
 	def.Comment = p.comment
 	p.expectKeyword("fragment")
+	def.FragmentKw = lex.Token{
+		Kind:     lex.Fragment,
+		Value:    p.peek().Value,
+		Position: p.peek().Position,
+	}
 
 	def.Name = p.parseFragmentName()
 	def.VariableDefinition = p.parseVariableDefinitions()
@@ -251,7 +262,7 @@ func (p *parser) parseValueLiteral(isConst bool) *Value {
 			p.unexpectedError()
 			return nil
 		}
-		return &Value{Position: &token.Pos, Comment: p.comment, Raw: p.parseVariable(), Kind: Variable}
+		return &Value{Position: &token.Position, Comment: p.comment, Raw: p.parseVariable(), Kind: Variable}
 	case lexer.Minus:
 		p.next()
 		tok := p.peek()
@@ -289,7 +300,7 @@ func (p *parser) parseValueLiteral(isConst bool) *Value {
 
 	p.next()
 
-	return &Value{Position: &token.Pos, Comment: p.comment, Raw: raw, Kind: kind}
+	return &Value{Position: &token.Position, Comment: p.comment, Raw: raw, Kind: kind}
 }
 
 func (p *parser) parseList(isConst bool) *Value {

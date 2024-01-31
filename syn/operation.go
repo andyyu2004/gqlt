@@ -4,6 +4,7 @@ import (
 	"io"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/lex"
 )
 
 type Operation string
@@ -16,6 +17,7 @@ const (
 
 type OperationDefinition struct {
 	Operation           Operation
+	OperationToken      *lex.Token `dump:"-"`
 	Name                string
 	VariableDefinitions VariableDefinitionList
 	Directives          DirectiveList

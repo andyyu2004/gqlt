@@ -42,7 +42,7 @@ func (ide *IDE) Highlight(path string) Highlights {
 		case syn.TokenEvent:
 			var kind protocol.SemanticTokenType
 			switch event.Token.Kind {
-			case lex.Let, lex.False, lex.True, lex.Null, lex.Assert, lex.Matches:
+			case lex.Let, lex.False, lex.True, lex.Null, lex.Assert, lex.Matches, lex.Fragment, lex.Query, lex.Mutation, lex.Set:
 				kind = protocol.SemanticTokenTypeKeyword
 			case lex.Name:
 				scope, ok := scopes.Peek()

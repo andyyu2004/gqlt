@@ -125,7 +125,7 @@ func convertToken(tok [n]lexer.Token) (Token, int) {
 		}
 
 	}
-	return Token{Kind: kind, Value: tok[0].Value, Position: tok[0].Pos}, len
+	return Token{Kind: kind, Value: tok[0].Value, Position: tok[0].Position}, len
 }
 
 type Token struct {
@@ -174,6 +174,7 @@ const (
 	Let
 	Query
 	Mutation
+	Subscription
 	Fragment
 	True
 	False
@@ -196,6 +197,8 @@ func (t TokenKind) Name() string {
 		return "query"
 	case Mutation:
 		return "mutation"
+	case Subscription:
+		return "subscription"
 	case Fragment:
 		return "fragment"
 	case True:
@@ -231,6 +234,8 @@ func (t TokenKind) String() string {
 		return "query"
 	case Mutation:
 		return "mutation"
+	case Subscription:
+		return "subscription"
 	case Fragment:
 		return "fragment"
 	case True:

@@ -38,6 +38,7 @@ type FragmentDefinition struct {
 	// Require validation
 	Definition *Definition
 
-	Position *ast.Position `dump:"-"`
-	Comment  *CommentGroup
+	FragmentKw Token         `dump:"-"`
+	Position   *ast.Position `dump:"-"`
+	Comment    *CommentGroup
 }

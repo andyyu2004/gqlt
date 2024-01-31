@@ -48,4 +48,15 @@ func TestHighlight(t *testing.T) {
 1:8..1:9: operator
 1:10..1:12: number
 `))
+
+	testHighlight(t, "queries", `let x = query { foo }
+mutation { bar }`, expect.Expect(`1:1..1:4: keyword
+1:5..1:6: variable
+1:7..1:8: operator
+1:9..1:14: keyword
+2:1..2:9: keyword
+`))
+
+	testHighlight(t, "fragments", `fragment Foo on Bar { baz }`, expect.Expect(`1:10..1:13: keyword
+`))
 }

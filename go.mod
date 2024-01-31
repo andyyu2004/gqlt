@@ -5,7 +5,7 @@ go 1.21.4
 require (
 	github.com/agnivade/levenshtein v1.1.1
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
-	github.com/andyyu2004/expect-test v0.6.5
+	github.com/andyyu2004/expect-test v0.6.7
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/gkampitakis/go-snaps v0.4.12
 	github.com/graph-gophers/graphql-go v1.5.0

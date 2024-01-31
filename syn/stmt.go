@@ -42,7 +42,7 @@ var _ Stmt = FragmentStmt{}
 
 func (stmt FragmentStmt) Children() Children {
 	return Children{
-		lex.Token{Kind: lex.Fragment, Value: stmt.RawFragment, Position: stmt.Position},
+		stmt.Fragment.FragmentKw,
 	}
 }
 

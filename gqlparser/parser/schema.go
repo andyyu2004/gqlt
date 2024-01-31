@@ -137,7 +137,7 @@ func (p *parser) parseOperationTypeDefinition() *OperationTypeDefinition {
 	var op OperationTypeDefinition
 	op.Position = p.peekPos()
 	op.Comment = p.comment
-	op.Operation = p.parseOperationType()
+	op.Operation, _ = p.parseOperationType()
 	p.expect(lexer.Colon)
 	op.Type = p.parseName()
 	return &op

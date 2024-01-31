@@ -1,22 +1,18 @@
 package syn
 
 import (
+	"fmt"
 	"io"
 	"strings"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 	"github.com/andyyu2004/gqlt/iterator"
 	"github.com/andyyu2004/gqlt/lex"
 	"github.com/andyyu2004/gqlt/memosa/lib"
 	"github.com/andyyu2004/gqlt/memosa/stack"
 	"github.com/andyyu2004/gqlt/slice"
 )
-
-// func Dump(node Node) string {
-// 	var buf bytes.Buffer
-// 	node.Dump(&buf)
-// 	return buf.String()
-// }
 
 type Token = lex.Token
 
@@ -100,8 +96,11 @@ func Traverse(node Node) iterator.Iterator[Event] {
 				return EnterEvent{child}, true
 			case lex.Token:
 				return TokenEvent{child}, true
+			case lexer.Token:
+				// it's safe to cast lexer.Token to lex.Token because `lex.Token` is a strict superset of `lexer.Token`
+				return TokenEvent{Token{Kind: lex.TokenKind(child.Kind), Value: child.Value, Position: child.Position}}, true
 			default:
-				panic("unreachable")
+				panic(fmt.Sprintf("unexpected child type %T", child))
 			}
 		}
 

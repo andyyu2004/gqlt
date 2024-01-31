@@ -45,9 +45,11 @@ type OperationExpr struct {
 var _ Expr = OperationExpr{}
 
 func (expr OperationExpr) Children() Children {
-	return Children{
-		lex.Token{Kind: lex.Query, Value: expr.Query, Position: expr.Position},
+	children := Children{}
+	if expr.Operation.OperationToken != nil {
+		children = append(children, *expr.Operation.OperationToken)
 	}
+	return children
 }
 
 func (OperationExpr) isExpr() {}
