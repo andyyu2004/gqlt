@@ -130,7 +130,7 @@ func (w *Walker) walkOperation(operation *syn.OperationDefinition) {
 }
 
 func (w *Walker) walkFragment(it *syn.FragmentDefinition) {
-	def := w.Schema.Types[it.TypeCondition]
+	def := w.Schema.Types[it.TypeCondition.Value]
 
 	it.Definition = def
 
@@ -279,7 +279,7 @@ func (w *Walker) walkSelection(parentDef *syn.Definition, it syn.Selection) {
 
 		var nextParentDef *syn.Definition
 		if def != nil {
-			nextParentDef = w.Schema.Types[def.TypeCondition]
+			nextParentDef = w.Schema.Types[def.TypeCondition.Value]
 		}
 
 		w.walkDirectives(nextParentDef, it.Directives, syn.LocationFragmentSpread)

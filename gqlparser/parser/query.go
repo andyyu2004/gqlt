@@ -220,19 +220,24 @@ func (p *parser) ParseFragmentDefinition() *FragmentDefinition {
 	var def FragmentDefinition
 	def.Position = p.peekPos()
 	def.Comment = p.comment
-	p.expectKeyword("fragment")
 	def.FragmentKw = lex.Token{
 		Kind:     lex.Fragment,
 		Value:    p.peek().Value,
 		Position: p.peek().Position,
 	}
+	p.expectKeyword("fragment")
 
 	def.Name = p.parseFragmentName()
 	def.VariableDefinition = p.parseVariableDefinitions()
 
-	p.expectKeyword("on")
+	onKw, _ := p.expectKeyword("on")
+	def.OnKw = lex.Token{
+		Kind:     lex.On,
+		Value:    onKw.Value,
+		Position: onKw.Position,
+	}
 
-	def.TypeCondition = p.parseName().Value
+	def.TypeCondition = p.parseName()
 	def.Directives = p.parseDirectives(false)
 	def.SelectionSet = p.parseRequiredSelectionSet()
 	return &def

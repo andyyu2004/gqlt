@@ -25,11 +25,11 @@ func init() {
 		})
 
 		observers.OnFragment(func(walker *Walker, fragment *syn.FragmentDefinition) {
-			if fragment.Definition == nil || fragment.TypeCondition == "" || fragment.Definition.IsCompositeType() {
+			if fragment.Definition == nil || fragment.TypeCondition.Value == "" || fragment.Definition.IsCompositeType() {
 				return
 			}
 
-			message := fmt.Sprintf(`Fragment "%s" cannot condition on non composite type "%s".`, fragment.Name.Value, fragment.TypeCondition)
+			message := fmt.Sprintf(`Fragment "%s" cannot condition on non composite type "%s".`, fragment.Name.Value, fragment.TypeCondition.Value)
 
 			addError(
 				Message(message),

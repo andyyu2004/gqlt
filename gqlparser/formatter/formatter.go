@@ -599,7 +599,7 @@ func (f *formatter) FormatFragmentDefinition(def *syn.FragmentDefinition) {
 
 	f.WriteWord("fragment").WriteWord(def.Name.Value)
 	f.FormatVariableDefinitionList(def.VariableDefinition)
-	f.WriteWord("on").WriteWord(def.TypeCondition)
+	f.WriteWord("on").WriteWord(def.TypeCondition.Value)
 	f.FormatDirectiveList(def.Directives)
 
 	if len(def.SelectionSet) != 0 {

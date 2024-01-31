@@ -96,6 +96,8 @@ func convertToken(tok [n]lexer.Token) (Token, int) {
 			kind = Mutation
 		case "fragment":
 			kind = Fragment
+		case "on":
+			kind = On
 		case "true":
 			kind = True
 		case "false":
@@ -176,6 +178,7 @@ const (
 	Mutation
 	Subscription
 	Fragment
+	On
 	True
 	False
 	Null
@@ -201,6 +204,8 @@ func (t TokenKind) Name() string {
 		return "subscription"
 	case Fragment:
 		return "fragment"
+	case On:
+		return "on"
 	case True:
 		return "true"
 	case False:
@@ -238,6 +243,8 @@ func (t TokenKind) String() string {
 		return "subscription"
 	case Fragment:
 		return "fragment"
+	case On:
+		return "on"
 	case True:
 		return "true"
 	case False:

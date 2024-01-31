@@ -57,6 +57,9 @@ mutation { bar }`, expect.Expect(`1:1..1:4: keyword
 2:1..2:9: keyword
 `))
 
-	testHighlight(t, "fragments", `fragment Foo on Bar { baz }`, expect.Expect(`1:10..1:13: keyword
+	testHighlight(t, "fragments", `fragment Foo on Bar { baz }`, expect.Expect(`1:1..1:9: keyword
+1:10..1:13: variable
+1:14..1:16: keyword
+1:17..1:20: variable
 `))
 }

@@ -34,7 +34,7 @@ type FragmentDefinition struct {
 	// Note: fragment variable definitions are experimental and may be changed
 	// or removed in the future.
 	VariableDefinition VariableDefinitionList
-	TypeCondition      string
+	TypeCondition      lexer.Token
 	Directives         DirectiveList
 	SelectionSet       SelectionSet
 
@@ -42,6 +42,7 @@ type FragmentDefinition struct {
 	Definition *Definition
 
 	FragmentKw Token         `dump:"-"`
+	OnKw       Token         `dump:"-"`
 	Position   *ast.Position `dump:"-"`
 	Comment    *CommentGroup
 }
