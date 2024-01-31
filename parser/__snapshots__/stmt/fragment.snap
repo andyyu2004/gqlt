@@ -1,0 +1,12 @@
+
+[TestParser/stmt/fragment - 1]
+fragment Foo on Bar {
+    id
+    name
+    foo
+    bar {
+        baz
+    }
+};
+
+---

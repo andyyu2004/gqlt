@@ -78,10 +78,22 @@ type executionContext struct {
 type scope struct {
 	parent *scope
 	vars   map[string]any
+	// defined fragments that can be referenced by queries
+	// map from fragment name to raw fragment string
+	fragments map[string]string
 }
 
 func (s *scope) bind(name string, val any) {
 	s.vars[name] = val
+}
+
+func (s *scope) LookupFragment(name string) (string, bool) {
+	frag, ok := s.fragments[name]
+	if !ok && s.parent != nil {
+		return s.parent.LookupFragment(name)
+	}
+
+	return frag, ok
 }
 
 func (s *scope) Lookup(name string) (any, bool) {
@@ -203,8 +215,9 @@ func (e *Executor) RunFile(ctx context.Context, file syn.File) error {
 
 	ecx := &executionContext{
 		scope: &scope{
-			parent: builtinScope,
-			vars:   map[string]any{},
+			parent:    builtinScope,
+			vars:      map[string]any{},
+			fragments: map[string]string{},
 		},
 	}
 

@@ -146,6 +146,8 @@ func (p *Parser) parseStmt() syn.Stmt {
 		return p.parseAssertStmt()
 	case lex.Set:
 		return p.parseSetStmt()
+	case lex.Fragment:
+		return p.parseFragment()
 	default:
 		expr := p.parseExpr()
 		if expr == nil {
@@ -153,6 +155,31 @@ func (p *Parser) parseStmt() syn.Stmt {
 		}
 
 		return &syn.ExprStmt{Position: expr.Pos(), Expr: expr}
+	}
+}
+
+func (p *Parser) parseFragment() *syn.FragmentStmt {
+	parser := parser.New(&p.lexer)
+	startPos := p.lexer.Peek()
+	fragment := parser.ParseFragmentDefinition()
+	if err := parser.Err(); err != nil {
+		// we can make this conversion as this is the only error type returned by parser
+		// (excluding lexer errors which we have already handled)
+		err := err.(*gqlerror.Error)
+		p.errors = append(p.errors, Error{
+			Position: startPos.Pos(),
+			Message:  err.Message,
+		})
+		return nil
+	}
+
+	endTok := p.lexer.Peek()
+	rawFragment := strings.TrimRight(endTok.Src.Input[startPos.Start:endTok.Start], "\n")
+
+	return &syn.FragmentStmt{
+		Position:    startPos.Merge(endTok),
+		RawFragment: rawFragment,
+		Fragment:    fragment,
 	}
 }
 

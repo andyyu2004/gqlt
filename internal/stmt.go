@@ -14,6 +14,10 @@ func (e *Executor) stmt(ctx context.Context, ecx *executionContext, stmt syn.Stm
 		if err := e.let(ctx, ecx, stmt); err != nil {
 			return err
 		}
+	case *syn.FragmentStmt:
+		if err := e.fragment(ctx, ecx, stmt); err != nil {
+			return err
+		}
 	case *syn.ExprStmt:
 		if _, err := e.eval(ctx, ecx, stmt.Expr); err != nil {
 			return err
@@ -75,5 +79,14 @@ func (e *Executor) let(ctx context.Context, ecx *executionContext, let *syn.LetS
 		return err
 	}
 
+	return nil
+}
+
+func (e *Executor) fragment(ctx context.Context, ecx *executionContext, stmt *syn.FragmentStmt) error {
+	if _, ok := ecx.scope.fragments[stmt.Fragment.Name]; ok {
+		return fmt.Errorf("fragment %s already defined", stmt.Fragment.Name)
+	}
+
+	ecx.scope.fragments[stmt.Fragment.Name] = stmt.RawFragment
 	return nil
 }

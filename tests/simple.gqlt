@@ -25,12 +25,16 @@ let name = query {
 
 assert name matches "Buddy"
 
+fragment DogDetails on Dog {
+    id
+    name
+}
+
 assert query ($name: String!) {
 	animals {
 		dogs {
 			find(name: $name) {
-				id
-				name
+                ... DogDetails
 			}
 		}
 	}

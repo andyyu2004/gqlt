@@ -1,0 +1,8 @@
+fragment Foo on Bar {
+    id
+    name
+    foo
+    bar {
+        baz
+    }
+}

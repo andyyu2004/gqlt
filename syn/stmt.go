@@ -30,6 +30,29 @@ func (stmt ExprStmt) Dump(w io.Writer) {
 	stmt.Expr.Dump(w)
 }
 
+type FragmentStmt struct {
+	ast.Position
+	// unparsed graphql string
+	// useful for pretty printing without formatting
+	RawFragment string
+	Fragment    *FragmentDefinition
+}
+
+var _ Stmt = FragmentStmt{}
+
+func (stmt FragmentStmt) Children() Children {
+	return Children{
+		lex.Token{Kind: lex.Fragment, Value: stmt.RawFragment, Position: stmt.Position},
+	}
+}
+
+func (FragmentStmt) isStmt() {}
+func (FragmentStmt) IsNode() {}
+
+func (stmt FragmentStmt) Dump(w io.Writer) {
+	_, _ = io.WriteString(w, stmt.RawFragment)
+}
+
 type SetStmt struct {
 	ast.Position
 	Key   lex.Token

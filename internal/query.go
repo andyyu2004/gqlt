@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/andyyu2004/gqlt/gqlparser/formatter"
+	"github.com/andyyu2004/gqlt/gqlparser/validator"
 	"github.com/andyyu2004/gqlt/memosa/lib"
 	"github.com/andyyu2004/gqlt/slice"
 	"github.com/andyyu2004/gqlt/syn"
@@ -20,11 +21,28 @@ func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.O
 		operation = transform.transformOperation(operation)
 	}
 
-	query := formatOperation(operation)
+	usedFragments := map[string]struct{}{}
+	observers := &validator.Events{}
+	observers.OnFragmentSpread(func(_ *validator.Walker, fragmentSpread *syn.FragmentSpread) {
+		usedFragments[fragmentSpread.Name] = struct{}{}
+	})
+
+	validator.Walk(&syn.Schema{}, &syn.QueryDocument{Operations: []*syn.OperationDefinition{expr.Operation}}, observers)
+
+	buf := formatOperation(operation)
+
+	for fragmentName := range usedFragments {
+		fragment, ok := ecx.scope.LookupFragment(fragmentName)
+		// if fragment doesn't exist, we just ignore it. Will be caught by better validation later
+		if ok {
+			buf.WriteString("\n\n")
+			buf.WriteString(fragment)
+		}
+	}
 
 	// Pass our local variables directly also as graphql variables
 	var data any
-	req := Request{Query: query, Variables: ecx.scope.gqlVars()}
+	req := Request{Query: buf.String(), Variables: ecx.scope.gqlVars()}
 	if err := e.client.Request(ctx, req, &data); err != nil {
 		return nil, err
 	}
@@ -32,14 +50,14 @@ func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.O
 	return flatten(data), nil
 }
 
-func formatOperation(operation *syn.OperationDefinition) string {
+func formatOperation(operation *syn.OperationDefinition) *bytes.Buffer {
 	buf := bytes.NewBufferString("")
 	f := formatter.NewFormatter(buf, formatter.WithIndent("  "))
 	f.FormatQueryDocument(&syn.QueryDocument{
 		Operations: []*syn.OperationDefinition{operation},
 	})
 
-	return buf.String()
+	return buf
 }
 
 type transform interface {

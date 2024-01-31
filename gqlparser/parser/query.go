@@ -26,7 +26,7 @@ func (p *parser) parseQueryDocument() *QueryDocument {
 			case "query", "mutation", "subscription":
 				doc.Operations = append(doc.Operations, p.ParseOperationDefinition())
 			case "fragment":
-				doc.Fragments = append(doc.Fragments, p.parseFragmentDefinition())
+				doc.Fragments = append(doc.Fragments, p.ParseFragmentDefinition())
 			default:
 				p.unexpectedError()
 			}
@@ -210,7 +210,7 @@ func (p *parser) parseFragment() Selection {
 	return &def
 }
 
-func (p *parser) parseFragmentDefinition() *FragmentDefinition {
+func (p *parser) ParseFragmentDefinition() *FragmentDefinition {
 	var def FragmentDefinition
 	def.Position = p.peekPos()
 	def.Comment = p.comment
