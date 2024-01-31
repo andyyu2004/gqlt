@@ -54,15 +54,18 @@ func bindPat(binder binder, pat syn.Pat, val any) error {
 	}
 }
 
-func bindListPat(binder binder, pat *syn.ListPat, values []any) error {
-	for i, pat := range pat.Pats {
+func bindListPat(binder binder, listPat *syn.ListPat, values []any) error {
+	for i, pat := range listPat.Pats {
 		rest, ok := pat.(*syn.RestPat)
 		if ok {
+			if i != len(listPat.Pats)-1 {
+				return fmt.Errorf("rest pattern must be the last in list pattern")
+			}
+
 			if err := bindPat(binder, rest.Pat, values[i:]); err != nil {
 				return err
 			}
 			return nil
-
 		}
 
 		if i > len(values)-1 {
@@ -77,10 +80,24 @@ func bindListPat(binder binder, pat *syn.ListPat, values []any) error {
 	return nil
 }
 
-func bindObjectPat(binder binder, pat *syn.ObjectPat, values map[string]any) error {
-	for entry := pat.Fields.Oldest(); entry != nil; entry = entry.Next() {
+func bindObjectPat(binder binder, objPat *syn.ObjectPat, values map[string]any) error {
+	var i int
+	for entry := objPat.Fields.Oldest(); entry != nil; entry = entry.Next() {
+		i++
 		name := entry.Key
 		pat := entry.Value
+
+		rest, ok := pat.(*syn.RestPat)
+		if ok {
+			if i != objPat.Fields.Len() {
+				return fmt.Errorf("rest pattern must be the last in object pattern")
+			}
+
+			if err := bindPat(binder, rest.Pat, values); err != nil {
+				return err
+			}
+			return nil
+		}
 
 		val, ok := values[name.Value]
 		if !ok {
@@ -90,6 +107,10 @@ func bindObjectPat(binder binder, pat *syn.ObjectPat, values map[string]any) err
 		if err := bindPat(binder, pat, val); err != nil {
 			return err
 		}
+
+		// delete the value once it's been bound for the rest pattern
+		// it's fine to mutate the map in place as the values won't be used again
+		delete(values, name.Value)
 	}
 
 	return nil

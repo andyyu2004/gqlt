@@ -232,8 +232,9 @@ func (p *Parser) parseLetStmt() *syn.LetStmt {
 }
 
 type patOpts struct {
-	// allow ...<pat> pattern
-	allowSpread           bool
+	// to allow `...<pat>` pattern
+	allowSpread bool
+	// to allow `...` without a trailing pattern (normal grammar is `...<pat>`)
 	allowImplicitWildcard bool
 }
 
@@ -319,17 +320,29 @@ func (p *Parser) parseObjectPat() *syn.ObjectPat {
 	start := p.bump(lex.BraceL)
 	fields := orderedmap.New[lex.Token, syn.Pat]()
 	for !p.at(lex.EOF) && !p.at(lex.BraceR) {
-		name, ok := p.expect(lex.Name)
-		if !ok {
-			return nil
-		}
-
-		var pat syn.Pat = &syn.NamePat{Name: name}
-		if p.eat_(lex.Colon) {
-			pat = p.parsePat(patOpts{allowSpread: true})
-			if pat == nil {
+		var name lex.Token
+		var pat syn.Pat
+		var ok bool
+		if p.eat_(lex.Spread) {
+			name, ok = p.expect(lex.Name)
+			if !ok {
 				return nil
 			}
+			pat = &syn.RestPat{Position: name.Pos(), Pat: &syn.NamePat{Name: name}}
+		} else {
+			name, ok = p.expect(lex.Name)
+			if !ok {
+				return nil
+			}
+
+			pat = &syn.NamePat{Name: name}
+			if p.eat_(lex.Colon) {
+				pat = p.parsePat(patOpts{})
+				if pat == nil {
+					return nil
+				}
+			}
+
 		}
 
 		fields.Set(name, pat)
