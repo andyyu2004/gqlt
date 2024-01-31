@@ -2,9 +2,9 @@ package ide
 
 import (
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/memosa"
 	"github.com/andyyu2004/gqlt/parser"
 	"github.com/andyyu2004/gqlt/syn"
-	"github.com/andyyu2004/memosa"
 )
 
 type (

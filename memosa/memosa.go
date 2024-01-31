@@ -1,7 +1,7 @@
 package memosa
 
 import (
-	"github.com/andyyu2004/memosa/internal"
+	"github.com/andyyu2004/gqlt/memosa/internal"
 )
 
 type (

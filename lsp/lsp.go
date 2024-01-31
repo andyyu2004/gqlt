@@ -6,7 +6,7 @@ import (
 	"slices"
 
 	"github.com/andyyu2004/gqlt/ide"
-	"github.com/andyyu2004/memosa/lib"
+	"github.com/andyyu2004/gqlt/memosa/lib"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 	"github.com/tliron/glsp/server"

@@ -8,9 +8,9 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/andyyu2004/gqlt/memosa/lib"
 	"github.com/andyyu2004/gqlt/parser"
 	"github.com/andyyu2004/gqlt/syn"
-	"github.com/andyyu2004/memosa/lib"
 	"github.com/bmatcuk/doublestar/v4"
 )
 

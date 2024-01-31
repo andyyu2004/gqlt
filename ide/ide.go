@@ -3,8 +3,8 @@ package ide
 import (
 	"maps"
 
+	"github.com/andyyu2004/gqlt/memosa"
 	"github.com/andyyu2004/gqlt/syn"
-	"github.com/andyyu2004/memosa"
 )
 
 type IDE struct {

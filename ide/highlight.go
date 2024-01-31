@@ -7,9 +7,9 @@ import (
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/iterator"
 	"github.com/andyyu2004/gqlt/lex"
+	"github.com/andyyu2004/gqlt/memosa/lib"
+	"github.com/andyyu2004/gqlt/memosa/stack"
 	"github.com/andyyu2004/gqlt/syn"
-	"github.com/andyyu2004/memosa/lib"
-	"github.com/andyyu2004/memosa/stack"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 

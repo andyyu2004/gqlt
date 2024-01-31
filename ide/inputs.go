@@ -1,7 +1,7 @@
 package ide
 
 import (
-	"github.com/andyyu2004/memosa"
+	"github.com/andyyu2004/gqlt/memosa"
 )
 
 type inputQuery struct{}

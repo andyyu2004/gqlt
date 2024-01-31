@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	"github.com/andyyu2004/gqlt/gqlparser/formatter"
+	"github.com/andyyu2004/gqlt/memosa/lib"
 	"github.com/andyyu2004/gqlt/slice"
 	"github.com/andyyu2004/gqlt/syn"
-	"github.com/andyyu2004/memosa/lib"
 )
 
 func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.OperationExpr) (any, error) {
