@@ -25,7 +25,7 @@ func (WildcardPat) Children() Children {
 }
 
 func (WildcardPat) isPat()  {}
-func (WildcardPat) IsNode() {}
+func (WildcardPat) isNode() {}
 
 func (WildcardPat) Dump(w io.Writer) {
 	io.WriteString(w, "_")
@@ -44,7 +44,7 @@ func (pat NamePat) Children() Children {
 }
 
 func (NamePat) isPat()  {}
-func (NamePat) IsNode() {}
+func (NamePat) isNode() {}
 
 func (pat NamePat) Dump(w io.Writer) {
 	io.WriteString(w, pat.Name.Value)
@@ -60,7 +60,7 @@ type LiteralPat struct {
 var _ Pat = LiteralPat{}
 
 func (LiteralPat) isPat()  {}
-func (LiteralPat) IsNode() {}
+func (LiteralPat) isNode() {}
 
 func (pat LiteralPat) Children() Children {
 	return Children{pat.Token}
@@ -86,7 +86,7 @@ func (pat ListPat) Children() Children {
 }
 
 func (ListPat) isPat()  {}
-func (ListPat) IsNode() {}
+func (ListPat) isNode() {}
 
 func (pat ListPat) Dump(w io.Writer) {
 	io.WriteString(w, "[")
@@ -118,7 +118,7 @@ func (pat ObjectPat) Children() Children {
 }
 
 func (ObjectPat) isPat()  {}
-func (ObjectPat) IsNode() {}
+func (ObjectPat) isNode() {}
 
 func (pat ObjectPat) Dump(w io.Writer) {
 	io.WriteString(w, "{")
@@ -145,7 +145,7 @@ func (pat RestPat) Children() Children {
 }
 
 func (RestPat) isPat()  {}
-func (RestPat) IsNode() {}
+func (RestPat) isNode() {}
 
 func (pat RestPat) Dump(w io.Writer) {
 	io.WriteString(w, "...")

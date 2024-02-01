@@ -18,7 +18,7 @@ type Token = lex.Token
 
 type Node interface {
 	Child
-	IsNode()
+	isNode()
 
 	Dump(io.Writer)
 	Children() Children
@@ -33,7 +33,7 @@ func (f File) Children() Children {
 	return slice.Map(f.Stmts, func(stmt Stmt) Child { return stmt })
 }
 
-func (File) IsNode() {}
+func (File) isNode() {}
 
 var _ Node = File{}
 

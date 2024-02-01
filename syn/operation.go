@@ -30,7 +30,7 @@ func (op OperationDefinition) Pos() ast.Position {
 	return *op.Position
 }
 
-func (OperationDefinition) IsNode() {}
+func (OperationDefinition) isNode() {}
 
 func (OperationDefinition) Dump(io.Writer) {}
 
