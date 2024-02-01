@@ -11,12 +11,12 @@ import (
 func init() {
 	AddRule("FragmentsOnCompositeTypes", func(observers *Events, addError AddErrFunc) {
 		observers.OnInlineFragment(func(walker *Walker, inlineFragment *syn.InlineFragment) {
-			fragmentType := walker.Schema.Types[inlineFragment.TypeCondition]
+			fragmentType := walker.Schema.Types[inlineFragment.TypeCondition.Value]
 			if fragmentType == nil || fragmentType.IsCompositeType() {
 				return
 			}
 
-			message := fmt.Sprintf(`Fragment cannot condition on non composite type "%s".`, inlineFragment.TypeCondition)
+			message := fmt.Sprintf(`Fragment cannot condition on non composite type "%s".`, inlineFragment.TypeCondition.Value)
 
 			addError(
 				Message(message),

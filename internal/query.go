@@ -233,7 +233,7 @@ func (t variableTransform) transformSelectionSet(ty typename, selectionSet syn.S
 			return &syn.InlineFragment{
 				TypeCondition: selection.TypeCondition,
 				Directives:    selection.Directives,
-				SelectionSet:  t.transformSelectionSet(typename(selection.TypeCondition), selection.SelectionSet),
+				SelectionSet:  t.transformSelectionSet(typename(selection.TypeCondition.Value), selection.SelectionSet),
 				Position:      selection.Position,
 				Comment:       selection.Comment,
 			}

@@ -206,9 +206,14 @@ func (p *parser) parseFragment() Selection {
 	def.Position = p.peekPos()
 	def.Comment = comment
 	if p.peek().Value == "on" {
-		p.next() // "on"
+		onKw := p.next() // "on"
+		def.OnKw = lex.Token{
+			Kind:     lex.On,
+			Value:    onKw.Value,
+			Position: onKw.Position,
+		}
 
-		def.TypeCondition = p.parseName().Value
+		def.TypeCondition = p.parseTypeName()
 	}
 
 	def.Directives = p.parseDirectives(false)

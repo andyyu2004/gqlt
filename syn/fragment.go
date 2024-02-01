@@ -31,7 +31,8 @@ func (FragmentSpread) Dump(io.Writer) {
 func (FragmentSpread) isNode() {}
 
 type InlineFragment struct {
-	TypeCondition string
+	OnKw          lex.Token `dump:"-"`
+	TypeCondition lex.Token
 	Directives    DirectiveList
 	SelectionSet  SelectionSet
 
@@ -44,8 +45,12 @@ type InlineFragment struct {
 
 var _ Node = &InlineFragment{}
 
-func (InlineFragment) Children() Children {
-	return Children{}
+func (f InlineFragment) Children() Children {
+	return Children{
+		f.OnKw,
+		f.TypeCondition,
+		f.SelectionSet,
+	}
 }
 
 func (InlineFragment) Dump(io.Writer) {

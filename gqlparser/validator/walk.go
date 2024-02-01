@@ -262,8 +262,8 @@ func (w *Walker) walkSelection(parentDef *syn.Definition, it syn.Selection) {
 		it.ObjectDefinition = parentDef
 
 		nextParentDef := parentDef
-		if it.TypeCondition != "" {
-			nextParentDef = w.Schema.Types[it.TypeCondition]
+		if it.TypeCondition.Value != "" {
+			nextParentDef = w.Schema.Types[it.TypeCondition.Value]
 		}
 
 		w.walkDirectives(nextParentDef, it.Directives, syn.LocationInlineFragment)

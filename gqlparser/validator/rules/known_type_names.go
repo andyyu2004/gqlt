@@ -22,7 +22,7 @@ func init() {
 		})
 
 		observers.OnInlineFragment(func(walker *Walker, inlineFragment *syn.InlineFragment) {
-			typedName := inlineFragment.TypeCondition
+			typedName := inlineFragment.TypeCondition.Value
 			if typedName == "" {
 				return
 			}

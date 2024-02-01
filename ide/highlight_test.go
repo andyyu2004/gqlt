@@ -72,6 +72,12 @@ mutation { bar }`, expect.Expect(`1:1..1:4: keyword
 1:12..1:15: type
 `))
 
+	check("inline fragment", `query { ...on Bar { bar } }`, expect.Expect(`1:1..1:6: keyword
+1:12..1:14: keyword
+1:15..1:18: type
+1:21..1:24: property
+`))
+
 	check("set", `set namespace "foo/bar"`, expect.Expect(`1:1..1:4: keyword
 1:5..1:14: variable
 1:16..1:25: string

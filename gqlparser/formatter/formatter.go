@@ -704,8 +704,8 @@ func (f *formatter) FormatInlineFragment(inline *syn.InlineFragment) {
 	f.FormatCommentGroup(inline.Comment)
 
 	f.WriteWord("...")
-	if inline.TypeCondition != "" {
-		f.WriteWord("on").WriteWord(inline.TypeCondition)
+	if inline.TypeCondition.Value != "" {
+		f.WriteWord("on").WriteWord(inline.TypeCondition.Value)
 	}
 
 	f.FormatDirectiveList(inline.Directives)
