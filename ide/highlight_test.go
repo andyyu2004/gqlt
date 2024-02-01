@@ -68,6 +68,11 @@ mutation { bar }`, expect.Expect(`1:1..1:4: keyword
 1:27..1:30: property
 `))
 
+	check("args", `query { foo(bar: "foo") }`, expect.Expect(`1:1..1:6: keyword
+1:9..1:12: property
+1:13..1:16: parameter
+`))
+
 	check("fragment spread", `query { ...Foo }`, expect.Expect(`1:1..1:6: keyword
 1:12..1:15: type
 `))

@@ -35,6 +35,7 @@ func (ide *IDE) Highlight(path string) Highlights {
 	type Scope int
 	const (
 		ScopeObject Scope = iota
+		ScopeArgs
 	)
 	scopes := stack.Stack[Scope]{}
 	return iterator.FilterMap(syn.Traverse(root), func(event syn.Event) (Highlight, bool) {
@@ -52,6 +53,8 @@ func (ide *IDE) Highlight(path string) Highlights {
 					switch scope {
 					case ScopeObject:
 						kind = protocol.SemanticTokenTypeProperty
+					case ScopeArgs:
+						kind = protocol.SemanticTokenTypeParameter
 					default:
 						kind = protocol.SemanticTokenTypeVariable
 					}
@@ -74,11 +77,15 @@ func (ide *IDE) Highlight(path string) Highlights {
 			switch event.Node.(type) {
 			case *syn.ObjectExpr, *syn.ObjectPat, syn.SelectionSet:
 				scopes.Push(ScopeObject)
+			case syn.ArgumentList:
+				scopes.Push(ScopeArgs)
 			}
 		case syn.ExitEvent:
 			switch event.Node.(type) {
 			case *syn.ObjectExpr, *syn.ObjectPat, syn.SelectionSet:
 				lib.Assert(scopes.MustPop() == ScopeObject)
+			case syn.ArgumentList:
+				lib.Assert(scopes.MustPop() == ScopeArgs)
 			}
 		}
 		return Highlight{}, false

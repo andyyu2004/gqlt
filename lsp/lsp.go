@@ -20,6 +20,7 @@ var semanticTokensLegend = protocol.SemanticTokensLegend{
 		string(protocol.SemanticTokenTypeNumber),
 		string(protocol.SemanticTokenTypeOperator),
 		string(protocol.SemanticTokenTypeType),
+		string(protocol.SemanticTokenTypeParameter),
 	},
 }
 
