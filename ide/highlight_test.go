@@ -62,4 +62,9 @@ mutation { bar }`, expect.Expect(`1:1..1:4: keyword
 1:14..1:16: keyword
 1:17..1:20: type
 `))
+
+	testHighlight(t, "set", `set namespace "foo/bar"`, expect.Expect(`1:1..1:4: keyword
+1:5..1:14: variable
+1:16..1:25: string
+`))
 }

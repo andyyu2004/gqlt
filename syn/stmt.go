@@ -58,6 +58,7 @@ func (stmt FragmentStmt) Dump(w io.Writer) {
 
 type SetStmt struct {
 	ast.Position
+	SetKw lex.Token
 	Key   lex.Token
 	Value Expr
 }
@@ -65,7 +66,7 @@ type SetStmt struct {
 var _ Stmt = SetStmt{}
 
 func (stmt SetStmt) Children() Children {
-	return Children{stmt.Key, stmt.Value}
+	return Children{stmt.SetKw, stmt.Key, stmt.Value}
 }
 
 func (SetStmt) isStmt() {}

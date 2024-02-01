@@ -184,7 +184,7 @@ func (p *Parser) parseFragment() *syn.FragmentStmt {
 }
 
 func (p *Parser) parseSetStmt() *syn.SetStmt {
-	start := p.bump(lex.Set)
+	setKw := p.bump(lex.Set)
 	key, ok := p.expect(lex.Name)
 	if !ok {
 		return nil
@@ -198,7 +198,7 @@ func (p *Parser) parseSetStmt() *syn.SetStmt {
 		return nil
 	}
 
-	return &syn.SetStmt{Position: start.Merge(expr), Key: key, Value: expr}
+	return &syn.SetStmt{Position: setKw.Merge(expr), SetKw: setKw, Key: key, Value: expr}
 }
 
 func (p *Parser) parseAssertStmt() *syn.AssertStmt {

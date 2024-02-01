@@ -3,24 +3,18 @@ assert 1 matches 1
 
 assert { x: 2 } matches { x }
 
+set namespace "animals/dogs"
+
 let dogs = query {
-	animals {
-		dogs {
-			list {
-				name
-			}
-		}
-	}
+    list {
+        name
+    }
 }
 
 let name = query {
-	animals {
-		dogs {
-			first {
-				name
-			}
-		}
-	}
+    first {
+        name
+    }
 }
 
 assert name matches "Buddy"
@@ -31,12 +25,8 @@ fragment DogDetails on Dog {
 }
 
 assert query ($name: String!) {
-	animals {
-		dogs {
-			find(name: $name) {
-                ... DogDetails
-			}
-		}
+    find(name: $name) {
+        ... DogDetails
 	}
 } matches { id: "1", name: "Buddy" }
 
