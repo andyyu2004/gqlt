@@ -68,6 +68,10 @@ mutation { bar }`, expect.Expect(`1:1..1:4: keyword
 1:27..1:30: property
 `))
 
+	check("fragment spread", `query { ...Foo }`, expect.Expect(`1:1..1:6: keyword
+1:12..1:15: type
+`))
+
 	check("set", `set namespace "foo/bar"`, expect.Expect(`1:1..1:4: keyword
 1:5..1:14: variable
 1:16..1:25: string

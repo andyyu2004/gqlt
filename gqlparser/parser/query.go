@@ -197,7 +197,7 @@ func (p *parser) parseFragment() Selection {
 		return &FragmentSpread{
 			Position:   p.peekPos(),
 			Comment:    comment,
-			Name:       p.parseFragmentName().Value,
+			Name:       p.parseFragmentName(),
 			Directives: p.parseDirectives(false),
 		}
 	}

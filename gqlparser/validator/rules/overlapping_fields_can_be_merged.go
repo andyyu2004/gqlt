@@ -114,23 +114,23 @@ type pairSet struct {
 
 func (pairSet *pairSet) Add(a *syn.FragmentSpread, b *syn.FragmentSpread, areMutuallyExclusive bool) {
 	add := func(a *syn.FragmentSpread, b *syn.FragmentSpread) {
-		m := pairSet.data[a.Name]
+		m := pairSet.data[a.Name.Value]
 		if m == nil {
 			m = make(map[string]bool)
-			pairSet.data[a.Name] = m
+			pairSet.data[a.Name.Value] = m
 		}
-		m[b.Name] = areMutuallyExclusive
+		m[b.Name.Value] = areMutuallyExclusive
 	}
 	add(a, b)
 	add(b, a)
 }
 
 func (pairSet *pairSet) Has(a *syn.FragmentSpread, b *syn.FragmentSpread, areMutuallyExclusive bool) bool {
-	am, ok := pairSet.data[a.Name]
+	am, ok := pairSet.data[a.Name.Value]
 	if !ok {
 		return false
 	}
-	result, ok := am[b.Name]
+	result, ok := am[b.Name.Value]
 	if !ok {
 		return false
 	}
@@ -272,10 +272,10 @@ func (m *overlappingFieldsCanBeMergedManager) findConflictsWithinSelectionSet(se
 }
 
 func (m *overlappingFieldsCanBeMergedManager) collectConflictsBetweenFieldsAndFragment(conflicts *conflictMessageContainer, areMutuallyExclusive bool, fieldsMap *sequentialFieldsMap, fragmentSpread *syn.FragmentSpread) {
-	if m.comparedFragments[fragmentSpread.Name] {
+	if m.comparedFragments[fragmentSpread.Name.Value] {
 		return
 	}
-	m.comparedFragments[fragmentSpread.Name] = true
+	m.comparedFragments[fragmentSpread.Name.Value] = true
 
 	if fragmentSpread.Definition == nil {
 		return
@@ -296,7 +296,7 @@ func (m *overlappingFieldsCanBeMergedManager) collectConflictsBetweenFieldsAndFr
 	// and any fragment names found in the given fragment.
 	baseFragmentSpread := fragmentSpread
 	for _, fragmentSpread := range fragmentSpreads {
-		if fragmentSpread.Name == baseFragmentSpread.Name {
+		if fragmentSpread.Name.Value == baseFragmentSpread.Name.Value {
 			continue
 		}
 		m.collectConflictsBetweenFieldsAndFragment(conflicts, areMutuallyExclusive, fieldsMap, fragmentSpread)
@@ -306,7 +306,7 @@ func (m *overlappingFieldsCanBeMergedManager) collectConflictsBetweenFieldsAndFr
 func (m *overlappingFieldsCanBeMergedManager) collectConflictsBetweenFragments(conflicts *conflictMessageContainer, areMutuallyExclusive bool, fragmentSpreadA *syn.FragmentSpread, fragmentSpreadB *syn.FragmentSpread) {
 	var check func(fragmentSpreadA *syn.FragmentSpread, fragmentSpreadB *syn.FragmentSpread)
 	check = func(fragmentSpreadA *syn.FragmentSpread, fragmentSpreadB *syn.FragmentSpread) {
-		if fragmentSpreadA.Name == fragmentSpreadB.Name {
+		if fragmentSpreadA.Name.Value == fragmentSpreadB.Name.Value {
 			return
 		}
 

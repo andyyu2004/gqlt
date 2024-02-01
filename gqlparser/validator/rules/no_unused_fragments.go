@@ -13,7 +13,7 @@ func init() {
 
 		observers.OnFragmentSpread(func(walker *Walker, fragmentSpread *syn.FragmentSpread) {
 			if !inFragmentDefinition {
-				fragmentNameUsed[fragmentSpread.Name] = true
+				fragmentNameUsed[fragmentSpread.Name.Value] = true
 			}
 		})
 

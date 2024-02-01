@@ -11,7 +11,7 @@ func init() {
 		observers.OnFragmentSpread(func(walker *Walker, fragmentSpread *syn.FragmentSpread) {
 			if fragmentSpread.Definition == nil {
 				addError(
-					Message(`Unknown fragment "%s".`, fragmentSpread.Name),
+					Message(`Unknown fragment "%s".`, fragmentSpread.Name.Value),
 					At(fragmentSpread.Position),
 				)
 			}

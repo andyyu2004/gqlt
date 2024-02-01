@@ -25,7 +25,7 @@ func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.O
 	usedFragments := map[string]struct{}{}
 	observers := &validator.Events{}
 	observers.OnFragmentSpread(func(_ *validator.Walker, fragmentSpread *syn.FragmentSpread) {
-		usedFragments[fragmentSpread.Name] = struct{}{}
+		usedFragments[fragmentSpread.Name.Value] = struct{}{}
 	})
 
 	validator.Walk(&syn.Schema{}, &syn.QueryDocument{Operations: []*syn.OperationDefinition{expr.Operation}}, observers)

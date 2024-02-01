@@ -8,7 +8,7 @@ import (
 )
 
 type FragmentSpread struct {
-	Name       string
+	Name       lex.Token
 	Directives DirectiveList
 
 	// Require validation
@@ -21,8 +21,8 @@ type FragmentSpread struct {
 
 var _ Node = &FragmentSpread{}
 
-func (FragmentSpread) Children() Children {
-	return Children{}
+func (f FragmentSpread) Children() Children {
+	return Children{f.Name}
 }
 
 func (FragmentSpread) Dump(io.Writer) {

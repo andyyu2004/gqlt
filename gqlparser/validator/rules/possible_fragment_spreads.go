@@ -59,7 +59,7 @@ func init() {
 			}
 			validate(walker, fragmentSpread.ObjectDefinition, fragmentSpread.Definition.TypeCondition.Value, func() {
 				addError(
-					Message(`Fragment "%s" cannot be spread here as objects of type "%s" can never be of type "%s".`, fragmentSpread.Name, fragmentSpread.ObjectDefinition.Name, fragmentSpread.Definition.TypeCondition.Value),
+					Message(`Fragment "%s" cannot be spread here as objects of type "%s" can never be of type "%s".`, fragmentSpread.Name.Value, fragmentSpread.ObjectDefinition.Name, fragmentSpread.Definition.TypeCondition.Value),
 					At(fragmentSpread.Position),
 				)
 			})

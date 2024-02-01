@@ -274,7 +274,7 @@ func (w *Walker) walkSelection(parentDef *syn.Definition, it syn.Selection) {
 		}
 
 	case *syn.FragmentSpread:
-		def := w.Document.Fragments.ForName(it.Name)
+		def := w.Document.Fragments.ForName(it.Name.Value)
 		it.Definition = def
 		it.ObjectDefinition = parentDef
 
