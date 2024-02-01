@@ -26,8 +26,8 @@ func (stmt ExprStmt) Children() Children {
 func (ExprStmt) isStmt() {}
 func (ExprStmt) isNode() {}
 
-func (stmt ExprStmt) Dump(w io.Writer) {
-	stmt.Expr.Dump(w)
+func (stmt ExprStmt) Format(w io.Writer) {
+	stmt.Expr.Format(w)
 }
 
 type FragmentStmt struct {
@@ -47,7 +47,7 @@ func (stmt FragmentStmt) Children() Children {
 func (FragmentStmt) isStmt() {}
 func (FragmentStmt) isNode() {}
 
-func (stmt FragmentStmt) Dump(w io.Writer) {
+func (stmt FragmentStmt) Format(w io.Writer) {
 	_, _ = io.WriteString(w, stmt.RawFragment)
 }
 
@@ -67,11 +67,11 @@ func (stmt SetStmt) Children() Children {
 func (SetStmt) isStmt() {}
 func (SetStmt) isNode() {}
 
-func (stmt SetStmt) Dump(w io.Writer) {
+func (stmt SetStmt) Format(w io.Writer) {
 	_, _ = io.WriteString(w, "set ")
 	_, _ = io.WriteString(w, stmt.Key.Value)
 	_, _ = io.WriteString(w, " ")
-	stmt.Value.Dump(w)
+	stmt.Value.Format(w)
 }
 
 type AssertStmt struct {
@@ -89,9 +89,9 @@ func (stmt AssertStmt) Children() Children {
 func (AssertStmt) isStmt() {}
 func (AssertStmt) isNode() {}
 
-func (stmt AssertStmt) Dump(w io.Writer) {
+func (stmt AssertStmt) Format(w io.Writer) {
 	_, _ = io.WriteString(w, "assert ")
-	stmt.Expr.Dump(w)
+	stmt.Expr.Format(w)
 }
 
 type LetStmt struct {
@@ -111,9 +111,9 @@ func (let LetStmt) Children() Children {
 func (LetStmt) isStmt() {}
 func (LetStmt) isNode() {}
 
-func (let LetStmt) Dump(w io.Writer) {
+func (let LetStmt) Format(w io.Writer) {
 	_, _ = io.WriteString(w, "let ")
-	let.Pat.Dump(w)
+	let.Pat.Format(w)
 	_, _ = io.WriteString(w, " = ")
-	let.Expr.Dump(w)
+	let.Expr.Format(w)
 }

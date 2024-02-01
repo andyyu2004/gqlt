@@ -97,7 +97,7 @@ func (args ArgumentList) Children() Children {
 	return children
 }
 
-func (ArgumentList) Dump(io.Writer) {
+func (ArgumentList) Format(io.Writer) {
 }
 
 func (l ArgumentList) Pos() ast.Position {

@@ -29,7 +29,7 @@ func (expr NameExpr) Children() Children {
 func (NameExpr) isExpr() {}
 func (NameExpr) isNode() {}
 
-func (expr NameExpr) Dump(w io.Writer) {
+func (expr NameExpr) Format(w io.Writer) {
 	_, _ = io.WriteString(w, expr.Name.Value)
 }
 
@@ -51,7 +51,7 @@ func (expr OperationExpr) Children() Children {
 func (OperationExpr) isExpr() {}
 func (OperationExpr) isNode() {}
 
-func (expr OperationExpr) Dump(w io.Writer) {
+func (expr OperationExpr) Format(w io.Writer) {
 	_, _ = io.WriteString(w, expr.Query)
 }
 
@@ -73,10 +73,10 @@ func (expr IndexExpr) Children() Children {
 func (IndexExpr) isExpr() {}
 func (IndexExpr) isNode() {}
 
-func (expr IndexExpr) Dump(w io.Writer) {
-	expr.Expr.Dump(w)
+func (expr IndexExpr) Format(w io.Writer) {
+	expr.Expr.Format(w)
 	_, _ = io.WriteString(w, "[")
-	expr.Index.Dump(w)
+	expr.Index.Format(w)
 	_, _ = io.WriteString(w, "]")
 }
 
@@ -94,7 +94,7 @@ func (expr LiteralExpr) Children() Children {
 func (LiteralExpr) isExpr() {}
 func (LiteralExpr) isNode() {}
 
-func (expr LiteralExpr) Dump(w io.Writer) {
+func (expr LiteralExpr) Format(w io.Writer) {
 	switch expr.Value.(type) {
 	case string:
 		fmt.Fprintf(w, "\"%v\"", expr.Value)
@@ -123,15 +123,15 @@ func (expr CallExpr) Children() Children {
 func (CallExpr) isExpr() {}
 func (CallExpr) isNode() {}
 
-func (expr CallExpr) Dump(w io.Writer) {
-	expr.Fn.Dump(w)
+func (expr CallExpr) Format(w io.Writer) {
+	expr.Fn.Format(w)
 	_, _ = io.WriteString(w, "(")
 
 	for i, arg := range expr.Args {
 		if i > 0 {
 			_, _ = io.WriteString(w, ", ")
 		}
-		arg.Dump(w)
+		arg.Format(w)
 	}
 	_, _ = io.WriteString(w, ")")
 }
@@ -152,10 +152,10 @@ func (expr MatchesExpr) Children() Children {
 func (MatchesExpr) isExpr() {}
 func (MatchesExpr) isNode() {}
 
-func (expr MatchesExpr) Dump(w io.Writer) {
-	expr.Expr.Dump(w)
+func (expr MatchesExpr) Format(w io.Writer) {
+	expr.Expr.Format(w)
 	_, _ = io.WriteString(w, " matches ")
-	expr.Pat.Dump(w)
+	expr.Pat.Format(w)
 }
 
 type ListExpr struct {
@@ -176,14 +176,14 @@ func (expr ListExpr) Children() Children {
 func (ListExpr) isExpr() {}
 func (ListExpr) isNode() {}
 
-func (expr ListExpr) Dump(w io.Writer) {
+func (expr ListExpr) Format(w io.Writer) {
 	_, _ = io.WriteString(w, "[")
 
 	for i, expr := range expr.Exprs {
 		if i > 0 {
 			_, _ = io.WriteString(w, ", ")
 		}
-		expr.Dump(w)
+		expr.Format(w)
 	}
 
 	_, _ = io.WriteString(w, "]")
@@ -207,14 +207,14 @@ func (expr ObjectExpr) Children() Children {
 func (ObjectExpr) isExpr() {}
 func (ObjectExpr) isNode() {}
 
-func (expr ObjectExpr) Dump(w io.Writer) {
+func (expr ObjectExpr) Format(w io.Writer) {
 	_, _ = io.WriteString(w, "{")
 
 	for entry := expr.Fields.Oldest(); entry != nil; entry = entry.Next() {
 		_, _ = io.WriteString(w, " ")
 		_, _ = io.WriteString(w, entry.Key.Value)
 		_, _ = io.WriteString(w, ": ")
-		entry.Value.Dump(w)
+		entry.Value.Format(w)
 	}
 
 	_, _ = io.WriteString(w, " }")
@@ -236,12 +236,12 @@ func (expr BinaryExpr) Children() Children {
 func (BinaryExpr) isExpr() {}
 func (BinaryExpr) isNode() {}
 
-func (expr BinaryExpr) Dump(w io.Writer) {
-	expr.Left.Dump(w)
+func (expr BinaryExpr) Format(w io.Writer) {
+	expr.Left.Format(w)
 	_, _ = io.WriteString(w, " ")
 	_, _ = io.WriteString(w, expr.Op.String())
 	_, _ = io.WriteString(w, " ")
-	expr.Right.Dump(w)
+	expr.Right.Format(w)
 }
 
 type UnaryExpr struct {
@@ -259,7 +259,7 @@ func (expr UnaryExpr) Children() Children {
 func (UnaryExpr) isExpr() {}
 func (UnaryExpr) isNode() {}
 
-func (expr UnaryExpr) Dump(w io.Writer) {
+func (expr UnaryExpr) Format(w io.Writer) {
 	_, _ = io.WriteString(w, expr.Op.String())
-	expr.Expr.Dump(w)
+	expr.Expr.Format(w)
 }

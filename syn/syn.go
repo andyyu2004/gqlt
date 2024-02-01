@@ -20,7 +20,7 @@ type Node interface {
 	Child
 	isNode()
 
-	Dump(io.Writer)
+	Format(io.Writer)
 	Children() Children
 }
 
@@ -44,16 +44,16 @@ type Child interface {
 	ast.HasPosition
 }
 
-func (f File) Dump(w io.Writer) {
+func (f File) Format(w io.Writer) {
 	for _, stmt := range f.Stmts {
-		stmt.Dump(w)
+		stmt.Format(w)
 		_, _ = io.WriteString(w, ";\n")
 	}
 }
 
 func (f File) String() string {
 	b := strings.Builder{}
-	f.Dump(&b)
+	f.Format(&b)
 	return b.String()
 }
 

@@ -42,7 +42,7 @@ func TestParser(t *testing.T) {
 				snaps.WithConfig(snaps.Filename(name)).MatchSnapshot(t, annotated)
 			} else {
 				buf := bytes.Buffer{}
-				file.Dump(&buf)
+				file.Format(&buf)
 				snaps.WithConfig(snaps.Filename(name)).MatchSnapshot(t, buf.String())
 			}
 		})

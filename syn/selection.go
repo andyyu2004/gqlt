@@ -11,9 +11,9 @@ type SelectionSet []Selection
 
 var _ Node = SelectionSet{}
 
-func (ss SelectionSet) Dump(w io.Writer) {
+func (ss SelectionSet) Format(w io.Writer) {
 	for _, s := range ss {
-		s.Dump(w)
+		s.Format(w)
 		_, _ = io.WriteString(w, "\n")
 	}
 }
@@ -73,7 +73,7 @@ func (f *Field) Children() Children {
 	return append(children, f.Arguments, f.SelectionSet)
 }
 
-func (*Field) Dump(io.Writer) {
+func (*Field) Format(io.Writer) {
 }
 
 func (*Field) isNode() {}
@@ -89,7 +89,7 @@ func (a *Argument) Children() Children {
 	return Children{a.Name}
 }
 
-func (*Argument) Dump(io.Writer) {}
+func (*Argument) Format(io.Writer) {}
 
 // Pos implements Node.
 func (a *Argument) Pos() ast.Position {

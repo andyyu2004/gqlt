@@ -27,7 +27,7 @@ func (WildcardPat) Children() Children {
 func (WildcardPat) isPat()  {}
 func (WildcardPat) isNode() {}
 
-func (WildcardPat) Dump(w io.Writer) {
+func (WildcardPat) Format(w io.Writer) {
 	_, _ = io.WriteString(w, "_")
 }
 
@@ -46,7 +46,7 @@ func (pat NamePat) Children() Children {
 func (NamePat) isPat()  {}
 func (NamePat) isNode() {}
 
-func (pat NamePat) Dump(w io.Writer) {
+func (pat NamePat) Format(w io.Writer) {
 	_, _ = io.WriteString(w, pat.Name.Value)
 }
 
@@ -66,7 +66,7 @@ func (pat LiteralPat) Children() Children {
 	return Children{pat.Token}
 }
 
-func (name LiteralPat) Dump(w io.Writer) {
+func (name LiteralPat) Format(w io.Writer) {
 	fmt.Fprintf(w, "%v", name.Value)
 }
 
@@ -88,7 +88,7 @@ func (pat ListPat) Children() Children {
 func (ListPat) isPat()  {}
 func (ListPat) isNode() {}
 
-func (pat ListPat) Dump(w io.Writer) {
+func (pat ListPat) Format(w io.Writer) {
 	_, _ = io.WriteString(w, "[")
 
 	for i, pat := range pat.Pats {
@@ -96,7 +96,7 @@ func (pat ListPat) Dump(w io.Writer) {
 			_, _ = io.WriteString(w, ", ")
 		}
 
-		pat.Dump(w)
+		pat.Format(w)
 	}
 
 	_, _ = io.WriteString(w, "]")
@@ -120,14 +120,14 @@ func (pat ObjectPat) Children() Children {
 func (ObjectPat) isPat()  {}
 func (ObjectPat) isNode() {}
 
-func (pat ObjectPat) Dump(w io.Writer) {
+func (pat ObjectPat) Format(w io.Writer) {
 	_, _ = io.WriteString(w, "{")
 
 	for entry := pat.Fields.Oldest(); entry != nil; entry = entry.Next() {
 		_, _ = io.WriteString(w, " ")
 		_, _ = io.WriteString(w, entry.Key.Value)
 		_, _ = io.WriteString(w, ": ")
-		entry.Value.Dump(w)
+		entry.Value.Format(w)
 	}
 
 	_, _ = io.WriteString(w, " }")
@@ -147,7 +147,7 @@ func (pat RestPat) Children() Children {
 func (RestPat) isPat()  {}
 func (RestPat) isNode() {}
 
-func (pat RestPat) Dump(w io.Writer) {
+func (pat RestPat) Format(w io.Writer) {
 	_, _ = io.WriteString(w, "...")
-	pat.Pat.Dump(w)
+	pat.Pat.Format(w)
 }

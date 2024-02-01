@@ -25,7 +25,7 @@ func (f FragmentSpread) Children() Children {
 	return Children{f.Name}
 }
 
-func (FragmentSpread) Dump(io.Writer) {
+func (FragmentSpread) Format(io.Writer) {
 }
 
 func (FragmentSpread) isNode() {}
@@ -53,7 +53,7 @@ func (f InlineFragment) Children() Children {
 	}
 }
 
-func (InlineFragment) Dump(io.Writer) {
+func (InlineFragment) Format(io.Writer) {
 }
 
 func (InlineFragment) isNode() {}
@@ -88,7 +88,7 @@ func (f FragmentDefinition) Children() Children {
 	}
 }
 
-func (d FragmentDefinition) Dump(w io.Writer) {
+func (d FragmentDefinition) Format(w io.Writer) {
 	_, _ = io.WriteString(w, "fragment ")
 	_, _ = io.WriteString(w, d.Name.Value)
 	_, _ = io.WriteString(w, "on ")

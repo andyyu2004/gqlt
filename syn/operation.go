@@ -27,13 +27,15 @@ type OperationDefinition struct {
 	Comment             *CommentGroup
 }
 
+var _ Node = OperationDefinition{}
+
 func (op OperationDefinition) Pos() ast.Position {
 	return op.Position
 }
 
 func (OperationDefinition) isNode() {}
 
-func (OperationDefinition) Dump(io.Writer) {}
+func (OperationDefinition) Format(io.Writer) {}
 
 func (d OperationDefinition) Children() Children {
 	children := Children{}
