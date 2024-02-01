@@ -47,7 +47,7 @@ type Child interface {
 func (f File) Dump(w io.Writer) {
 	for _, stmt := range f.Stmts {
 		stmt.Dump(w)
-		io.WriteString(w, ";\n")
+		_, _ = io.WriteString(w, ";\n")
 	}
 }
 

@@ -70,11 +70,11 @@ func (d *dumper) dump(v reflect.Value) {
 }
 
 func (d *dumper) writeIndent() {
-	d.Buffer.WriteString(strings.Repeat("  ", d.indent))
+	d.WriteString(strings.Repeat("  ", d.indent))
 }
 
 func (d *dumper) nl() {
-	d.Buffer.WriteByte('\n')
+	d.WriteByte('\n')
 	d.writeIndent()
 }
 

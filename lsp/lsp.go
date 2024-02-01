@@ -2,7 +2,6 @@ package lsp
 
 import (
 	"errors"
-	"fmt"
 	"slices"
 
 	"github.com/andyyu2004/gqlt/ide"
@@ -40,9 +39,9 @@ type ls struct {
 	*ide.IDE
 }
 
-func trace(ctx *glsp.Context, format string, args ...any) {
-	_ = protocol.Trace(ctx, protocol.MessageTypeError, fmt.Sprintf(format, args...))
-}
+// func trace(ctx *glsp.Context, format string, args ...any) {
+// 	_ = protocol.Trace(ctx, protocol.MessageTypeError, fmt.Sprintf(format, args...))
+// }
 
 func (s *ls) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (any, error) {
 	protocol.SetTraceValue(protocol.TraceValueVerbose)

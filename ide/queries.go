@@ -27,9 +27,10 @@ func (parseQuery) Execute(ctx *memosa.Context, key parseKey) syn.File {
 	}
 
 	ast, err := parser.Parse()
-	if err != nil {
-		// TODO diagnostics
-	}
+	_ = err
+	// if err != nil {
+	// TODO diagnostics
+	// }
 
 	return ast
 }

@@ -34,7 +34,9 @@ func (OperationDefinition) isNode() {}
 
 func (OperationDefinition) Dump(io.Writer) {}
 
-func (OperationDefinition) Children() {}
+func (OperationDefinition) Children() Children {
+	return Children{}
+}
 
 type VariableDefinition struct {
 	Variable     string

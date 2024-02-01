@@ -28,7 +28,7 @@ func (WildcardPat) isPat()  {}
 func (WildcardPat) isNode() {}
 
 func (WildcardPat) Dump(w io.Writer) {
-	io.WriteString(w, "_")
+	_, _ = io.WriteString(w, "_")
 }
 
 // A name pattern matches any value and binds it to the name
@@ -47,7 +47,7 @@ func (NamePat) isPat()  {}
 func (NamePat) isNode() {}
 
 func (pat NamePat) Dump(w io.Writer) {
-	io.WriteString(w, pat.Name.Value)
+	_, _ = io.WriteString(w, pat.Name.Value)
 }
 
 // A literal pattern matches a value that is equal to the literal
@@ -89,17 +89,17 @@ func (ListPat) isPat()  {}
 func (ListPat) isNode() {}
 
 func (pat ListPat) Dump(w io.Writer) {
-	io.WriteString(w, "[")
+	_, _ = io.WriteString(w, "[")
 
 	for i, pat := range pat.Pats {
 		if i > 0 {
-			io.WriteString(w, ", ")
+			_, _ = io.WriteString(w, ", ")
 		}
 
 		pat.Dump(w)
 	}
 
-	io.WriteString(w, "]")
+	_, _ = io.WriteString(w, "]")
 }
 
 type ObjectPat struct {
@@ -121,16 +121,16 @@ func (ObjectPat) isPat()  {}
 func (ObjectPat) isNode() {}
 
 func (pat ObjectPat) Dump(w io.Writer) {
-	io.WriteString(w, "{")
+	_, _ = io.WriteString(w, "{")
 
 	for entry := pat.Fields.Oldest(); entry != nil; entry = entry.Next() {
-		io.WriteString(w, " ")
-		io.WriteString(w, entry.Key.Value)
-		io.WriteString(w, ": ")
+		_, _ = io.WriteString(w, " ")
+		_, _ = io.WriteString(w, entry.Key.Value)
+		_, _ = io.WriteString(w, ": ")
 		entry.Value.Dump(w)
 	}
 
-	io.WriteString(w, " }")
+	_, _ = io.WriteString(w, " }")
 }
 
 type RestPat struct {
@@ -148,6 +148,6 @@ func (RestPat) isPat()  {}
 func (RestPat) isNode() {}
 
 func (pat RestPat) Dump(w io.Writer) {
-	io.WriteString(w, "...")
+	_, _ = io.WriteString(w, "...")
 	pat.Pat.Dump(w)
 }

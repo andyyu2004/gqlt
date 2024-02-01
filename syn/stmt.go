@@ -73,9 +73,9 @@ func (SetStmt) isStmt() {}
 func (SetStmt) isNode() {}
 
 func (stmt SetStmt) Dump(w io.Writer) {
-	io.WriteString(w, "set ")
-	io.WriteString(w, stmt.Key.Value)
-	io.WriteString(w, " ")
+	_, _ = io.WriteString(w, "set ")
+	_, _ = io.WriteString(w, stmt.Key.Value)
+	_, _ = io.WriteString(w, " ")
 	stmt.Value.Dump(w)
 }
 
@@ -95,7 +95,7 @@ func (AssertStmt) isStmt() {}
 func (AssertStmt) isNode() {}
 
 func (stmt AssertStmt) Dump(w io.Writer) {
-	io.WriteString(w, "assert ")
+	_, _ = io.WriteString(w, "assert ")
 	stmt.Expr.Dump(w)
 }
 
@@ -117,8 +117,8 @@ func (LetStmt) isStmt() {}
 func (LetStmt) isNode() {}
 
 func (let LetStmt) Dump(w io.Writer) {
-	io.WriteString(w, "let ")
+	_, _ = io.WriteString(w, "let ")
 	let.Pat.Dump(w)
-	io.WriteString(w, " = ")
+	_, _ = io.WriteString(w, " = ")
 	let.Expr.Dump(w)
 }

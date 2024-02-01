@@ -79,9 +79,9 @@ func (IndexExpr) isNode() {}
 
 func (expr IndexExpr) Dump(w io.Writer) {
 	expr.Expr.Dump(w)
-	io.WriteString(w, "[")
+	_, _ = io.WriteString(w, "[")
 	expr.Index.Dump(w)
-	io.WriteString(w, "]")
+	_, _ = io.WriteString(w, "]")
 }
 
 type LiteralExpr struct {
@@ -129,15 +129,15 @@ func (CallExpr) isNode() {}
 
 func (expr CallExpr) Dump(w io.Writer) {
 	expr.Fn.Dump(w)
-	io.WriteString(w, "(")
+	_, _ = io.WriteString(w, "(")
 
 	for i, arg := range expr.Args {
 		if i > 0 {
-			io.WriteString(w, ", ")
+			_, _ = io.WriteString(w, ", ")
 		}
 		arg.Dump(w)
 	}
-	io.WriteString(w, ")")
+	_, _ = io.WriteString(w, ")")
 }
 
 type MatchesExpr struct {
@@ -158,7 +158,7 @@ func (MatchesExpr) isNode() {}
 
 func (expr MatchesExpr) Dump(w io.Writer) {
 	expr.Expr.Dump(w)
-	io.WriteString(w, " matches ")
+	_, _ = io.WriteString(w, " matches ")
 	expr.Pat.Dump(w)
 }
 
@@ -181,16 +181,16 @@ func (ListExpr) isExpr() {}
 func (ListExpr) isNode() {}
 
 func (expr ListExpr) Dump(w io.Writer) {
-	io.WriteString(w, "[")
+	_, _ = io.WriteString(w, "[")
 
 	for i, expr := range expr.Exprs {
 		if i > 0 {
-			io.WriteString(w, ", ")
+			_, _ = io.WriteString(w, ", ")
 		}
 		expr.Dump(w)
 	}
 
-	io.WriteString(w, "]")
+	_, _ = io.WriteString(w, "]")
 }
 
 type ObjectExpr struct {
@@ -212,16 +212,16 @@ func (ObjectExpr) isExpr() {}
 func (ObjectExpr) isNode() {}
 
 func (expr ObjectExpr) Dump(w io.Writer) {
-	io.WriteString(w, "{")
+	_, _ = io.WriteString(w, "{")
 
 	for entry := expr.Fields.Oldest(); entry != nil; entry = entry.Next() {
-		io.WriteString(w, " ")
-		io.WriteString(w, entry.Key.Value)
-		io.WriteString(w, ": ")
+		_, _ = io.WriteString(w, " ")
+		_, _ = io.WriteString(w, entry.Key.Value)
+		_, _ = io.WriteString(w, ": ")
 		entry.Value.Dump(w)
 	}
 
-	io.WriteString(w, " }")
+	_, _ = io.WriteString(w, " }")
 }
 
 type BinaryExpr struct {
@@ -242,9 +242,9 @@ func (BinaryExpr) isNode() {}
 
 func (expr BinaryExpr) Dump(w io.Writer) {
 	expr.Left.Dump(w)
-	io.WriteString(w, " ")
-	io.WriteString(w, expr.Op.String())
-	io.WriteString(w, " ")
+	_, _ = io.WriteString(w, " ")
+	_, _ = io.WriteString(w, expr.Op.String())
+	_, _ = io.WriteString(w, " ")
 	expr.Right.Dump(w)
 }
 
@@ -264,6 +264,6 @@ func (UnaryExpr) isExpr() {}
 func (UnaryExpr) isNode() {}
 
 func (expr UnaryExpr) Dump(w io.Writer) {
-	io.WriteString(w, expr.Op.String())
+	_, _ = io.WriteString(w, expr.Op.String())
 	expr.Expr.Dump(w)
 }

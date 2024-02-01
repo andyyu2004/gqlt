@@ -2,7 +2,6 @@ package memosa_test
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -47,7 +46,7 @@ var _ memosa.Query[KeyB, int32] = QueryB{}
 type KeyB struct{ X int32 }
 
 func (QueryB) Execute(ctx *memosa.Context, key KeyB) int32 {
-	return memosa.Fetch[QueryA](ctx, KeyA{X: key.X}) + 42
+	return memosa.Fetch[QueryA](ctx, KeyA(key)) + 42
 }
 
 type QueryC struct{}
@@ -83,11 +82,6 @@ func (QueryD) Execute(ctx *memosa.Context, key KeyD) int32 {
 func NewContext() (*memosa.Context, <-chan memosa.Event) {
 	ch := make(chan memosa.Event, 1000)
 	return memosa.New(memosa.WithEventHandler(func(event memosa.Event) { ch <- event })), ch
-}
-
-func typeof[T any]() reflect.Type {
-	var t T
-	return reflect.TypeOf(t)
 }
 
 func eq[T any](t testing.TB, x, y T) {

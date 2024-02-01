@@ -125,10 +125,6 @@ type memoized[T any] struct {
 	value T
 }
 
-func castMemoized[T any](memo *memoized[any]) *memoized[T] {
-	return &memoized[T]{verifiedAt: memo.verifiedAt, deps: memo.deps, value: memo.value.(T)}
-}
-
 func newRt(eventHandler func(Event)) *runtime {
 	return &runtime{
 		revision:         0,
