@@ -165,9 +165,12 @@ func tryGet(ctx *Context, queryType reflect.Type) (any, bool) {
 func fetch(ctx *Context, queryType reflect.Type, key any) any {
 	recordRead(ctx.rt, queryType, key)
 
+	// if the query is an input query, return the input value that was set
 	if value, ok := tryGet(ctx, queryType); ok {
 		return value
 	}
+
+	// otherwise, this is a derived query
 
 	// if a up-to-date memoized value exists, return it
 	memo, ok := tryFetchMemoized(ctx.rt, queryType, key)
