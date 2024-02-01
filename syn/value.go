@@ -25,7 +25,7 @@ const (
 
 type Value struct {
 	Raw      string
-	Children ChildValueList
+	Fields   ChildValueList
 	Kind     ValueKind
 	Position ast.Position `dump:"-"`
 	Comment  *CommentGroup
@@ -68,7 +68,7 @@ func (v *Value) Value(vars map[string]interface{}) (interface{}, error) {
 		return nil, nil
 	case ListValue:
 		var val []interface{}
-		for _, elem := range v.Children {
+		for _, elem := range v.Fields {
 			elemVal, err := elem.Value.Value(vars)
 			if err != nil {
 				return val, err
@@ -78,7 +78,7 @@ func (v *Value) Value(vars map[string]interface{}) (interface{}, error) {
 		return val, nil
 	case ObjectValue:
 		val := map[string]interface{}{}
-		for _, elem := range v.Children {
+		for _, elem := range v.Fields {
 			elemVal, err := elem.Value.Value(vars)
 			if err != nil {
 				return val, err
@@ -104,13 +104,13 @@ func (v *Value) String() string {
 		return strconv.Quote(v.Raw)
 	case ListValue:
 		var val []string
-		for _, elem := range v.Children {
+		for _, elem := range v.Fields {
 			val = append(val, elem.Value.String())
 		}
 		return "[" + strings.Join(val, ",") + "]"
 	case ObjectValue:
 		var val []string
-		for _, elem := range v.Children {
+		for _, elem := range v.Fields {
 			val = append(val, elem.Name+":"+elem.Value.String())
 		}
 		return "{" + strings.Join(val, ",") + "}"

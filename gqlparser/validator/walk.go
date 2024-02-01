@@ -153,7 +153,7 @@ func (w *Walker) walkDirectives(parentDef *syn.Definition, directives []*syn.Dir
 		for _, arg := range dir.Arguments {
 			var argDef *syn.ArgumentDefinition
 			if def != nil {
-				argDef = def.Arguments.ForName(arg.Name)
+				argDef = def.Arguments.ForName(arg.Name.Value)
 			}
 
 			w.walkArgument(argDef, arg)
@@ -178,7 +178,7 @@ func (w *Walker) walkValue(value *syn.Value) {
 	}
 
 	if value.Kind == syn.ObjectValue {
-		for _, child := range value.Children {
+		for _, child := range value.Fields {
 			if value.Definition != nil {
 				fieldDef := value.Definition.Fields.ForName(child.Name)
 				if fieldDef != nil {
@@ -191,7 +191,7 @@ func (w *Walker) walkValue(value *syn.Value) {
 	}
 
 	if value.Kind == syn.ListValue {
-		for _, child := range value.Children {
+		for _, child := range value.Fields {
 			if value.ExpectedType != nil && value.ExpectedType.Elem != nil {
 				child.Value.ExpectedType = value.ExpectedType.Elem
 				child.Value.Definition = value.Definition
@@ -245,7 +245,7 @@ func (w *Walker) walkSelection(parentDef *syn.Definition, it syn.Selection) {
 		for _, arg := range it.Arguments {
 			var argDef *syn.ArgumentDefinition
 			if def != nil {
-				argDef = def.Arguments.ForName(arg.Name)
+				argDef = def.Arguments.ForName(arg.Name.Value)
 			}
 
 			w.walkArgument(argDef, arg)

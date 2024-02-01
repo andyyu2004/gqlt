@@ -16,7 +16,7 @@ func TestDump(t *testing.T) {
 		Directives: []*Directive{
 			{
 				Name:      "foo",
-				Arguments: []*Argument{{Name: "bar"}},
+				Arguments: []*Argument{{Name: lexer.Token{Value: "bar"}}},
 			},
 			{Arguments: []*Argument{}},
 		},

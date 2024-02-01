@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,8 +22,8 @@ func TestArg2Map(t *testing.T) {
 
 	t.Run("values", func(t *testing.T) {
 		args := arg2map(defs, ArgumentList{
-			{Name: "A", Value: &Value{Kind: StringValue, Raw: "valA"}},
-			{Name: "B", Value: &Value{Kind: StringValue, Raw: "valB"}},
+			{Name: lexer.Token{Value: "A"}, Value: &Value{Kind: StringValue, Raw: "valA"}},
+			{Name: lexer.Token{Value: "B"}, Value: &Value{Kind: StringValue, Raw: "valB"}},
 		}, nil)
 		require.Equal(t, "valA", args["A"])
 		require.Equal(t, "valB", args["B"])
@@ -30,8 +31,8 @@ func TestArg2Map(t *testing.T) {
 
 	t.Run("nulls", func(t *testing.T) {
 		args := arg2map(defs, ArgumentList{
-			{Name: "A", Value: &Value{Kind: NullValue}},
-			{Name: "B", Value: &Value{Kind: NullValue}},
+			{Name: lexer.Token{Value: "A"}, Value: &Value{Kind: NullValue}},
+			{Name: lexer.Token{Value: "B"}, Value: &Value{Kind: NullValue}},
 		}, nil)
 		require.Equal(t, nil, args["A"])
 		require.Equal(t, nil, args["B"])
@@ -41,8 +42,8 @@ func TestArg2Map(t *testing.T) {
 
 	t.Run("undefined variables", func(t *testing.T) {
 		args := arg2map(defs, ArgumentList{
-			{Name: "A", Value: &Value{Kind: Variable, Raw: "VarA"}},
-			{Name: "B", Value: &Value{Kind: Variable, Raw: "VarB"}},
+			{Name: lexer.Token{Value: "A"}, Value: &Value{Kind: Variable, Raw: "VarA"}},
+			{Name: lexer.Token{Value: "B"}, Value: &Value{Kind: Variable, Raw: "VarB"}},
 		}, map[string]interface{}{})
 		require.Equal(t, "defaultA", args["A"])
 		require.NotContains(t, args, "B")
@@ -50,8 +51,8 @@ func TestArg2Map(t *testing.T) {
 
 	t.Run("nil variables", func(t *testing.T) {
 		args := arg2map(defs, ArgumentList{
-			{Name: "A", Value: &Value{Kind: Variable, Raw: "VarA"}},
-			{Name: "B", Value: &Value{Kind: Variable, Raw: "VarB"}},
+			{Name: lexer.Token{Value: "A"}, Value: &Value{Kind: Variable, Raw: "VarA"}},
+			{Name: lexer.Token{Value: "B"}, Value: &Value{Kind: Variable, Raw: "VarB"}},
 		}, map[string]interface{}{
 			"VarA": nil,
 			"VarB": nil,
@@ -64,8 +65,8 @@ func TestArg2Map(t *testing.T) {
 
 	t.Run("defined variables", func(t *testing.T) {
 		args := arg2map(defs, ArgumentList{
-			{Name: "A", Value: &Value{Kind: Variable, Raw: "VarA"}},
-			{Name: "B", Value: &Value{Kind: Variable, Raw: "VarB"}},
+			{Name: lexer.Token{Value: "A"}, Value: &Value{Kind: Variable, Raw: "VarA"}},
+			{Name: lexer.Token{Value: "B"}, Value: &Value{Kind: Variable, Raw: "VarB"}},
 		}, map[string]interface{}{
 			"VarA": "varvalA",
 			"VarB": "varvalB",

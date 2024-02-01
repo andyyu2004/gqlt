@@ -14,7 +14,7 @@ func init() {
 			}
 
 			seen := map[string]bool{}
-			for _, field := range value.Children {
+			for _, field := range value.Fields {
 				if seen[field.Name] {
 					addError(
 						Message(`There can be only one input field named "%s".`, field.Name),

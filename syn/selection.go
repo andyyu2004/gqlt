@@ -70,7 +70,7 @@ func (f *Field) Children() Children {
 		children = append(children, f.Name)
 	}
 
-	return append(children, f.SelectionSet)
+	return append(children, f.Arguments, f.SelectionSet)
 }
 
 func (*Field) Dump(io.Writer) {
@@ -79,11 +79,26 @@ func (*Field) Dump(io.Writer) {
 func (*Field) isNode() {}
 
 type Argument struct {
-	Name     string
+	Name     lexer.Token
 	Value    *Value
 	Position ast.Position `dump:"-"`
 	Comment  *CommentGroup
 }
+
+func (a *Argument) Children() Children {
+	return Children{a.Name}
+}
+
+func (*Argument) Dump(io.Writer) {}
+
+// Pos implements Node.
+func (a *Argument) Pos() ast.Position {
+	return a.Position
+}
+
+func (*Argument) isNode() {}
+
+var _ Node = &Argument{}
 
 func (f *Field) ArgumentMap(vars map[string]interface{}) map[string]interface{} {
 	return arg2map(f.Definition.Arguments, f.Arguments, vars)

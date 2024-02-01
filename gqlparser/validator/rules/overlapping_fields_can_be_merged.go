@@ -481,7 +481,7 @@ func sameArguments(args1 []*syn.Argument, args2 []*syn.Argument) bool {
 	for _, arg1 := range args1 {
 		var matched bool
 		for _, arg2 := range args2 {
-			if arg1.Name == arg2.Name && sameValue(arg1.Value, arg2.Value) {
+			if arg1.Name.Value == arg2.Name.Value && sameValue(arg1.Value, arg2.Value) {
 				matched = true
 				break
 			}

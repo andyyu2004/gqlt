@@ -378,8 +378,8 @@ func validateDirectives(schema *Schema, dirs DirectiveList, location DirectiveLo
 			return gqlerror.ErrorPosf(dir.Position, "Directive %s is not applicable on %s.", dir.Name, location)
 		}
 		for _, arg := range dir.Arguments {
-			if dirDefinition.Arguments.ForName(arg.Name) == nil {
-				return gqlerror.ErrorPosf(arg.Position, "Undefined argument %s for directive %s.", arg.Name, dir.Name)
+			if dirDefinition.Arguments.ForName(arg.Name.Value) == nil {
+				return gqlerror.ErrorPosf(arg.Position, "Undefined argument %s for directive %s.", arg.Name.Value, dir.Name)
 			}
 		}
 		for _, schemaArg := range dirDefinition.Arguments {

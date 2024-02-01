@@ -100,7 +100,7 @@ func init() {
 
 				for _, field := range value.Definition.Fields {
 					if field.Type.NonNull {
-						fieldValue := value.Children.ForName(field.Name)
+						fieldValue := value.Fields.ForName(field.Name)
 						if fieldValue == nil && field.DefaultValue == nil {
 							addError(
 								Message(`Field "%s.%s" of required type "%s" was not provided.`, value.Definition.Name, field.Name, field.Type.String()),
@@ -111,7 +111,7 @@ func init() {
 					}
 				}
 
-				for _, fieldValue := range value.Children {
+				for _, fieldValue := range value.Fields {
 					if value.Definition.Fields.ForName(fieldValue.Name) == nil {
 						var suggestions []string
 						for _, fieldValue := range value.Definition.Fields {

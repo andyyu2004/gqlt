@@ -14,7 +14,7 @@ func init() {
 				return
 			}
 			for _, arg := range field.Arguments {
-				def := field.Definition.Arguments.ForName(arg.Name)
+				def := field.Definition.Arguments.ForName(arg.Name.Value)
 				if def != nil {
 					continue
 				}
@@ -25,8 +25,8 @@ func init() {
 				}
 
 				addError(
-					Message(`Unknown argument "%s" on field "%s.%s".`, arg.Name, field.ObjectDefinition.Name, field.Name.Value),
-					SuggestListQuoted("Did you mean", arg.Name, suggestions),
+					Message(`Unknown argument "%s" on field "%s.%s".`, arg.Name.Value, field.ObjectDefinition.Name, field.Name.Value),
+					SuggestListQuoted("Did you mean", arg.Name.Value, suggestions),
 					At(field.Position),
 				)
 			}
@@ -37,7 +37,7 @@ func init() {
 				return
 			}
 			for _, arg := range directive.Arguments {
-				def := directive.Definition.Arguments.ForName(arg.Name)
+				def := directive.Definition.Arguments.ForName(arg.Name.Value)
 				if def != nil {
 					continue
 				}
@@ -48,8 +48,8 @@ func init() {
 				}
 
 				addError(
-					Message(`Unknown argument "%s" on directive "@%s".`, arg.Name, directive.Name),
-					SuggestListQuoted("Did you mean", arg.Name, suggestions),
+					Message(`Unknown argument "%s" on directive "@%s".`, arg.Name.Value, directive.Name),
+					SuggestListQuoted("Did you mean", arg.Name.Value, suggestions),
 					At(directive.Position),
 				)
 			}

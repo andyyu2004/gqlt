@@ -183,7 +183,7 @@ func (p *parser) parseArgument(isConst bool) *Argument {
 	arg := Argument{}
 	arg.Position = p.peekPos()
 	arg.Comment = p.comment
-	arg.Name = p.parseName().Value
+	arg.Name = p.parseName()
 	p.expect(lexer.Colon)
 
 	arg.Value = p.parseValueLiteral(isConst)
@@ -322,7 +322,7 @@ func (p *parser) parseList(isConst bool) *Value {
 		values = append(values, &ChildValue{Value: p.parseValueLiteral(isConst)})
 	})
 
-	return &Value{Children: values, Kind: ListValue, Position: pos, Comment: comment}
+	return &Value{Fields: values, Kind: ListValue, Position: pos, Comment: comment}
 }
 
 func (p *parser) parseObject(isConst bool) *Value {
@@ -333,7 +333,7 @@ func (p *parser) parseObject(isConst bool) *Value {
 		fields = append(fields, p.parseObjectField(isConst))
 	})
 
-	return &Value{Children: fields, Kind: ObjectValue, Position: pos, Comment: comment}
+	return &Value{Fields: fields, Kind: ObjectValue, Position: pos, Comment: comment}
 }
 
 func (p *parser) parseObjectField(isConst bool) *ChildValue {

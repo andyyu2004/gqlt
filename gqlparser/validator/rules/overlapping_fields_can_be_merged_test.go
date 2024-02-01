@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 	"github.com/andyyu2004/gqlt/syn"
 )
 
@@ -22,7 +23,7 @@ func Test_sameArguments(t *testing.T) {
 			args: func() (args1 []*syn.Argument, args2 []*syn.Argument) {
 				return nil, []*syn.Argument{
 					{
-						Name:     "thing",
+						Name:     lexer.Token{Value: "thing"},
 						Value:    &syn.Value{Raw: "a thing"},
 						Position: ast.Position{},
 					},
@@ -34,7 +35,7 @@ func Test_sameArguments(t *testing.T) {
 			args: func() (args1 []*syn.Argument, args2 []*syn.Argument) {
 				return []*syn.Argument{
 					{
-						Name:     "thing",
+						Name:     lexer.Token{Value: "thing"},
 						Value:    &syn.Value{Raw: "a thing"},
 						Position: ast.Position{},
 					},
@@ -46,14 +47,14 @@ func Test_sameArguments(t *testing.T) {
 			args: func() (args1 []*syn.Argument, args2 []*syn.Argument) {
 				return []*syn.Argument{
 						{
-							Name:     "thing1",
+							Name:     lexer.Token{Value: "thing1"},
 							Value:    &syn.Value{Raw: "1 thing"},
 							Position: ast.Position{},
 						},
 					},
 					[]*syn.Argument{
 						{
-							Name:     "thing2",
+							Name:     lexer.Token{Value: "thing2"},
 							Value:    &syn.Value{Raw: "2 thing"},
 							Position: ast.Position{},
 						},
@@ -65,14 +66,14 @@ func Test_sameArguments(t *testing.T) {
 			args: func() (args1 []*syn.Argument, args2 []*syn.Argument) {
 				return []*syn.Argument{
 						{
-							Name:     "thing1",
+							Name:     lexer.Token{Value: "thing1"},
 							Value:    &syn.Value{Raw: "1 thing"},
 							Position: ast.Position{},
 						},
 					},
 					[]*syn.Argument{
 						{
-							Name:     "thing1",
+							Name:     lexer.Token{Value: "thing1"},
 							Value:    &syn.Value{Raw: "2 thing"},
 							Position: ast.Position{},
 						},
@@ -84,14 +85,14 @@ func Test_sameArguments(t *testing.T) {
 			args: func() (args1 []*syn.Argument, args2 []*syn.Argument) {
 				return []*syn.Argument{
 						{
-							Name:     "thing1",
+							Name:     lexer.Token{Value: "thing1"},
 							Value:    &syn.Value{Raw: "1 thing"},
 							Position: ast.Position{},
 						},
 					},
 					[]*syn.Argument{
 						{
-							Name:     "thing1",
+							Name:     lexer.Token{Value: "thing1"},
 							Value:    &syn.Value{Raw: "1 thing"},
 							Position: ast.Position{},
 						},
@@ -103,24 +104,24 @@ func Test_sameArguments(t *testing.T) {
 			args: func() (args1 []*syn.Argument, args2 []*syn.Argument) {
 				return []*syn.Argument{
 						{
-							Name:     "thing1",
+							Name:     lexer.Token{Value: "thing1"},
 							Value:    &syn.Value{Raw: "1 thing"},
 							Position: ast.Position{},
 						},
 						{
-							Name:     "thing2",
+							Name:     lexer.Token{Value: "thing2"},
 							Value:    &syn.Value{Raw: "2 thing"},
 							Position: ast.Position{},
 						},
 					},
 					[]*syn.Argument{
 						{
-							Name:     "thing1",
+							Name:     lexer.Token{Value: "thing1"},
 							Value:    &syn.Value{Raw: "1 thing"},
 							Position: ast.Position{},
 						},
 						{
-							Name:     "thing2",
+							Name:     lexer.Token{Value: "thing2"},
 							Value:    &syn.Value{Raw: "2 thing"},
 							Position: ast.Position{},
 						},

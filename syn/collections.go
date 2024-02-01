@@ -1,5 +1,11 @@
 package syn
 
+import (
+	"io"
+
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
+)
+
 type FieldList []*FieldDefinition
 
 func (l FieldList) ForName(name string) *FieldDefinition {
@@ -81,9 +87,30 @@ func (l VariableDefinitionList) ForName(name string) *VariableDefinition {
 
 type ArgumentList []*Argument
 
+var _ Node = ArgumentList{}
+
+func (args ArgumentList) Children() Children {
+	children := make(Children, 0, len(args))
+	for _, arg := range args {
+		children = append(children, arg)
+	}
+	return children
+}
+
+func (ArgumentList) Dump(io.Writer) {
+}
+
+func (l ArgumentList) Pos() ast.Position {
+	fst := l[0]
+	lst := l[len(l)-1]
+	return fst.Pos().Merge(lst)
+}
+
+func (ArgumentList) isNode() {}
+
 func (l ArgumentList) ForName(name string) *Argument {
 	for _, it := range l {
-		if it.Name == name {
+		if it.Name.Value == name {
 			return it
 		}
 	}

@@ -22,13 +22,13 @@ func checkUniqueArgs(args syn.ArgumentList, addError AddErrFunc) {
 	knownArgNames := map[string]int{}
 
 	for _, arg := range args {
-		if knownArgNames[arg.Name] == 1 {
+		if knownArgNames[arg.Name.Value] == 1 {
 			addError(
-				Message(`There can be only one argument named "%s".`, arg.Name),
+				Message(`There can be only one argument named "%s".`, arg.Name.Value),
 				At(arg.Position),
 			)
 		}
 
-		knownArgNames[arg.Name]++
+		knownArgNames[arg.Name.Value]++
 	}
 }

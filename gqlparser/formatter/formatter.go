@@ -584,7 +584,7 @@ func (f *formatter) FormatArgumentList(lists syn.ArgumentList) {
 func (f *formatter) FormatArgument(arg *syn.Argument) {
 	f.FormatCommentGroup(arg.Comment)
 
-	f.WriteWord(arg.Name).NoPadding().WriteString(":").NeedPadding()
+	f.WriteWord(arg.Name.Value).NoPadding().WriteString(":").NeedPadding()
 	f.WriteString(arg.Value.String())
 }
 

@@ -22,7 +22,7 @@ func init() {
 					continue
 				}
 				for _, arg := range field.Arguments {
-					if arg.Name == argDef.Name {
+					if arg.Name.Value == argDef.Name {
 						continue argDef
 					}
 				}
@@ -48,7 +48,7 @@ func init() {
 					continue
 				}
 				for _, arg := range directive.Arguments {
-					if arg.Name == argDef.Name {
+					if arg.Name.Value == argDef.Name {
 						continue argDef
 					}
 				}

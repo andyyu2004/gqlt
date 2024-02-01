@@ -139,7 +139,7 @@ func (t variableTransform) transformOperation(operation *syn.OperationDefinition
 
 func (t variableTransform) transformArgumentList(argTypes map[string]typename, argumentList syn.ArgumentList) syn.ArgumentList {
 	return slice.Map(argumentList, func(argument *syn.Argument) *syn.Argument {
-		argTy := argTypes[argument.Name]
+		argTy := argTypes[argument.Name.Value]
 		return &syn.Argument{
 			Name:     argument.Name,
 			Value:    t.transformValue(argTy, argument.Value),
@@ -154,7 +154,7 @@ func (t variableTransform) transformValue(expectedType typename, value *syn.Valu
 	switch value.Kind {
 	case syn.Variable:
 		//  unexpected children for variable value
-		lib.Assert(len(value.Children) == 0)
+		lib.Assert(len(value.Fields) == 0)
 		val, ok := t.scope.Lookup(value.Raw)
 		if !ok {
 			t.err = fmt.Errorf("reference to undefined variable in graphql query: %s", value.Raw)
@@ -189,7 +189,7 @@ func (t variableTransform) transformValue(expectedType typename, value *syn.Valu
 	default:
 		return &syn.Value{
 			Raw: value.Raw,
-			Children: slice.Map(value.Children, func(child *syn.ChildValue) *syn.ChildValue {
+			Fields: slice.Map(value.Fields, func(child *syn.ChildValue) *syn.ChildValue {
 				childTy := ty.InputFields[child.Name]
 				return &syn.ChildValue{
 					Name:     child.Name,
