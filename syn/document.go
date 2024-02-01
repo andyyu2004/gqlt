@@ -5,7 +5,7 @@ import "github.com/andyyu2004/gqlt/gqlparser/ast"
 type QueryDocument struct {
 	Operations OperationList
 	Fragments  FragmentDefinitionList
-	Position   *ast.Position `dump:"-"`
+	Position   ast.Position `dump:"-"`
 	Comment    *CommentGroup
 }
 
@@ -15,7 +15,7 @@ type SchemaDocument struct {
 	Directives      DirectiveDefinitionList
 	Definitions     DefinitionList
 	Extensions      DefinitionList
-	Position        *ast.Position `dump:"-"`
+	Position        ast.Position `dump:"-"`
 	Comment         *CommentGroup
 }
 
@@ -75,7 +75,7 @@ type SchemaDefinition struct {
 	Description    string
 	Directives     DirectiveList
 	OperationTypes OperationTypeDefinitionList
-	Position       *ast.Position `dump:"-"`
+	Position       ast.Position `dump:"-"`
 
 	BeforeDescriptionComment *CommentGroup
 	AfterDescriptionComment  *CommentGroup
@@ -85,6 +85,6 @@ type SchemaDefinition struct {
 type OperationTypeDefinition struct {
 	Operation Operation
 	Type      string
-	Position  *ast.Position `dump:"-"`
+	Position  ast.Position `dump:"-"`
 	Comment   *CommentGroup
 }

@@ -46,7 +46,7 @@ func init() {
 
 type topField struct {
 	name     string
-	position *ast.Position
+	position ast.Position
 }
 
 func retrieveTopFieldNames(selectionSet syn.SelectionSet) []*topField {
@@ -59,7 +59,7 @@ func retrieveTopFieldNames(selectionSet syn.SelectionSet) []*topField {
 			case *syn.Field:
 				fields = append(fields, &topField{
 					name:     selection.Name,
-					position: selection.GetPosition(),
+					position: selection.Pos(),
 				})
 			case *syn.InlineFragment:
 				walk(selection.SelectionSet)

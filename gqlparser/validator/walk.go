@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/syn"
 )
 
@@ -227,7 +228,7 @@ func (w *Walker) walkSelection(parentDef *syn.Definition, it syn.Selection) {
 		if it.Name == "__typename" {
 			def = &syn.FieldDefinition{
 				Name: "__typename",
-				Type: syn.NamedType("String", nil),
+				Type: syn.NamedType("String", ast.Position{}),
 			}
 		} else if parentDef != nil {
 			def = parentDef.Fields.ForName(it.Name)

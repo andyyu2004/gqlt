@@ -268,7 +268,7 @@ func (p *parser) parseValueLiteral(isConst bool) *Value {
 			p.unexpectedError()
 			return nil
 		}
-		return &Value{Position: &token.Position, Comment: p.comment, Raw: p.parseVariable(), Kind: Variable}
+		return &Value{Position: token.Position, Comment: p.comment, Raw: p.parseVariable(), Kind: Variable}
 	case lexer.Minus:
 		p.next()
 		tok := p.peek()
@@ -306,7 +306,7 @@ func (p *parser) parseValueLiteral(isConst bool) *Value {
 
 	p.next()
 
-	return &Value{Position: &token.Position, Comment: p.comment, Raw: raw, Kind: kind}
+	return &Value{Position: token.Position, Comment: p.comment, Raw: raw, Kind: kind}
 }
 
 func (p *parser) parseList(isConst bool) *Value {

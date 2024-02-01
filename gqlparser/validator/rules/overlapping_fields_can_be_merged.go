@@ -200,7 +200,7 @@ type ConflictMessage struct {
 	ResponseName string
 	Names        []string
 	SubMessage   []*ConflictMessage
-	Position     *ast.Position
+	Position     ast.Position
 }
 
 func (m *ConflictMessage) String(buf *bytes.Buffer) {

@@ -149,7 +149,7 @@ func ErrorPathf(path fmt.Stringer, message string, args ...interface{}) *Error {
 	}
 }
 
-func ErrorPosf(pos *ast.Position, message string, args ...interface{}) *Error {
+func ErrorPosf(pos ast.Position, message string, args ...interface{}) *Error {
 	return ErrorLocf(
 		pos.Src.Name,
 		pos.Line,

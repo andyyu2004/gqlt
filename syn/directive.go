@@ -32,7 +32,7 @@ const (
 type Directive struct {
 	Name      string
 	Arguments ArgumentList
-	Position  *ast.Position `dump:"-"`
+	Position  ast.Position `dump:"-"`
 
 	// Requires validation
 	ParentDefinition *Definition

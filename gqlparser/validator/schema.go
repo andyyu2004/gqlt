@@ -172,13 +172,13 @@ func ValidateSchemaDocument(sd *SchemaDocument) (*Schema, error) {
 			schema.Query.Fields,
 			&FieldDefinition{
 				Name: "__schema",
-				Type: NonNullNamedType("__Schema", nil),
+				Type: NonNullNamedType("__Schema", ast.Position{}),
 			},
 			&FieldDefinition{
 				Name: "__type",
-				Type: NamedType("__Type", nil),
+				Type: NamedType("__Type", ast.Position{}),
 				Arguments: ArgumentDefinitionList{
-					{Name: "name", Type: NonNullNamedType("String", nil)},
+					{Name: "name", Type: NonNullNamedType("String", ast.Position{})},
 				},
 			},
 		)
@@ -505,7 +505,7 @@ func isCovariant(schema *Schema, required *Type, actual *Type) bool {
 	return isCovariant(schema, required.Elem, actual.Elem)
 }
 
-func validateName(pos *ast.Position, name string) *gqlerror.Error {
+func validateName(pos ast.Position, name string) *gqlerror.Error {
 	if strings.HasPrefix(name, "__") {
 		return gqlerror.ErrorPosf(pos, `Name "%s" must not begin with "__", which is reserved by GraphQL introspection.`, name)
 	}

@@ -27,7 +27,7 @@ type Value struct {
 	Raw      string
 	Children ChildValueList
 	Kind     ValueKind
-	Position *ast.Position `dump:"-"`
+	Position ast.Position `dump:"-"`
 	Comment  *CommentGroup
 
 	// Require validation
@@ -39,7 +39,7 @@ type Value struct {
 type ChildValue struct {
 	Name     string
 	Value    *Value
-	Position *ast.Position `dump:"-"`
+	Position ast.Position `dump:"-"`
 	Comment  *CommentGroup
 }
 

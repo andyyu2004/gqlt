@@ -91,13 +91,8 @@ func (p *parser) consumeCommentGroup() {
 	p.commentConsuming = false
 }
 
-func (p *parser) peekPos() *ast.Position {
-	if p.err != nil {
-		return nil
-	}
-
-	peek := p.peek()
-	return &peek.Position
+func (p *parser) peekPos() ast.Position {
+	return p.peek().Position
 }
 
 func (p *parser) peek() lexer.Token {

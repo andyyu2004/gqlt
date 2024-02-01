@@ -41,12 +41,7 @@ type FragmentStmt struct {
 var _ Stmt = FragmentStmt{}
 
 func (stmt FragmentStmt) Children() Children {
-	return Children{
-		stmt.Fragment.FragmentKw,
-		stmt.Fragment.Name,
-		stmt.Fragment.OnKw,
-		stmt.Fragment.TypeCondition,
-	}
+	return Children{stmt.Fragment}
 }
 
 func (FragmentStmt) isStmt() {}

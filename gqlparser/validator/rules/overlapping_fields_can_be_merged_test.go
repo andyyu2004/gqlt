@@ -24,7 +24,7 @@ func Test_sameArguments(t *testing.T) {
 					{
 						Name:     "thing",
 						Value:    &syn.Value{Raw: "a thing"},
-						Position: &ast.Position{},
+						Position: ast.Position{},
 					},
 				}
 			},
@@ -36,7 +36,7 @@ func Test_sameArguments(t *testing.T) {
 					{
 						Name:     "thing",
 						Value:    &syn.Value{Raw: "a thing"},
-						Position: &ast.Position{},
+						Position: ast.Position{},
 					},
 				}, nil
 			},
@@ -48,14 +48,14 @@ func Test_sameArguments(t *testing.T) {
 						{
 							Name:     "thing1",
 							Value:    &syn.Value{Raw: "1 thing"},
-							Position: &ast.Position{},
+							Position: ast.Position{},
 						},
 					},
 					[]*syn.Argument{
 						{
 							Name:     "thing2",
 							Value:    &syn.Value{Raw: "2 thing"},
-							Position: &ast.Position{},
+							Position: ast.Position{},
 						},
 					}
 			},
@@ -67,14 +67,14 @@ func Test_sameArguments(t *testing.T) {
 						{
 							Name:     "thing1",
 							Value:    &syn.Value{Raw: "1 thing"},
-							Position: &ast.Position{},
+							Position: ast.Position{},
 						},
 					},
 					[]*syn.Argument{
 						{
 							Name:     "thing1",
 							Value:    &syn.Value{Raw: "2 thing"},
-							Position: &ast.Position{},
+							Position: ast.Position{},
 						},
 					}
 			},
@@ -86,14 +86,14 @@ func Test_sameArguments(t *testing.T) {
 						{
 							Name:     "thing1",
 							Value:    &syn.Value{Raw: "1 thing"},
-							Position: &ast.Position{},
+							Position: ast.Position{},
 						},
 					},
 					[]*syn.Argument{
 						{
 							Name:     "thing1",
 							Value:    &syn.Value{Raw: "1 thing"},
-							Position: &ast.Position{},
+							Position: ast.Position{},
 						},
 					}
 			},
@@ -105,24 +105,24 @@ func Test_sameArguments(t *testing.T) {
 						{
 							Name:     "thing1",
 							Value:    &syn.Value{Raw: "1 thing"},
-							Position: &ast.Position{},
+							Position: ast.Position{},
 						},
 						{
 							Name:     "thing2",
 							Value:    &syn.Value{Raw: "2 thing"},
-							Position: &ast.Position{},
+							Position: ast.Position{},
 						},
 					},
 					[]*syn.Argument{
 						{
 							Name:     "thing1",
 							Value:    &syn.Value{Raw: "1 thing"},
-							Position: &ast.Position{},
+							Position: ast.Position{},
 						},
 						{
 							Name:     "thing2",
 							Value:    &syn.Value{Raw: "2 thing"},
-							Position: &ast.Position{},
+							Position: ast.Position{},
 						},
 					}
 			},

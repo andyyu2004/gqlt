@@ -3,13 +3,14 @@ package syn
 import (
 	"testing"
 
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/stretchr/testify/require"
 )
 
 func TestArg2Map(t *testing.T) {
 	defs := ArgumentDefinitionList{
-		{Name: "A", Type: NamedType("String", nil), DefaultValue: &Value{Kind: StringValue, Raw: "defaultA"}},
-		{Name: "B", Type: NamedType("String", nil)},
+		{Name: "A", Type: NamedType("String", ast.Position{}), DefaultValue: &Value{Kind: StringValue, Raw: "defaultA"}},
+		{Name: "B", Type: NamedType("String", ast.Position{})},
 	}
 
 	t.Run("defaults", func(t *testing.T) {

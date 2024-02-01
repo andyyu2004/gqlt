@@ -22,12 +22,12 @@ type OperationDefinition struct {
 	VariableDefinitions VariableDefinitionList
 	Directives          DirectiveList
 	SelectionSet        SelectionSet
-	Position            *ast.Position `dump:"-"`
+	Position            ast.Position `dump:"-"`
 	Comment             *CommentGroup
 }
 
 func (op OperationDefinition) Pos() ast.Position {
-	return *op.Position
+	return op.Position
 }
 
 func (OperationDefinition) isNode() {}
@@ -43,7 +43,7 @@ type VariableDefinition struct {
 	Type         *Type
 	DefaultValue *Value
 	Directives   DirectiveList
-	Position     *ast.Position `dump:"-"`
+	Position     ast.Position `dump:"-"`
 	Comment      *CommentGroup
 
 	// Requires validation

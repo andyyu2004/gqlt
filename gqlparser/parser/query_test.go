@@ -42,6 +42,6 @@ query SomeOperation {
 		})
 		assert.Nil(t, err)
 		assert.Equal(t, 3, query.Operations.ForName("SomeOperation").Position.Line)
-		assert.Equal(t, 5, query.Operations.ForName("SomeOperation").SelectionSet[0].GetPosition().Line)
+		assert.Equal(t, 5, query.Operations.ForName("SomeOperation").SelectionSet[0].Pos().Line)
 	})
 }
