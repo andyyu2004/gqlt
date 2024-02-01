@@ -225,13 +225,13 @@ func (w *Walker) walkSelection(parentDef *syn.Definition, it syn.Selection) {
 	switch it := it.(type) {
 	case *syn.Field:
 		var def *syn.FieldDefinition
-		if it.Name == "__typename" {
+		if it.Name.Value == "__typename" {
 			def = &syn.FieldDefinition{
 				Name: "__typename",
 				Type: syn.NamedType("String", ast.Position{}),
 			}
 		} else if parentDef != nil {
-			def = parentDef.Fields.ForName(it.Name)
+			def = parentDef.Fields.ForName(it.Name.Value)
 		}
 
 		it.Definition = def

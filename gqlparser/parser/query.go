@@ -153,10 +153,10 @@ func (p *parser) parseField() *Field {
 	var field Field
 	field.Position = p.peekPos()
 	field.Comment = p.comment
-	field.Alias = p.parseName().Value
+	field.Alias = p.parseName()
 
 	if p.skip(lexer.Colon) {
-		field.Name = p.parseName().Value
+		field.Name = p.parseName()
 	} else {
 		field.Name = field.Alias
 	}

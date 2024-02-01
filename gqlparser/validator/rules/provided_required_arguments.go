@@ -28,7 +28,7 @@ func init() {
 				}
 
 				addError(
-					Message(`Field "%s" argument "%s" of type "%s" is required, but it was not provided.`, field.Name, argDef.Name, argDef.Type.String()),
+					Message(`Field "%s" argument "%s" of type "%s" is required, but it was not provided.`, field.Name.Value, argDef.Name, argDef.Type.String()),
 					At(field.Position),
 				)
 			}

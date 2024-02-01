@@ -676,10 +676,10 @@ func (f *formatter) FormatSelection(selection syn.Selection) {
 func (f *formatter) FormatField(field *syn.Field) {
 	f.FormatCommentGroup(field.Comment)
 
-	if field.Alias != "" && field.Alias != field.Name {
-		f.WriteWord(field.Alias).NoPadding().WriteString(":").NeedPadding()
+	if field.Alias.Value != "" && field.Alias.Value != field.Name.Value {
+		f.WriteWord(field.Alias.Value).NoPadding().WriteString(":").NeedPadding()
 	}
-	f.WriteWord(field.Name)
+	f.WriteWord(field.Name.Value)
 
 	if len(field.Arguments) != 0 {
 		f.NoPadding()

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/andyyu2004/gqlt/gqlparser/formatter"
+	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 	"github.com/andyyu2004/gqlt/gqlparser/validator"
 	"github.com/andyyu2004/gqlt/memosa/lib"
 	"github.com/andyyu2004/gqlt/slice"
@@ -79,7 +80,11 @@ func (t namespaceTransform) transformOperation(operation *syn.OperationDefinitio
 	// iterate in reverse order to build up the selection set from the inside out
 	for i := len(t.namespace) - 1; i >= 0; i-- {
 		selectionSet = syn.SelectionSet{
-			&syn.Field{Alias: t.namespace[i], Name: t.namespace[i], SelectionSet: selectionSet},
+			&syn.Field{
+				Alias:        lexer.Token{Value: t.namespace[i]},
+				Name:         lexer.Token{Value: t.namespace[i]},
+				SelectionSet: selectionSet,
+			},
 		}
 	}
 
@@ -207,7 +212,7 @@ func (t variableTransform) transformSelectionSet(ty typename, selectionSet syn.S
 	return slice.Map(selectionSet, func(selection syn.Selection) syn.Selection {
 		switch selection := selection.(type) {
 		case *syn.Field:
-			field := t.schema.Types[ty].Fields[selection.Name]
+			field := t.schema.Types[ty].Fields[selection.Name.Value]
 			return &syn.Field{
 				Alias:        selection.Alias,
 				Name:         selection.Name,

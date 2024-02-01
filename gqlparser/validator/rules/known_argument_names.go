@@ -25,7 +25,7 @@ func init() {
 				}
 
 				addError(
-					Message(`Unknown argument "%s" on field "%s.%s".`, arg.Name, field.ObjectDefinition.Name, field.Name),
+					Message(`Unknown argument "%s" on field "%s.%s".`, arg.Name, field.ObjectDefinition.Name, field.Name.Value),
 					SuggestListQuoted("Did you mean", arg.Name, suggestions),
 					At(field.Position),
 				)

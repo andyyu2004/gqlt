@@ -20,8 +20,8 @@ func TestWalker(t *testing.T) {
 	observers.OnField(func(_ *Walker, field *syn.Field) {
 		called = true
 
-		require.Equal(t, "name", field.Name)
-		require.Equal(t, "as", field.Alias)
+		require.Equal(t, "name", field.Name.Value)
+		require.Equal(t, "as", field.Alias.Value)
 		require.Equal(t, "name", field.Definition.Name)
 		require.Equal(t, "Query", field.ObjectDefinition.Name)
 	})
@@ -42,7 +42,7 @@ func TestWalkInlineFragment(t *testing.T) {
 	observers.OnField(func(_ *Walker, field *syn.Field) {
 		called = true
 
-		require.Equal(t, "name", field.Name)
+		require.Equal(t, "name", field.Name.Value)
 		require.Equal(t, "name", field.Definition.Name)
 		require.Equal(t, "Query", field.ObjectDefinition.Name)
 	})

@@ -58,7 +58,7 @@ func retrieveTopFieldNames(selectionSet syn.SelectionSet) []*topField {
 			switch selection := selection.(type) {
 			case *syn.Field:
 				fields = append(fields, &topField{
-					name:     selection.Name,
+					name:     selection.Name.Value,
 					position: selection.Pos(),
 				})
 			case *syn.InlineFragment:

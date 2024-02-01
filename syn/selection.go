@@ -4,6 +4,7 @@ import (
 	"io"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 )
 
 type SelectionSet []Selection
@@ -47,8 +48,8 @@ func (s *FragmentSpread) Pos() ast.Position { return s.Position }
 func (f *InlineFragment) Pos() ast.Position { return f.Position }
 
 type Field struct {
-	Alias        string
-	Name         string
+	Alias        lexer.Token
+	Name         lexer.Token
 	Arguments    ArgumentList
 	Directives   DirectiveList
 	SelectionSet SelectionSet

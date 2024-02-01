@@ -427,17 +427,17 @@ func (m *overlappingFieldsCanBeMergedManager) findConflict(parentFieldsAreMutual
 		areMutuallyExclusive = tmp
 	}
 
-	fieldNameA := fieldA.Name
-	if fieldA.Alias != "" {
-		fieldNameA = fieldA.Alias
+	fieldNameA := fieldA.Name.Value
+	if fieldA.Alias.Value != "" {
+		fieldNameA = fieldA.Alias.Value
 	}
 
 	if !areMutuallyExclusive {
 		// Two aliases must refer to the same field.
-		if fieldA.Name != fieldB.Name {
+		if fieldA.Name.Value != fieldB.Name.Value {
 			return &ConflictMessage{
 				ResponseName: fieldNameA,
-				Message:      fmt.Sprintf(`"%s" and "%s" are different fields`, fieldA.Name, fieldB.Name),
+				Message:      fmt.Sprintf(`"%s" and "%s" are different fields`, fieldA.Name.Value, fieldB.Name.Value),
 				Position:     fieldB.Position,
 			}
 		}
@@ -540,9 +540,9 @@ func getFieldsAndFragmentNames(selectionSet syn.SelectionSet) (*sequentialFields
 		for _, selection := range selectionSet {
 			switch selection := selection.(type) {
 			case *syn.Field:
-				responseName := selection.Name
-				if selection.Alias != "" {
-					responseName = selection.Alias
+				responseName := selection.Name.Value
+				if selection.Alias.Value != "" {
+					responseName = selection.Alias.Value
 				}
 				fieldsMap.Push(responseName, selection)
 

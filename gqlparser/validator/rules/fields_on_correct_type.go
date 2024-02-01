@@ -17,11 +17,11 @@ func init() {
 				return
 			}
 
-			message := fmt.Sprintf(`Cannot query field "%s" on type "%s".`, field.Name, field.ObjectDefinition.Name)
+			message := fmt.Sprintf(`Cannot query field "%s" on type "%s".`, field.Name.Value, field.ObjectDefinition.Name)
 
-			if suggestedTypeNames := getSuggestedTypeNames(walker, field.ObjectDefinition, field.Name); suggestedTypeNames != nil {
+			if suggestedTypeNames := getSuggestedTypeNames(walker, field.ObjectDefinition, field.Name.Value); suggestedTypeNames != nil {
 				message += " Did you mean to use an inline fragment on " + QuotedOrList(suggestedTypeNames...) + "?"
-			} else if suggestedFieldNames := getSuggestedFieldNames(field.ObjectDefinition, field.Name); suggestedFieldNames != nil {
+			} else if suggestedFieldNames := getSuggestedFieldNames(field.ObjectDefinition, field.Name.Value); suggestedFieldNames != nil {
 				message += " Did you mean " + QuotedOrList(suggestedFieldNames...) + "?"
 			}
 
