@@ -30,6 +30,7 @@ func New(ide *ide.IDE) *server.Server {
 		Initialize:                     ls.initialize,
 		Initialized:                    ls.initialized,
 		TextDocumentDidChange:          ls.onChange,
+		TextDocumentDidOpen:            ls.onOpen,
 		TextDocumentSemanticTokensFull: ls.semanticTokens,
 	}
 	return server.NewServer(handler, "gqlt", false)
@@ -49,7 +50,8 @@ func (s *ls) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (a
 	return protocol.InitializeResult{
 		Capabilities: protocol.ServerCapabilities{
 			TextDocumentSync: protocol.TextDocumentSyncOptions{
-				Change: lib.Ref(protocol.TextDocumentSyncKindFull),
+				OpenClose: lib.Ref(true),
+				Change:    lib.Ref(protocol.TextDocumentSyncKindFull),
 			},
 			SemanticTokensProvider: protocol.SemanticTokensOptions{
 				Legend: semanticTokensLegend,
@@ -61,6 +63,16 @@ func (s *ls) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (a
 }
 
 func (s *ls) initialized(ctx *glsp.Context, params *protocol.InitializedParams) error {
+	return nil
+}
+
+func (s *ls) onOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
+	s.Apply(ide.Changes{
+		ide.SetFileContent{
+			Path:    params.TextDocument.URI,
+			Content: params.TextDocument.Text,
+		},
+	})
 	return nil
 }
 
