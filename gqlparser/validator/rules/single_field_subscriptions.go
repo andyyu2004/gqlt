@@ -21,8 +21,8 @@ func init() {
 			fields := retrieveTopFieldNames(operation.SelectionSet)
 
 			name := "Anonymous Subscription"
-			if operation.Name != "" {
-				name = `Subscription ` + strconv.Quote(operation.Name)
+			if operation.Name.Value != "" {
+				name = `Subscription ` + strconv.Quote(operation.Name.Value)
 			}
 
 			if len(fields) > 1 {

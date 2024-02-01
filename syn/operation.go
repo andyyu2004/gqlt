@@ -4,6 +4,7 @@ import (
 	"io"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 	"github.com/andyyu2004/gqlt/lex"
 )
 
@@ -18,7 +19,7 @@ const (
 type OperationDefinition struct {
 	Operation           Operation
 	OperationToken      *lex.Token `dump:"-"`
-	Name                string
+	Name                lexer.Token
 	VariableDefinitions VariableDefinitionList
 	Directives          DirectiveList
 	SelectionSet        SelectionSet
@@ -34,8 +35,13 @@ func (OperationDefinition) isNode() {}
 
 func (OperationDefinition) Dump(io.Writer) {}
 
-func (OperationDefinition) Children() Children {
-	return Children{}
+func (d OperationDefinition) Children() Children {
+	children := Children{}
+	if d.OperationToken != nil {
+		children = append(children, *d.OperationToken)
+	}
+
+	return children
 }
 
 type VariableDefinition struct {

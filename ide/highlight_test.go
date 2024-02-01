@@ -49,7 +49,7 @@ func TestHighlight(t *testing.T) {
 1:10..1:12: number
 `))
 
-	check("queries", `let x = query { foo }
+	check("queries", `let x = query { foo bar }
 mutation { bar }`, expect.Expect(`1:1..1:4: keyword
 1:5..1:6: variable
 1:7..1:8: operator

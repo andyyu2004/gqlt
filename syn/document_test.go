@@ -21,7 +21,7 @@ func TestQueryDocMethods(t *testing.T) {
 
 	require.Nil(t, err)
 	t.Run("GetOperation", func(t *testing.T) {
-		require.EqualValues(t, "Bob", doc.Operations.ForName("Bob").Name)
+		require.EqualValues(t, "Bob", doc.Operations.ForName("Bob").Name.Value)
 		require.Nil(t, doc.Operations.ForName("Alice"))
 	})
 

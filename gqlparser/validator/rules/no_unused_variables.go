@@ -14,9 +14,9 @@ func init() {
 					continue
 				}
 
-				if operation.Name != "" {
+				if operation.Name.Value != "" {
 					addError(
-						Message(`Variable "$%s" is never used in operation "%s".`, varDef.Variable, operation.Name),
+						Message(`Variable "$%s" is never used in operation "%s".`, varDef.Variable, operation.Name.Value),
 						At(varDef.Position),
 					)
 				} else {

@@ -539,8 +539,8 @@ func (f *formatter) FormatOperationDefinition(def *syn.OperationDefinition) {
 	f.FormatCommentGroup(def.Comment)
 
 	f.WriteWord(string(def.Operation))
-	if def.Name != "" {
-		f.WriteWord(def.Name)
+	if def.Name.Value != "" {
+		f.WriteWord(def.Name.Value)
 	}
 	f.FormatVariableDefinitionList(def.VariableDefinitions)
 	f.FormatDirectiveList(def.Directives)

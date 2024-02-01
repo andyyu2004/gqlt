@@ -108,7 +108,7 @@ func (d *dumper) dumpStruct(v reflect.Value) {
 			continue
 		}
 
-		if isZero(f) {
+		if shouldSkip(f) {
 			continue
 		}
 		d.nl()
@@ -120,8 +120,10 @@ func (d *dumper) dumpStruct(v reflect.Value) {
 	d.indent--
 }
 
-func isZero(v reflect.Value) bool {
+func shouldSkip(v reflect.Value) bool {
 	switch v.Kind() {
+	case reflect.Bool:
+		return false
 	case reflect.Ptr, reflect.Interface:
 		return v.IsNil()
 	case reflect.Func, reflect.Map:
@@ -133,13 +135,13 @@ func isZero(v reflect.Value) bool {
 		}
 		z := true
 		for i := 0; i < v.Len(); i++ {
-			z = z && isZero(v.Index(i))
+			z = z && shouldSkip(v.Index(i))
 		}
 		return z
 	case reflect.Struct:
 		z := true
 		for i := 0; i < v.NumField(); i++ {
-			z = z && isZero(v.Field(i))
+			z = z && shouldSkip(v.Field(i))
 		}
 		return z
 	case reflect.String:
@@ -147,7 +149,7 @@ func isZero(v reflect.Value) bool {
 	}
 
 	// Compare other types directly:
-	return reflect.DeepEqual(v.Interface(), reflect.Zero(v.Type()))
+	return v.Equal(reflect.Zero(v.Type()))
 }
 
 func (d *dumper) dumpPtr(v reflect.Value) {

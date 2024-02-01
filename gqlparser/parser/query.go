@@ -58,7 +58,7 @@ func (p *parser) ParseOperationDefinition() *OperationDefinition {
 	od.Operation, od.OperationToken = p.parseOperationType()
 
 	if p.peek().Kind == lexer.Name {
-		od.Name = p.next().Value
+		od.Name = p.next()
 	}
 
 	od.VariableDefinitions = p.parseVariableDefinitions()

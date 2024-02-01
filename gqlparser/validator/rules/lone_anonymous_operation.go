@@ -9,7 +9,7 @@ import (
 func init() {
 	AddRule("LoneAnonymousOperation", func(observers *Events, addError AddErrFunc) {
 		observers.OnOperation(func(walker *Walker, operation *syn.OperationDefinition) {
-			if operation.Name == "" && len(walker.Document.Operations) > 1 {
+			if operation.Name.Value == "" && len(walker.Document.Operations) > 1 {
 				addError(
 					Message(`This anonymous operation must be the only defined operation.`),
 					At(operation.Position),

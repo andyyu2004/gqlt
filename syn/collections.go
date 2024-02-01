@@ -50,7 +50,7 @@ func (l OperationList) ForName(name string) *OperationDefinition {
 		return l[0]
 	}
 	for _, it := range l {
-		if it.Name == name {
+		if it.Name.Value == name {
 			return it
 		}
 	}

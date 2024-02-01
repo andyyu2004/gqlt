@@ -11,13 +11,13 @@ func init() {
 		seen := map[string]bool{}
 
 		observers.OnOperation(func(walker *Walker, operation *syn.OperationDefinition) {
-			if seen[operation.Name] {
+			if seen[operation.Name.Value] {
 				addError(
-					Message(`There can be only one operation named "%s".`, operation.Name),
+					Message(`There can be only one operation named "%s".`, operation.Name.Value),
 					At(operation.Position),
 				)
 			}
-			seen[operation.Name] = true
+			seen[operation.Name.Value] = true
 		})
 	})
 }
