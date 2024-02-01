@@ -70,7 +70,7 @@ func (f *Field) Children() Children {
 		children = append(children, f.Name)
 	}
 
-	return children
+	return append(children, f.SelectionSet)
 }
 
 func (*Field) Dump(io.Writer) {

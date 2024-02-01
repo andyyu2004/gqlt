@@ -41,7 +41,7 @@ func (d OperationDefinition) Children() Children {
 		children = append(children, *d.OperationToken)
 	}
 
-	return children
+	return append(children, d.Name, d.SelectionSet)
 }
 
 type VariableDefinition struct {

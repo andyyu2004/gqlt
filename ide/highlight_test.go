@@ -54,7 +54,10 @@ mutation { bar }`, expect.Expect(`1:1..1:4: keyword
 1:5..1:6: variable
 1:7..1:8: operator
 1:9..1:14: keyword
+1:17..1:20: property
+1:21..1:24: property
 2:1..2:9: keyword
+2:12..2:15: property
 `))
 
 	check("fragments", `fragment Foo on Bar { baz foo }`, expect.Expect(`1:1..1:9: keyword
