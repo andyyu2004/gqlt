@@ -72,12 +72,12 @@ func (ide *IDE) Highlight(path string) Highlights {
 			return Highlight{Pos: event.Token.Position, TokenKind: kind}, true
 		case syn.EnterEvent:
 			switch event.Node.(type) {
-			case *syn.ObjectExpr, *syn.ObjectPat:
+			case *syn.ObjectExpr, *syn.ObjectPat, syn.SelectionSet:
 				scopes.Push(ScopeObject)
 			}
 		case syn.ExitEvent:
 			switch event.Node.(type) {
-			case *syn.ObjectExpr, *syn.ObjectPat:
+			case *syn.ObjectExpr, *syn.ObjectPat, syn.SelectionSet:
 				lib.Assert(scopes.MustPop() == ScopeObject)
 			}
 		}

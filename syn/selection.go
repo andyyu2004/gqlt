@@ -63,8 +63,14 @@ type Field struct {
 
 var _ Node = &Field{}
 
-func (*Field) Children() Children {
-	return Children{}
+func (f *Field) Children() Children {
+	children := Children{f.Alias}
+	if f.Name != f.Alias {
+		// the parser will make name and alias the same token if no alias is provided
+		children = append(children, f.Name)
+	}
+
+	return children
 }
 
 func (*Field) Dump(io.Writer) {
