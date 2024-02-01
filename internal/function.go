@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 )
 
@@ -96,15 +97,8 @@ func truthy(val any) bool {
 
 var builtinScope = &scope{
 	vars: map[string]any{
-		"example": function(func(args []any) (any, error) {
-			if err := checkArity(1, args); err != nil {
-				return nil, err
-			}
-
-			if !truthy(args[0]) {
-				return nil, fmt.Errorf("assertion failed")
-			}
-
+		"print": function(func(args []any) (any, error) {
+			log.Println(args...)
 			return nil, nil
 		}),
 	},

@@ -91,7 +91,7 @@ func bindObjectPat(binder binder, objPat *syn.ObjectPat, values map[string]any) 
 
 		val, ok := values[name.Value]
 		if !ok {
-			return fmt.Errorf("object missing field specified in pattern %s", name)
+			return fmt.Errorf("object missing field specified in pattern `%s`", name.Value)
 		}
 
 		if err := bindPat(binder, pat, val); err != nil {

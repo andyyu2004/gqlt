@@ -4,18 +4,16 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 
-	"github.com/andyyu2004/gqlt/syn"
 	"github.com/graph-gophers/graphql-go"
+	"github.com/graph-gophers/graphql-go/errors"
 )
 
 type Client interface {
-	Request(ctx context.Context, req Request, out any) error
+	Request(ctx context.Context, req Request, out any) (GraphQLErrors, error)
 }
 
 type Request struct {
@@ -24,24 +22,36 @@ type Request struct {
 	Variables     map[string]any `json:"variables,omitempty"`
 }
 
+type Response struct {
+	Errors GraphQLErrors `json:"errors"`
+	Data   any           `json:"data"`
+}
+
+type GraphQLErrors []*errors.QueryError
+
+func (e GraphQLErrors) Error() string {
+	var buf bytes.Buffer
+	for _, err := range e {
+		buf.WriteString(err.Error())
+		buf.WriteString("\n")
+	}
+	return buf.String()
+}
+
 type GraphQLGophersClient struct {
 	Schema *graphql.Schema
 }
 
 var _ Client = GraphQLGophersClient{}
 
-func (a GraphQLGophersClient) Request(ctx context.Context, req Request, out any) error {
+func (a GraphQLGophersClient) Request(ctx context.Context, req Request, out any) (GraphQLErrors, error) {
 	res := a.Schema.Exec(ctx, req.Query, req.OperationName, req.Variables)
-	if len(res.Errors) > 0 {
-		errs := make([]error, 0, len(res.Errors))
-		for _, err := range res.Errors {
-			errs = append(errs, err)
-		}
 
-		return errors.Join(errs...)
+	if err := json.Unmarshal([]byte(res.Data), out); err != nil {
+		return nil, err
 	}
 
-	return json.Unmarshal([]byte(res.Data), out)
+	return res.Errors, nil
 }
 
 type HTTPClient struct {
@@ -52,16 +62,16 @@ type HTTPClient struct {
 
 var _ Client = GraphQLGophersClient{}
 
-func (c HTTPClient) Request(ctx context.Context, req Request, out any) error {
+func (c HTTPClient) Request(ctx context.Context, req Request, out any) (GraphQLErrors, error) {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(req)
 	if err != nil {
-		return fmt.Errorf("unable to encode request body: %w", err)
+		return nil, fmt.Errorf("unable to encode request body: %w", err)
 	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, c.URL, &buf)
 	if err != nil {
-		return fmt.Errorf("unable to create request: %w", err)
+		return nil, fmt.Errorf("unable to create request: %w", err)
 	}
 
 	if c.Headers != nil {
@@ -71,43 +81,15 @@ func (c HTTPClient) Request(ctx context.Context, req Request, out any) error {
 	httpReq.Header.Set("Content-Type", "application/json; charset=utf-8")
 	httpReq.Header.Set("Accept", "application/json; charset=utf-8")
 
+	res := Response{
+		Data: out,
+	}
 	w := httptest.NewRecorder()
 	c.Handler.ServeHTTP(w, httpReq)
 
-	type Response struct {
-		Errors GraphqlErrors `json:"errors"`
-		Data   interface{}
+	if err := json.NewDecoder(w.Body).Decode(&res); err != nil {
+		return nil, err
 	}
 
-	graphqlResponse := Response{Data: out}
-
-	if err := json.NewDecoder(w.Body).Decode(&graphqlResponse); err != nil {
-		return err
-	}
-
-	if len(graphqlResponse.Errors) > 0 {
-		return graphqlResponse.Errors
-	}
-
-	return nil
-}
-
-type Response struct {
-	Errors GraphqlErrors `json:"errors"`
-	Data   interface{}
-}
-
-type GraphqlErrors []GraphqlError
-
-type GraphqlError struct {
-	Message string   `json:"message"`
-	Path    syn.Path `json:"path,omitempty"`
-}
-
-func (e GraphqlErrors) Error() string {
-	var errs []string
-	for _, err := range e {
-		errs = append(errs, err.Message)
-	}
-	return strings.Join(errs, ",")
+	return res.Errors, nil
 }

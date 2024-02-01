@@ -2,6 +2,7 @@ package gqlt_test
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 
@@ -62,6 +63,13 @@ type query struct {
 	dogs []dog
 }
 
+func (q query) Fail(args struct{ Yes bool }) (int32, error) {
+	if args.Yes {
+		return 1, errors.New("failed")
+	}
+
+	return 0, nil
+}
 func (q query) Animals() query         { return q }
 func (q query) Dogs() dogQuery         { return dogQuery{q} }
 func (q query) Cats() catQuery         { return catQuery{q} }

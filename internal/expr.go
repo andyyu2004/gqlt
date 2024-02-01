@@ -67,7 +67,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 	case *syn.NameExpr:
 		val, ok := ecx.scope.Lookup(expr.Name.Value)
 		if !ok {
-			return nil, fmt.Errorf("reference to undefined variable: %s", expr.Name)
+			return nil, fmt.Errorf("reference to undefined variable: %s", expr.Name.Value)
 		}
 
 		return val, nil

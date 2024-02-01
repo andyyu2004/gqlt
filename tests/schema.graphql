@@ -1,4 +1,5 @@
 type Query {
+  fail(yes: Boolean! = true): Int!
   animals: AnimalQuery!
 }
 

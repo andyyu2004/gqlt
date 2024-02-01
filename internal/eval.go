@@ -370,7 +370,12 @@ func (e *Executor) prepareSchema(ctx context.Context) error {
 			} `json:"__schema"`
 		}
 
-		err = e.client.Request(ctx, Request{Query: introspectionQuery}, &res)
+		var errors GraphQLErrors
+		errors, err = e.client.Request(ctx, Request{Query: introspectionQuery}, &res)
+		if errors != nil {
+			err = errors
+			return
+		}
 
 		// can continue even on error safely, it will just become mostly a noop
 		types := map[typename]ty{}
