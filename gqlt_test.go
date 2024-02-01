@@ -21,8 +21,6 @@ func TestGqlt(t *testing.T) {
 	// change this to something else to debug a particular test
 	const debugGlob = "**"
 
-	ctx := context.Background()
-
 	const testpath = "tests"
 
 	q := &query{
@@ -49,9 +47,9 @@ func TestGqlt(t *testing.T) {
 	}
 
 	for _, client := range clients {
-		gqlt.New(gqlt.ClientFactoryFunc(func(testing.TB) gqlt.Client {
-			return client
-		})).Run(t, ctx, testpath, gqlt.WithGlob(debugGlob))
+		gqlt.New(gqlt.ClientFactoryFunc(func(testing.TB) (context.Context, gqlt.Client) {
+			return context.Background(), client
+		})).Test(t, testpath, gqlt.WithGlob(debugGlob))
 	}
 }
 

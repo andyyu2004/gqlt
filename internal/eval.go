@@ -160,8 +160,8 @@ func Discover(dir string) ([]string, error) {
 	return doublestar.FilepathGlob(fmt.Sprintf("%s/**/*%s", dir, Ext))
 }
 
-// `Run` all `gqlt` tests in the given directory (recursively).
-func (e *Executor) Run(t *testing.T, ctx context.Context, root string, opts ...Opt) {
+// `Test` all `gqlt` tests in the given directory (recursively).
+func (e *Executor) Test(t *testing.T, root string, opts ...Opt) {
 	runConfig := runConfig{
 		glob: "**",
 	}
@@ -202,7 +202,7 @@ func (e *Executor) Run(t *testing.T, ctx context.Context, root string, opts ...O
 				t.Fatal(err)
 			}
 
-			client := e.factory.CreateClient(t)
+			ctx, client := e.factory.CreateClient(t)
 			if err := e.RunFile(ctx, client, file); err != nil {
 				t.Fatal(err)
 			}

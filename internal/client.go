@@ -18,12 +18,12 @@ type Client interface {
 }
 
 type ClientFactory interface {
-	CreateClient(t testing.TB) Client
+	CreateClient(t testing.TB) (context.Context, Client)
 }
 
-type ClientFactoryFunc func(t testing.TB) Client
+type ClientFactoryFunc func(t testing.TB) (context.Context, Client)
 
-func (f ClientFactoryFunc) CreateClient(t testing.TB) Client {
+func (f ClientFactoryFunc) CreateClient(t testing.TB) (context.Context, Client) {
 	return f(t)
 }
 
