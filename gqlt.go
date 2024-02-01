@@ -10,6 +10,8 @@ var (
 )
 
 type (
+	ClientFactory        = internal.ClientFactory
+	ClientFactoryFunc    = internal.ClientFactoryFunc
 	Client               = internal.Client
 	GraphQLGophersClient = internal.GraphQLGophersClient
 	HTTPClient           = internal.HTTPClient

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"testing"
 
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/errors"
@@ -14,6 +15,16 @@ import (
 
 type Client interface {
 	Request(ctx context.Context, req Request, out any) (GraphQLErrors, error)
+}
+
+type ClientFactory interface {
+	CreateClient(t testing.TB) Client
+}
+
+type ClientFactoryFunc func(t testing.TB) Client
+
+func (f ClientFactoryFunc) CreateClient(t testing.TB) Client {
+	return f(t)
 }
 
 type Request struct {

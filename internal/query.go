@@ -45,7 +45,7 @@ func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.O
 	// Pass our local variables directly also as graphql variables
 	var data any
 	req := Request{Query: buf.String(), Variables: ecx.scope.gqlVars()}
-	errs, err := e.client.Request(ctx, req, &data)
+	errs, err := ecx.client.Request(ctx, req, &data)
 	if err != nil {
 		return nil, err
 	}

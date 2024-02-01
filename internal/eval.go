@@ -31,13 +31,13 @@ type runConfig struct {
 
 // A thread-safe graphql client
 type Executor struct {
-	client     Client
+	factory    ClientFactory
 	schemaOnce sync.Once
 	schema     schema
 }
 
-func New(client Client) *Executor {
-	return &Executor{client: client}
+func New(factory ClientFactory) *Executor {
+	return &Executor{factory: factory}
 }
 
 type settings struct {
@@ -71,6 +71,7 @@ func (s *settings) Set(key string, val any) error {
 }
 
 type executionContext struct {
+	client   Client
 	scope    *scope
 	settings settings
 }
@@ -201,19 +202,21 @@ func (e *Executor) Run(t *testing.T, ctx context.Context, root string, opts ...O
 				t.Fatal(err)
 			}
 
-			if err := e.RunFile(ctx, file); err != nil {
+			client := e.factory.CreateClient(t)
+			if err := e.RunFile(ctx, client, file); err != nil {
 				t.Fatal(err)
 			}
 		})
 	}
 }
 
-func (e *Executor) RunFile(ctx context.Context, file syn.File) error {
-	if err := e.prepareSchema(ctx); err != nil {
+func (e *Executor) RunFile(ctx context.Context, client Client, file syn.File) error {
+	if err := e.prepareSchema(ctx, client); err != nil {
 		return err
 	}
 
 	ecx := &executionContext{
+		client: client,
 		scope: &scope{
 			parent:    builtinScope,
 			vars:      map[string]any{},
@@ -342,7 +345,7 @@ type field struct {
 	Args map[string]typename
 }
 
-func (e *Executor) prepareSchema(ctx context.Context) error {
+func (e *Executor) prepareSchema(ctx context.Context, client Client) error {
 	var err error
 	e.schemaOnce.Do(func() {
 		type Field struct {
@@ -371,7 +374,7 @@ func (e *Executor) prepareSchema(ctx context.Context) error {
 		}
 
 		var errors GraphQLErrors
-		errors, err = e.client.Request(ctx, Request{Query: introspectionQuery}, &res)
+		errors, err = client.Request(ctx, Request{Query: introspectionQuery}, &res)
 		if errors != nil {
 			err = errors
 			return
