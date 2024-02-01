@@ -2,10 +2,12 @@ package syn
 
 import (
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 )
 
 type ValueKind int
@@ -36,12 +38,45 @@ type Value struct {
 	ExpectedType       *Type
 }
 
+// Children implements Node.
+func (v *Value) Children() Children {
+	children := Children{}
+	for _, f := range v.Fields {
+		children = append(children, f)
+	}
+	return children
+}
+
+func (v *Value) Format(io.Writer) {}
+
+func (v *Value) Pos() ast.Position {
+	return v.Position
+}
+
+func (*Value) isNode() {}
+
+var _ Node = new(Value)
+
 type ChildValue struct {
-	Name     string
+	Name     lexer.Token
 	Value    *Value
 	Position ast.Position `dump:"-"`
 	Comment  *CommentGroup
 }
+
+func (v *ChildValue) Children() Children {
+	return Children{v.Name, v.Value}
+}
+
+func (*ChildValue) Format(io.Writer) {}
+
+func (v *ChildValue) Pos() ast.Position {
+	return v.Position
+}
+
+func (*ChildValue) isNode() {}
+
+var _ Node = new(ChildValue)
 
 func (v *Value) Value(vars map[string]interface{}) (interface{}, error) {
 	if v == nil {
@@ -83,7 +118,7 @@ func (v *Value) Value(vars map[string]interface{}) (interface{}, error) {
 			if err != nil {
 				return val, err
 			}
-			val[elem.Name] = elemVal
+			val[elem.Name.Value] = elemVal
 		}
 		return val, nil
 	default:
@@ -111,7 +146,7 @@ func (v *Value) String() string {
 	case ObjectValue:
 		var val []string
 		for _, elem := range v.Fields {
-			val = append(val, elem.Name+":"+elem.Value.String())
+			val = append(val, elem.Name.Value+":"+elem.Value.String())
 		}
 		return "{" + strings.Join(val, ",") + "}"
 	default:

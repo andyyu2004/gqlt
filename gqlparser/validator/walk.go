@@ -180,7 +180,7 @@ func (w *Walker) walkValue(value *syn.Value) {
 	if value.Kind == syn.ObjectValue {
 		for _, child := range value.Fields {
 			if value.Definition != nil {
-				fieldDef := value.Definition.Fields.ForName(child.Name)
+				fieldDef := value.Definition.Fields.ForName(child.Name.Value)
 				if fieldDef != nil {
 					child.Value.ExpectedType = fieldDef.Type
 					child.Value.Definition = w.Schema.Types[fieldDef.Type.Name()]

@@ -112,15 +112,15 @@ func init() {
 				}
 
 				for _, fieldValue := range value.Fields {
-					if value.Definition.Fields.ForName(fieldValue.Name) == nil {
+					if value.Definition.Fields.ForName(fieldValue.Name.Value) == nil {
 						var suggestions []string
 						for _, fieldValue := range value.Definition.Fields {
 							suggestions = append(suggestions, fieldValue.Name)
 						}
 
 						addError(
-							Message(`Field "%s" is not defined by type "%s".`, fieldValue.Name, value.Definition.Name),
-							SuggestListQuoted("Did you mean", fieldValue.Name, suggestions),
+							Message(`Field "%s" is not defined by type "%s".`, fieldValue.Name.Value, value.Definition.Name),
+							SuggestListQuoted("Did you mean", fieldValue.Name.Value, suggestions),
 							At(fieldValue.Position),
 						)
 					}

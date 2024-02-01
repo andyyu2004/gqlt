@@ -190,7 +190,7 @@ func (t variableTransform) transformValue(expectedType typename, value *syn.Valu
 		return &syn.Value{
 			Raw: value.Raw,
 			Fields: slice.Map(value.Fields, func(child *syn.ChildValue) *syn.ChildValue {
-				childTy := ty.InputFields[child.Name]
+				childTy := ty.InputFields[child.Name.Value]
 				return &syn.ChildValue{
 					Name:     child.Name,
 					Value:    t.transformValue(childTy.Type, child.Value),

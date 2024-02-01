@@ -86,7 +86,7 @@ type Argument struct {
 }
 
 func (a *Argument) Children() Children {
-	return Children{a.Name}
+	return Children{a.Name, a.Value}
 }
 
 func (*Argument) Format(io.Writer) {}

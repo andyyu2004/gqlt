@@ -167,7 +167,7 @@ type ChildValueList []*ChildValue
 
 func (v ChildValueList) ForName(name string) *Value {
 	for _, f := range v {
-		if f.Name == name {
+		if f.Name.Value == name {
 			return f.Value
 		}
 	}

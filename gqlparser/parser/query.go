@@ -340,7 +340,7 @@ func (p *parser) parseObjectField(isConst bool) *ChildValue {
 	field := ChildValue{}
 	field.Position = p.peekPos()
 	field.Comment = p.comment
-	field.Name = p.parseName().Value
+	field.Name = p.parseName()
 
 	p.expect(lexer.Colon)
 

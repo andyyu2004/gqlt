@@ -15,13 +15,13 @@ func init() {
 
 			seen := map[string]bool{}
 			for _, field := range value.Fields {
-				if seen[field.Name] {
+				if seen[field.Name.Value] {
 					addError(
-						Message(`There can be only one input field named "%s".`, field.Name),
+						Message(`There can be only one input field named "%s".`, field.Name.Value),
 						At(field.Position),
 					)
 				}
-				seen[field.Name] = true
+				seen[field.Name.Value] = true
 			}
 		})
 	})
