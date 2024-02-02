@@ -1,13 +1,18 @@
 package syn
 
-import "github.com/andyyu2004/gqlt/gqlparser/ast"
+import (
+	"io"
+
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/lex"
+)
 
 func NonNullNamedType(named string, pos ast.Position) *Type {
-	return &Type{NamedType: named, NonNull: true, Position: pos}
+	return &Type{NamedType: lex.Token{Value: named, Kind: lex.TypeName}, NonNull: true, Position: pos}
 }
 
 func NamedType(named string, pos ast.Position) *Type {
-	return &Type{NamedType: named, NonNull: false, Position: pos}
+	return &Type{NamedType: lex.Token{Value: named, Kind: lex.TypeName}, NonNull: false, Position: pos}
 }
 
 func NonNullListType(elem *Type, pos ast.Position) *Type {
@@ -19,15 +24,37 @@ func ListType(elem *Type, pos ast.Position) *Type {
 }
 
 type Type struct {
-	NamedType string
+	NamedType lex.Token
 	Elem      *Type
 	NonNull   bool
 	Position  ast.Position `dump:"-"`
 }
 
+var _ Node = Type{}
+
+func (t Type) Children() Children {
+	children := Children{}
+	if t.NamedType.Value != "" {
+		children = append(children, t.NamedType)
+	}
+	if t.Elem != nil {
+		children = append(children, t.Elem)
+	}
+
+	return children
+}
+
+func (Type) Format(io.Writer) {}
+
+func (t Type) Pos() ast.Position {
+	return t.Position
+}
+
+func (Type) isNode() {}
+
 func (t *Type) Name() string {
-	if t.NamedType != "" {
-		return t.NamedType
+	if t.NamedType.Value != "" {
+		return t.NamedType.Value
 	}
 
 	return t.Elem.Name()
@@ -38,15 +65,15 @@ func (t *Type) String() string {
 	if t.NonNull {
 		nn = "!"
 	}
-	if t.NamedType != "" {
-		return t.NamedType + nn
+	if t.NamedType.Value != "" {
+		return t.NamedType.Value + nn
 	}
 
 	return "[" + t.Elem.String() + "]" + nn
 }
 
 func (t *Type) IsCompatible(other *Type) bool {
-	if t.NamedType != other.NamedType {
+	if t.NamedType.Value != other.NamedType.Value {
 		return false
 	}
 

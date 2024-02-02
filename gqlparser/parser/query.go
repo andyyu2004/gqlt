@@ -379,7 +379,7 @@ func (p *parser) parseTypeReference() *Type {
 		p.expect(lexer.BracketR)
 	} else {
 		typ.Position = p.peekPos()
-		typ.NamedType = p.parseName().Value
+		typ.NamedType = p.parseTypeName()
 	}
 
 	if p.skip(lexer.Bang) {

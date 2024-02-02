@@ -64,6 +64,7 @@ var _ Node = VariableDefinition{}
 func (d VariableDefinition) Children() Children {
 	return Children{
 		d.Variable,
+		d.Type,
 		d.DefaultValue,
 	}
 }

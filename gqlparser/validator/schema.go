@@ -486,12 +486,12 @@ func isCovariant(schema *Schema, required *Type, actual *Type) bool {
 		return false
 	}
 
-	if required.NamedType != "" {
-		if required.NamedType == actual.NamedType {
+	if required.NamedType.Value != "" {
+		if required.NamedType.Value == actual.NamedType.Value {
 			return true
 		}
-		for _, pt := range schema.PossibleTypes[required.NamedType] {
-			if pt.Name == actual.NamedType {
+		for _, pt := range schema.PossibleTypes[required.NamedType.Value] {
+			if pt.Name == actual.NamedType.Value {
 				return true
 			}
 		}

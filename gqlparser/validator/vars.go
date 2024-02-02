@@ -55,16 +55,16 @@ func VariableValues(schema *syn.Schema, op *syn.OperationDefinition, variables m
 
 				jsonNumber, isJSONNumber := val.(json.Number)
 				if isJSONNumber {
-					if v.Type.NamedType == "Int" {
+					if v.Type.NamedType.Value == "Int" {
 						n, err := jsonNumber.Int64()
 						if err != nil {
-							return nil, gqlerror.ErrorPathf(validator.path, "cannot use value %d as %s", n, v.Type.NamedType)
+							return nil, gqlerror.ErrorPathf(validator.path, "cannot use value %d as %s", n, v.Type.NamedType.Value)
 						}
 						rv = reflect.ValueOf(n)
-					} else if v.Type.NamedType == "Float" {
+					} else if v.Type.NamedType.Value == "Float" {
 						f, err := jsonNumber.Float64()
 						if err != nil {
-							return nil, gqlerror.ErrorPathf(validator.path, "cannot use value %f as %s", f, v.Type.NamedType)
+							return nil, gqlerror.ErrorPathf(validator.path, "cannot use value %f as %s", f, v.Type.NamedType.Value)
 						}
 						rv = reflect.ValueOf(f)
 
@@ -123,9 +123,9 @@ func (v *varValidator) validateVarType(typ *syn.Type, val reflect.Value) (reflec
 		}
 		return val, nil
 	}
-	def := v.schema.Types[typ.NamedType]
+	def := v.schema.Types[typ.NamedType.Value]
 	if def == nil {
-		panic(fmt.Errorf("missing def for %s", typ.NamedType))
+		panic(fmt.Errorf("missing def for %s", typ.NamedType.Value))
 	}
 
 	if !typ.NonNull && !val.IsValid() {
@@ -151,7 +151,7 @@ func (v *varValidator) validateVarType(typ *syn.Type, val reflect.Value) (reflec
 		return val, nil
 	case syn.Scalar:
 		kind := val.Type().Kind()
-		switch typ.NamedType {
+		switch typ.NamedType.Value {
 		case "Int":
 			if kind == reflect.Int || kind == reflect.Int32 || kind == reflect.Int64 || kind == reflect.Float32 || kind == reflect.Float64 || IsValidIntString(val, kind) {
 				return val, nil
@@ -178,7 +178,7 @@ func (v *varValidator) validateVarType(typ *syn.Type, val reflect.Value) (reflec
 			// assume custom scalars are ok
 			return val, nil
 		}
-		return val, gqlerror.ErrorPathf(v.path, "cannot use %s as %s", kind.String(), typ.NamedType)
+		return val, gqlerror.ErrorPathf(v.path, "cannot use %s as %s", kind.String(), typ.NamedType.Value)
 	case syn.InputObject:
 		if val.Kind() != reflect.Map {
 			return val, gqlerror.ErrorPathf(v.path, "must be a %s", def.Name)

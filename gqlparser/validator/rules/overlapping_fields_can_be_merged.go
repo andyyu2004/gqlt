@@ -520,8 +520,8 @@ func doTypesConflict(walker *Walker, type1 *syn.Type, type2 *syn.Type) bool {
 		return true
 	}
 
-	t1 := walker.Schema.Types[type1.NamedType]
-	t2 := walker.Schema.Types[type2.NamedType]
+	t1 := walker.Schema.Types[type1.NamedType.Value]
+	t2 := walker.Schema.Types[type2.NamedType.Value]
 	if (t1.Kind == syn.Scalar || t1.Kind == syn.Enum) && (t2.Kind == syn.Scalar || t2.Kind == syn.Enum) {
 		return t1.Name != t2.Name
 	}

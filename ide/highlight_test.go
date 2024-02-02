@@ -95,6 +95,7 @@ mutation { bar }`, expect.Expect(`1:1..1:4: keyword
 
 	check("query variables", "query ($foo: Foo!) { foo(foo: $foo) }", expect.Expect(`1:1..1:6: keyword
 1:9..1:12: parameter
+1:14..1:17: type
 1:22..1:25: property
 1:26..1:29: parameter
 `))
