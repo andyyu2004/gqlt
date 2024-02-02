@@ -8,7 +8,7 @@ import (
 )
 
 func TestHighlight(t *testing.T) {
-	check := func(name, content string, expect expect.Expectation) {
+	check := func(name, content string, expectation expect.Expectation) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			const path = "test.gqlt"
@@ -23,7 +23,7 @@ func TestHighlight(t *testing.T) {
 			t.Cleanup(cleanup)
 
 			highlights := s.Highlight(path)
-			expect.AssertEqual(t, highlights.String())
+			expectation.AssertEqual(t, highlights.String())
 		})
 	}
 

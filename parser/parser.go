@@ -136,7 +136,7 @@ func (p *Parser) expect(kind lex.TokenKind) (lex.Token, bool) {
 	}
 
 	tok := p.lexer.Peek()
-	p.error(tok, "expected `%s`, found `%s`", kind.String(), tok.String())
+	p.error(tok, "expected '%s', found '%s'", kind.String(), tok.String())
 	return lex.Token{}, false
 }
 
