@@ -20,14 +20,21 @@ type Opt func(*runConfig)
 // Apply a glob filter to the test files
 // This is applied to the path formed by stripping the root from the test file's path.
 func WithGlob(glob string) Opt {
-	return func(o *runConfig) {
-		o.glob = glob
+	return func(c *runConfig) {
+		c.glob = glob
+	}
+}
+
+func TypeCheck(b bool) Opt {
+	return func(c *runConfig) {
+		c.typecheck = b
 	}
 }
 
 type runConfig struct {
 	// Filter is a glob pattern (with support for **) that is matched against each test file path.
-	glob string
+	glob      string
+	typecheck bool
 }
 
 // A thread-safe graphql client
@@ -197,7 +204,10 @@ func (e *Executor) Test(t *testing.T, root string, opts ...Opt) {
 
 			tcx := typecheck.New()
 			if _, err := tcx.Check(file); err != nil {
-				t.Fatal(err)
+				if runConfig.typecheck {
+					t.Fatal(err)
+				}
+				t.Logf("ignoring typecheck error: %v", err)
 			}
 
 			ctx, client := e.factory.CreateClient(t)

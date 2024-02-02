@@ -49,7 +49,7 @@ func TestGqlt(t *testing.T) {
 	for _, client := range clients {
 		gqlt.New(gqlt.ClientFactoryFunc(func(testing.TB) (context.Context, gqlt.Client) {
 			return context.Background(), client
-		})).Test(t, testpath, gqlt.WithGlob(debugGlob))
+		})).Test(t, testpath, gqlt.WithGlob(debugGlob), gqlt.TypeCheck(true))
 	}
 }
 

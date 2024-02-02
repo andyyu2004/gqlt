@@ -3,10 +3,11 @@ package gqlt
 import "github.com/andyyu2004/gqlt/internal/eval"
 
 var (
-	New      = eval.New
-	Discover = eval.Discover
-	Ext      = eval.Ext
-	WithGlob = eval.WithGlob
+	New       = eval.New
+	Discover  = eval.Discover
+	Ext       = eval.Ext
+	WithGlob  = eval.WithGlob
+	TypeCheck = eval.TypeCheck
 )
 
 type (
