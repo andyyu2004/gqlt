@@ -91,10 +91,26 @@ func (s *ls) onChange(ctx *glsp.Context, params *protocol.DidChangeTextDocumentP
 	}
 
 	s.Apply(changes)
+
+	s.publishDiagnostics(ctx)
+
 	return nil
 }
 
-func (s *ls) semanticTokens(ctx *glsp.Context, params *protocol.SemanticTokensParams) (*protocol.SemanticTokens, error) {
+func (l *ls) publishDiagnostics(ctx *glsp.Context) {
+	s, cleanup := l.Snapshot()
+	defer cleanup()
+
+	diagnostics := s.Diagnostics()
+	for uri, diags := range diagnostics {
+		ctx.Notify(protocol.ServerTextDocumentPublishDiagnostics, &protocol.PublishDiagnosticsParams{
+			URI:         uri,
+			Diagnostics: diags,
+		})
+	}
+}
+
+func (l *ls) semanticTokens(ctx *glsp.Context, params *protocol.SemanticTokensParams) (*protocol.SemanticTokens, error) {
 	type SemanticToken struct {
 		deltaLine            uint32
 		deltaStart           uint32
@@ -102,6 +118,9 @@ func (s *ls) semanticTokens(ctx *glsp.Context, params *protocol.SemanticTokensPa
 		tokenType            uint32
 		tokenModifiersBitset uint32
 	}
+
+	s, cleanup := l.Snapshot()
+	defer cleanup()
 
 	highlights := s.Highlight(params.TextDocument.URI)
 	tokens := []SemanticToken{}

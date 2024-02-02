@@ -19,8 +19,10 @@ func TestHighlight(t *testing.T) {
 
 			ide := ide.New()
 			ide.Apply(changes)
+			s, cleanup := ide.Snapshot()
+			t.Cleanup(cleanup)
 
-			highlights := ide.Highlight(path)
+			highlights := s.Highlight(path)
 			expect.AssertEqual(t, highlights.String())
 		})
 	}

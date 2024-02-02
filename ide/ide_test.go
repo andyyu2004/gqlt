@@ -19,8 +19,10 @@ func TestIDE(t *testing.T) {
 
 	ide := ide.New()
 	ide.Apply(changes)
+	s, cleanup := ide.Snapshot()
+	t.Cleanup(cleanup)
 
-	ast := ide.Parse(path)
+	ast := s.Parse(path)
 	expect.Expect(`let x = 5;
 `).AssertEqual(t, ast.String())
 }

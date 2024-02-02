@@ -30,8 +30,8 @@ type Highlight struct {
 	TokenKind protocol.SemanticTokenType
 }
 
-func (ide *IDE) Highlight(path string) Highlights {
-	root := ide.Parse(path)
+func (s *Snapshot) Highlight(path string) Highlights {
+	root := s.Parse(path)
 	type Scope int
 	const (
 		ScopeObject Scope = iota
