@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/andyyu2004/gqlt/slice"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/errors"
 )
@@ -39,6 +40,17 @@ type Response struct {
 }
 
 type GraphQLErrors []*errors.QueryError
+
+func (errs GraphQLErrors) catch() any {
+	return slice.Map(errs, func(err *errors.QueryError) any {
+		return map[string]any{
+			"message": err.Message,
+			"path":    err.Path,
+		}
+	})
+}
+
+var _ catchable = GraphQLErrors{}
 
 func (e GraphQLErrors) Error() string {
 	var buf bytes.Buffer

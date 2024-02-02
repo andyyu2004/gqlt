@@ -538,7 +538,7 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 	case lex.ParenL:
 		p.bump(lex.ParenL)
 		expr := p.parseExpr()
-		if expr == nil {
+		if isNil(expr) {
 			return nil
 		}
 		p.expect(lex.ParenR)
@@ -547,6 +547,13 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 		return p.parseQueryExpr()
 	case lex.Int, lex.Float, lex.String, lex.BlockString, lex.True, lex.False, lex.Null:
 		return p.parseLiteralExpr()
+	case lex.Try:
+		tryKw := p.bump(lex.Try)
+		expr := p.parseAtomExpr()
+		if isNil(expr) {
+			return nil
+		}
+		return &syn.TryExpr{TryKw: tryKw, Expr: expr}
 	case lex.Name:
 		p.bump(lex.Name)
 		return &syn.NameExpr{Position: tok.Pos(), Name: tok}

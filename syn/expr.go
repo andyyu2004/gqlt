@@ -263,3 +263,26 @@ func (expr UnaryExpr) Format(w io.Writer) {
 	_, _ = io.WriteString(w, expr.Op.String())
 	expr.Expr.Format(w)
 }
+
+type TryExpr struct {
+	TryKw lex.Token
+	Expr  Expr
+}
+
+var _ Expr = TryExpr{}
+
+func (expr TryExpr) Children() Children {
+	return Children{expr.TryKw, expr.Expr}
+}
+
+func (expr TryExpr) Pos() ast.Position {
+	return expr.TryKw.Pos().Merge(expr.Expr)
+}
+
+func (TryExpr) isExpr() {}
+func (TryExpr) isNode() {}
+
+func (expr TryExpr) Format(w io.Writer) {
+	_, _ = io.WriteString(w, "try ")
+	expr.Expr.Format(w)
+}

@@ -10,6 +10,26 @@ import (
 
 func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Expr) (any, error) {
 	switch expr := expr.(type) {
+	case *syn.TryExpr:
+		const dataKey = "data"
+		const errorsKey = "errors"
+		data, err := e.eval(ctx, ecx, expr.Expr)
+		if err != nil {
+			if err, ok := err.(catchable); ok {
+				return map[string]any{
+					dataKey:   data,
+					errorsKey: err.catch(),
+				}, nil
+			}
+
+			return nil, err
+		}
+
+		return map[string]any{
+			dataKey:   data,
+			errorsKey: nil,
+		}, nil
+
 	case *syn.OperationExpr:
 		return e.query(ctx, ecx, expr)
 

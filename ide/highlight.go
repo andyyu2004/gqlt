@@ -43,7 +43,18 @@ func (ide *IDE) Highlight(path string) Highlights {
 		case syn.TokenEvent:
 			var kind protocol.SemanticTokenType
 			switch event.Token.Kind {
-			case lex.Let, lex.False, lex.True, lex.Null, lex.Assert, lex.Matches, lex.Fragment, lex.On, lex.Query, lex.Mutation, lex.Set:
+			case lex.Let,
+				lex.False,
+				lex.True,
+				lex.Null,
+				lex.Assert,
+				lex.Matches,
+				lex.Fragment,
+				lex.On,
+				lex.Query,
+				lex.Mutation,
+				lex.Set,
+				lex.Try:
 				kind = protocol.SemanticTokenTypeKeyword
 			case lex.TypeName:
 				kind = protocol.SemanticTokenTypeType

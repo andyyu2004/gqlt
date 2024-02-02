@@ -114,6 +114,8 @@ func convertToken(tok [n]lexer.Token) (Token, int) {
 			kind = Set
 		case "not":
 			kind = Not
+		case "try":
+			kind = Try
 		default:
 			kind = Name
 		}
@@ -194,6 +196,7 @@ const (
 	Equals2
 	BangEqual
 	Not
+	Try
 
 	TypeName
 )
@@ -232,6 +235,8 @@ func (t TokenKind) Name() string {
 		return "BangEqual"
 	case Not:
 		return "Not"
+	case Try:
+		return "try"
 	default:
 		return lexer.Type(t).Name()
 	}
@@ -271,6 +276,8 @@ func (t TokenKind) String() string {
 		return "!="
 	case Not:
 		return "not"
+	case Try:
+		return "try"
 	default:
 		return lexer.Type(t).String()
 	}

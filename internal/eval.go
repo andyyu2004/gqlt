@@ -408,3 +408,9 @@ func (e *Executor) prepareSchema(ctx context.Context, client Client) error {
 	})
 	return err
 }
+
+// an interface an error type should implement if it should be catchable by a `try <expr>`
+type catchable interface {
+	// convert the error into a gqlt value that can returned
+	catch() any
+}

@@ -87,4 +87,9 @@ mutation { bar }`, expect.Expect(`1:1..1:4: keyword
 1:5..1:14: variable
 1:16..1:25: string
 `))
+
+	check("try", "try query { foo }", expect.Expect(`1:1..1:4: keyword
+1:5..1:10: keyword
+1:13..1:16: property
+`))
 }

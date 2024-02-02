@@ -1,5 +1,5 @@
- assert query { fail(yes: false) } == 0
- let { data, errors } = query { fail(yes: true) }
+ assert try query { fail(yes: false) } == { data: 0, errors: null }
+ let { data, errors } = try query { fail(yes: true) }
  assert data == null
  assert errors == [
     {

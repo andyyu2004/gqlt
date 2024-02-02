@@ -11,7 +11,6 @@ import (
 	"github.com/andyyu2004/gqlt/memosa/lib"
 	"github.com/andyyu2004/gqlt/slice"
 	"github.com/andyyu2004/gqlt/syn"
-	"github.com/graph-gophers/graphql-go/errors"
 )
 
 func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.OperationExpr) (any, error) {
@@ -50,24 +49,16 @@ func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.O
 		return nil, err
 	}
 
-	data = flatten(data)
 	if len(errs) > 0 {
-		return map[string]any{
-			"data": data,
-			"errors": slice.Map(errs, func(err *errors.QueryError) any {
-				return map[string]any{
-					"message": err.Message,
-					"path":    err.Path,
-				}
-			}),
-		}, nil
-	} else {
-		return data, nil
+		return flatten(data), errs
 	}
+
+	return flatten(data), nil
 }
 
 func formatOperation(operation *syn.OperationDefinition) *bytes.Buffer {
 	buf := bytes.NewBufferString("")
+
 	f := formatter.NewFormatter(buf, formatter.WithIndent("  "))
 	f.FormatQueryDocument(&syn.QueryDocument{
 		Operations: []*syn.OperationDefinition{operation},
