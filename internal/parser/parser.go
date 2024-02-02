@@ -43,6 +43,8 @@ func New(src *ast.Source) *Parser {
 	return &Parser{lexer: lexer}
 }
 
+var stmtFst = []lex.TokenKind{lex.Let, lex.Assert, lex.Set, lex.Fragment}
+
 func (p *Parser) Parse() (syn.File, error) {
 	for !p.at(lex.EOF) {
 		stmt := p.parseStmt()
@@ -51,7 +53,8 @@ func (p *Parser) Parse() (syn.File, error) {
 			p.stmts = append(p.stmts, stmt)
 		} else {
 			// error recovery by skipping tokens until the next start of statement by searching for a semicolon
-			for !p.at(lex.EOF) && !p.eat_(lex.Semi) {
+			// or searching for the start of the next statement
+			for !p.at(lex.EOF) && !p.at(stmtFst...) && !p.eat_(lex.Semi) {
 				p.lexer.Next()
 			}
 		}
@@ -84,9 +87,12 @@ func (p *Parser) peek() lex.Token {
 	return p.lexer.Peek()
 }
 
-func (p *Parser) at(kind lex.TokenKind) bool {
+func (p *Parser) at(kinds ...lex.TokenKind) bool {
 	tok := p.peek()
-	return tok.Kind == kind
+	for _, kind := range kinds {
+		return tok.Kind == kind
+	}
+	return false
 }
 
 func (p *Parser) eat_(kind lex.TokenKind) bool {
