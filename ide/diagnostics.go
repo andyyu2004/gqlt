@@ -25,7 +25,7 @@ func (s Snapshot) diagnoseFile(path string) []protocol.Diagnostic {
 			diagnostics = append(diagnostics, protocol.Diagnostic{
 				Range:    posToProto(mapper, err.Position),
 				Severity: lib.Ref(protocol.DiagnosticSeverityError),
-				Message:  err.Message,
+				Message:  err.Message(),
 			})
 		}
 	}

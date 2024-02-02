@@ -27,11 +27,15 @@ type Parser struct {
 
 type Error struct {
 	ast.Position
-	Message string
+	message string
 }
 
 func (err Error) Error() string {
-	return fmt.Sprintf("%v: %s", err.Position, err.Message)
+	return fmt.Sprintf("%v: %s", err.Position, err.Message())
+}
+
+func (err Error) Message() string {
+	return err.message
 }
 
 type Errors []Error
@@ -168,7 +172,7 @@ func (p *Parser) parseFragment() *syn.FragmentStmt {
 		err := err.(*gqlerror.Error)
 		p.errors = append(p.errors, Error{
 			Position: startPos.Pos(),
-			Message:  err.Message,
+			message:  err.Message,
 		})
 		return nil
 	}
@@ -239,7 +243,7 @@ type patOpts struct {
 }
 
 func (p *Parser) error(tok ast.HasPosition, msg string, args ...any) {
-	err := Error{Position: tok.Pos(), Message: fmt.Sprintf(msg, args...)}
+	err := Error{Position: tok.Pos(), message: fmt.Sprintf(msg, args...)}
 	p.errors = append(p.errors, err)
 }
 
@@ -649,7 +653,7 @@ func (p *Parser) parseQueryExpr() *syn.OperationExpr {
 		err := err.(*gqlerror.Error)
 		p.errors = append(p.errors, Error{
 			Position: startPos.Pos(),
-			Message:  err.Message,
+			message:  err.Message,
 		})
 		return nil
 	}
