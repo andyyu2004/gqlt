@@ -36,6 +36,7 @@ func (s *Snapshot) Highlight(path string) Highlights {
 	const (
 		ScopeObject Scope = iota
 		ScopeArgs
+		ScopeSet
 	)
 	scopes := stack.Stack[Scope]{}
 	return iterator.FilterMap(syn.Traverse(root.Ast), func(event syn.Event) (Highlight, bool) {
@@ -62,7 +63,7 @@ func (s *Snapshot) Highlight(path string) Highlights {
 				scope, ok := scopes.Peek()
 				if ok {
 					switch scope {
-					case ScopeObject:
+					case ScopeObject, ScopeSet:
 						kind = protocol.SemanticTokenTypeProperty
 					case ScopeArgs:
 						kind = protocol.SemanticTokenTypeParameter
@@ -90,6 +91,8 @@ func (s *Snapshot) Highlight(path string) Highlights {
 				scopes.Push(ScopeObject)
 			case syn.ArgumentList, syn.VariableDefinitionList:
 				scopes.Push(ScopeArgs)
+			case *syn.SetStmt:
+				scopes.Push(ScopeSet)
 			}
 		case syn.ExitEvent:
 			switch event.Node.(type) {
@@ -97,6 +100,8 @@ func (s *Snapshot) Highlight(path string) Highlights {
 				lib.Assert(scopes.MustPop() == ScopeObject)
 			case syn.ArgumentList, syn.VariableDefinitionList:
 				lib.Assert(scopes.MustPop() == ScopeArgs)
+			case *syn.SetStmt:
+				lib.Assert(scopes.MustPop() == ScopeSet)
 			}
 		}
 		return Highlight{}, false

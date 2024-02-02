@@ -86,7 +86,7 @@ mutation { bar }`, expect.Expect(`1:1..1:4: keyword
 `))
 
 	check("set", `set namespace "foo/bar"`, expect.Expect(`1:1..1:4: keyword
-1:5..1:14: variable
+1:5..1:14: property
 1:16..1:25: string
 `))
 
