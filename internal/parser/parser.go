@@ -202,7 +202,7 @@ func (p *Parser) parseSetStmt() *syn.SetStmt {
 		return nil
 	}
 
-	return &syn.SetStmt{Position: setKw.Merge(expr), SetKw: setKw, Key: key, Value: expr}
+	return &syn.SetStmt{Position: setKw.Merge(expr), SetKw: setKw, Key: key, Expr: expr}
 }
 
 func (p *Parser) parseAssertStmt() *syn.AssertStmt {
@@ -643,7 +643,7 @@ func (p *Parser) parseLiteral() any {
 	}
 }
 
-func (p *Parser) parseQueryExpr() *syn.OperationExpr {
+func (p *Parser) parseQueryExpr() *syn.QueryExpr {
 	parser := parser.New(&p.lexer)
 	startPos := p.lexer.Peek()
 	operation := parser.ParseOperationDefinition()
@@ -661,7 +661,7 @@ func (p *Parser) parseQueryExpr() *syn.OperationExpr {
 	endTok := p.lexer.Peek()
 	query := strings.TrimRight(endTok.Src.Input[startPos.Start:endTok.Start], "\n")
 
-	return &syn.OperationExpr{Position: startPos.Merge(endTok), Query: query, Operation: operation}
+	return &syn.QueryExpr{Position: startPos.Merge(endTok), Query: query, Operation: operation}
 }
 
 func assert(cond bool) {

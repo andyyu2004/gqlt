@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/andyyu2004/gqlt/internal/parser"
+	"github.com/andyyu2004/gqlt/internal/typecheck"
 	"github.com/andyyu2004/gqlt/memosa/lib"
 	"github.com/andyyu2004/gqlt/syn"
 	"github.com/bmatcuk/doublestar/v4"
@@ -144,14 +145,6 @@ func (s *scope) gqlVars() map[string]any {
 
 type function func(args []any) (any, error)
 
-func checkArity(arity int, args []any) error {
-	if len(args) != arity {
-		return fmt.Errorf("expected %d args, found %d", arity, len(args))
-	}
-
-	return nil
-}
-
 const Ext = ".gqlt"
 
 // Discover all `gqlt` tests in the given directory (recursively).
@@ -199,6 +192,11 @@ func (e *Executor) Test(t *testing.T, root string, opts ...Opt) {
 
 			file, err := parser.Parse()
 			if err != nil {
+				t.Fatal(err)
+			}
+
+			tcx := typecheck.New()
+			if _, err := tcx.Check(file); err != nil {
 				t.Fatal(err)
 			}
 

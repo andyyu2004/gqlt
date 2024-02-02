@@ -8,9 +8,11 @@ import (
 	"github.com/andyyu2004/gqlt/syn"
 )
 
+// keep in sync with typecheck/expr.go
 func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Expr) (any, error) {
 	switch expr := expr.(type) {
 	case *syn.TryExpr:
+		// keep in sync with typecheck/expr.go (tryExpr)
 		const dataKey = "data"
 		const errorsKey = "errors"
 		data, err := e.eval(ctx, ecx, expr.Expr)
@@ -30,7 +32,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			errorsKey: nil,
 		}, nil
 
-	case *syn.OperationExpr:
+	case *syn.QueryExpr:
 		return e.query(ctx, ecx, expr)
 
 	case *syn.LiteralExpr:
@@ -67,6 +69,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			return nil, err
 		}
 
+		// keep in sync with typecheck/expr.go (binaryExpr)
 		switch expr.Op.Kind {
 		case lex.Equals2:
 			return eq(lhs, rhs), nil

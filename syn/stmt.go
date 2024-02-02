@@ -55,13 +55,13 @@ type SetStmt struct {
 	ast.Position
 	SetKw lex.Token
 	Key   lex.Token
-	Value Expr
+	Expr  Expr
 }
 
 var _ Stmt = SetStmt{}
 
 func (stmt SetStmt) Children() Children {
-	return Children{stmt.SetKw, stmt.Key, stmt.Value}
+	return Children{stmt.SetKw, stmt.Key, stmt.Expr}
 }
 
 func (SetStmt) isStmt() {}
@@ -71,7 +71,7 @@ func (stmt SetStmt) Format(w io.Writer) {
 	_, _ = io.WriteString(w, "set ")
 	_, _ = io.WriteString(w, stmt.Key.Value)
 	_, _ = io.WriteString(w, " ")
-	stmt.Value.Format(w)
+	stmt.Expr.Format(w)
 }
 
 type AssertStmt struct {

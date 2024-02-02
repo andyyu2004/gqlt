@@ -33,7 +33,7 @@ func (expr NameExpr) Format(w io.Writer) {
 	_, _ = io.WriteString(w, expr.Name.Value)
 }
 
-type OperationExpr struct {
+type QueryExpr struct {
 	ast.Position
 	// unparsed graphql string
 	// useful for pretty printing without formatting
@@ -42,16 +42,16 @@ type OperationExpr struct {
 	Operation *OperationDefinition
 }
 
-var _ Expr = OperationExpr{}
+var _ Expr = QueryExpr{}
 
-func (expr OperationExpr) Children() Children {
+func (expr QueryExpr) Children() Children {
 	return Children{expr.Operation}
 }
 
-func (OperationExpr) isExpr() {}
-func (OperationExpr) isNode() {}
+func (QueryExpr) isExpr() {}
+func (QueryExpr) isNode() {}
 
-func (expr OperationExpr) Format(w io.Writer) {
+func (expr QueryExpr) Format(w io.Writer) {
 	_, _ = io.WriteString(w, expr.Query)
 }
 

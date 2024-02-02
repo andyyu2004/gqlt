@@ -13,7 +13,7 @@ import (
 	"github.com/andyyu2004/gqlt/syn"
 )
 
-func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.OperationExpr) (any, error) {
+func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.QueryExpr) (any, error) {
 	operation := expr.Operation
 	for _, transform := range []transform{
 		namespaceTransform{ecx.settings.namespace},

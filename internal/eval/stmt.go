@@ -24,7 +24,7 @@ func (e *Executor) stmt(ctx context.Context, ecx *executionContext, stmt syn.Stm
 		}
 
 	case *syn.SetStmt:
-		val, err := e.eval(ctx, ecx, stmt.Value)
+		val, err := e.eval(ctx, ecx, stmt.Expr)
 		if err != nil {
 			return err
 		}

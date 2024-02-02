@@ -42,6 +42,7 @@ type Response struct {
 type GraphQLErrors []*errors.QueryError
 
 func (errs GraphQLErrors) catch() any {
+	// keep in sync with typecheck/expr.go (tryExpr)
 	return slice.Map(errs, func(err *errors.QueryError) any {
 		return map[string]any{
 			"message": err.Message,
