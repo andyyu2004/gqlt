@@ -40,6 +40,9 @@ type Value struct {
 
 // Children implements Node.
 func (v *Value) Children() Children {
+	if v == nil {
+		return nil
+	}
 	children := Children{}
 	for _, f := range v.Fields {
 		children = append(children, f)

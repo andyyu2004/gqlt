@@ -12,13 +12,13 @@ func init() {
 			seen := map[string]int{}
 			for _, def := range operation.VariableDefinitions {
 				// add the same error only once per a variable.
-				if seen[def.Variable] == 1 {
+				if seen[def.Variable.Value] == 1 {
 					addError(
-						Message(`There can be only one variable named "$%s".`, def.Variable),
+						Message(`There can be only one variable named "$%s".`, def.Variable.Value),
 						At(def.Position),
 					)
 				}
-				seen[def.Variable]++
+				seen[def.Variable.Value]++
 			}
 		})
 	})

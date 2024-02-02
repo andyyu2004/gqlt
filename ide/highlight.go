@@ -88,14 +88,14 @@ func (ide *IDE) Highlight(path string) Highlights {
 			switch event.Node.(type) {
 			case *syn.ObjectExpr, *syn.ObjectPat, syn.SelectionSet:
 				scopes.Push(ScopeObject)
-			case syn.ArgumentList:
+			case syn.ArgumentList, syn.VariableDefinitionList:
 				scopes.Push(ScopeArgs)
 			}
 		case syn.ExitEvent:
 			switch event.Node.(type) {
 			case *syn.ObjectExpr, *syn.ObjectPat, syn.SelectionSet:
 				lib.Assert(scopes.MustPop() == ScopeObject)
-			case syn.ArgumentList:
+			case syn.ArgumentList, syn.VariableDefinitionList:
 				lib.Assert(scopes.MustPop() == ScopeArgs)
 			}
 		}

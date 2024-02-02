@@ -76,9 +76,30 @@ func (l FragmentDefinitionList) ForName(name string) *FragmentDefinition {
 
 type VariableDefinitionList []*VariableDefinition
 
+var _ Node = VariableDefinitionList{}
+
+func (l VariableDefinitionList) Children() Children {
+	children := make(Children, 0, len(l))
+	for _, arg := range l {
+		children = append(children, arg)
+	}
+
+	return children
+}
+
+func (VariableDefinitionList) Format(io.Writer) {}
+
+func (l VariableDefinitionList) Pos() ast.Position {
+	fst := l[0]
+	lst := l[len(l)-1]
+	return fst.Pos().Merge(lst)
+}
+
+func (VariableDefinitionList) isNode() {}
+
 func (l VariableDefinitionList) ForName(name string) *VariableDefinition {
 	for _, it := range l {
-		if it.Variable == name {
+		if it.Variable.Value == name {
 			return it
 		}
 	}

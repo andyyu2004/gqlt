@@ -114,9 +114,9 @@ func (p *parser) parseVariableDefinition() *VariableDefinition {
 	return &def
 }
 
-func (p *parser) parseVariable() string {
+func (p *parser) parseVariable() lexer.Token {
 	p.expect(lexer.Dollar)
-	return p.parseName().Value
+	return p.parseName()
 }
 
 func (p *parser) parseOptionalSelectionSet() SelectionSet {
@@ -273,7 +273,7 @@ func (p *parser) parseValueLiteral(isConst bool) *Value {
 			p.unexpectedError()
 			return nil
 		}
-		return &Value{Position: token.Position, Comment: p.comment, Raw: p.parseVariable(), Kind: Variable}
+		return &Value{Position: token.Position, Comment: p.comment, Raw: p.parseVariable().Value, Kind: Variable}
 	case lexer.Minus:
 		p.next()
 		tok := p.peek()

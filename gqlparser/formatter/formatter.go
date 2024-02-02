@@ -627,7 +627,7 @@ func (f *formatter) FormatVariableDefinitionList(lists syn.VariableDefinitionLis
 func (f *formatter) FormatVariableDefinition(def *syn.VariableDefinition) {
 	f.FormatCommentGroup(def.Comment)
 
-	f.WriteString("$").WriteWord(def.Variable).NoPadding().WriteString(":").NeedPadding()
+	f.WriteString("$").WriteWord(def.Variable.Value).NoPadding().WriteString(":").NeedPadding()
 	f.FormatType(def.Type)
 
 	if def.DefaultValue != nil {

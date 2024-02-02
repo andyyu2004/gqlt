@@ -23,13 +23,13 @@ func VariableValues(schema *syn.Schema, op *syn.OperationDefinition, variables m
 	}
 
 	for _, v := range op.VariableDefinitions {
-		validator.path = append(validator.path, syn.PathName(v.Variable))
+		validator.path = append(validator.path, syn.PathName(v.Variable.Value))
 
 		if !v.Definition.IsInputType() {
 			return nil, gqlerror.ErrorPathf(validator.path, "must an input type")
 		}
 
-		val, hasValue := variables[v.Variable]
+		val, hasValue := variables[v.Variable.Value]
 
 		if !hasValue {
 			if v.DefaultValue != nil {
@@ -49,7 +49,7 @@ func VariableValues(schema *syn.Schema, op *syn.OperationDefinition, variables m
 				if v.Type.NonNull {
 					return nil, gqlerror.ErrorPathf(validator.path, "cannot be null")
 				}
-				coercedVars[v.Variable] = nil
+				coercedVars[v.Variable.Value] = nil
 			} else {
 				rv := reflect.ValueOf(val)
 
@@ -78,7 +78,7 @@ func VariableValues(schema *syn.Schema, op *syn.OperationDefinition, variables m
 				if err != nil {
 					return nil, err
 				}
-				coercedVars[v.Variable] = rval.Interface()
+				coercedVars[v.Variable.Value] = rval.Interface()
 			}
 		}
 

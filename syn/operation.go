@@ -43,11 +43,11 @@ func (d OperationDefinition) Children() Children {
 		children = append(children, *d.OperationToken)
 	}
 
-	return append(children, d.Name, d.SelectionSet)
+	return append(children, d.Name, d.VariableDefinitions, d.SelectionSet)
 }
 
 type VariableDefinition struct {
-	Variable     string
+	Variable     lexer.Token
 	Type         *Type
 	DefaultValue *Value
 	Directives   DirectiveList
@@ -58,3 +58,20 @@ type VariableDefinition struct {
 	Definition *Definition
 	Used       bool `dump:"-"`
 }
+
+var _ Node = VariableDefinition{}
+
+func (d VariableDefinition) Children() Children {
+	return Children{
+		d.Variable,
+		d.DefaultValue,
+	}
+}
+
+func (VariableDefinition) Format(io.Writer) {}
+
+func (v VariableDefinition) Pos() ast.Position {
+	return v.Position
+}
+
+func (VariableDefinition) isNode() {}
