@@ -9,7 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/andyyu2004/gqlt/slice"
+	"github.com/andyyu2004/gqlt/internal/slice"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/errors"
 )

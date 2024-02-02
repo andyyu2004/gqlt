@@ -3,7 +3,7 @@ package lex_test
 import (
 	"testing"
 
-	"github.com/andyyu2004/gqlt/lex"
+	"github.com/andyyu2004/gqlt/internal/lex"
 
 	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 	"github.com/stretchr/testify/require"

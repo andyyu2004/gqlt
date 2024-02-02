@@ -8,8 +8,8 @@ import (
 	"github.com/andyyu2004/gqlt/gqlparser/formatter"
 	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 	"github.com/andyyu2004/gqlt/gqlparser/validator"
+	"github.com/andyyu2004/gqlt/internal/slice"
 	"github.com/andyyu2004/gqlt/memosa/lib"
-	"github.com/andyyu2004/gqlt/slice"
 	"github.com/andyyu2004/gqlt/syn"
 )
 

@@ -7,11 +7,11 @@ import (
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/gqlparser/lexer"
-	"github.com/andyyu2004/gqlt/iterator"
-	"github.com/andyyu2004/gqlt/lex"
+	"github.com/andyyu2004/gqlt/internal/iterator"
+	"github.com/andyyu2004/gqlt/internal/lex"
+	"github.com/andyyu2004/gqlt/internal/slice"
 	"github.com/andyyu2004/gqlt/memosa/lib"
 	"github.com/andyyu2004/gqlt/memosa/stack"
-	"github.com/andyyu2004/gqlt/slice"
 )
 
 type Token = lex.Token

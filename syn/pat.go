@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/lex"
+	"github.com/andyyu2004/gqlt/internal/lex"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 

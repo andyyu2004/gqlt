@@ -4,7 +4,7 @@ import (
 	"io"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/lex"
+	"github.com/andyyu2004/gqlt/internal/lex"
 )
 
 type FragmentSpread struct {

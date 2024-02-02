@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/andyyu2004/gqlt/lex"
+	"github.com/andyyu2004/gqlt/internal/lex"
 	"github.com/andyyu2004/gqlt/syn"
 )
 
