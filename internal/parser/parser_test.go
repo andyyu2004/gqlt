@@ -8,7 +8,7 @@ import (
 
 	"github.com/andyyu2004/gqlt"
 	"github.com/andyyu2004/gqlt/internal/annotate"
-	"github.com/andyyu2004/gqlt/parser"
+	"github.com/andyyu2004/gqlt/internal/parser"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/gkampitakis/go-snaps/snaps"
