@@ -10,32 +10,36 @@ import (
 )
 
 func (tcx *typechecker) expr(expr syn.Expr) Ty {
-	switch expr := expr.(type) {
-	case *syn.NameExpr:
-		return Any{}
-	case *syn.BinaryExpr:
-		return tcx.binaryExpr(expr)
-	case *syn.CallExpr:
-		return Any{}
-	case *syn.IndexExpr:
-		return Any{}
-	case *syn.LiteralExpr:
-		return tcx.literalExpr(expr, expr.Value)
-	case *syn.ListExpr:
-		return tcx.listExpr(expr)
-	case *syn.MatchesExpr:
-		return Any{}
-	case *syn.ObjectExpr:
-		return Any{}
-	case *syn.QueryExpr:
-		return tcx.queryExpr(expr)
-	case *syn.TryExpr:
-		return tcx.tryExpr(expr)
-	case *syn.UnaryExpr:
-		return Any{}
-	default:
-		panic(fmt.Sprintf("missing case typechecker.expr %T", expr))
-	}
+	ty := func() Ty {
+		switch expr := expr.(type) {
+		case *syn.NameExpr:
+			return Any{}
+		case *syn.BinaryExpr:
+			return tcx.binaryExpr(expr)
+		case *syn.CallExpr:
+			return Any{}
+		case *syn.IndexExpr:
+			return Any{}
+		case *syn.LiteralExpr:
+			return tcx.literalExpr(expr, expr.Value)
+		case *syn.ListExpr:
+			return tcx.listExpr(expr)
+		case *syn.MatchesExpr:
+			return Any{}
+		case *syn.ObjectExpr:
+			return Any{}
+		case *syn.QueryExpr:
+			return tcx.queryExpr(expr)
+		case *syn.TryExpr:
+			return tcx.tryExpr(expr)
+		case *syn.UnaryExpr:
+			return Any{}
+		default:
+			panic(fmt.Sprintf("missing case typechecker.expr %T", expr))
+		}
+	}()
+	tcx.info.ExprTypes[expr] = ty
+	return ty
 }
 
 func (tcx *typechecker) queryExpr(expr *syn.QueryExpr) Ty {

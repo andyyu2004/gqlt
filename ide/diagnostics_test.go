@@ -50,21 +50,12 @@ func TestDiagnostics(t *testing.T) {
 	check := func(name, content string, expectation expect.Expectation) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			const path = "test.gqlt"
+			ide.TestWith(t, content, func(path string, s ide.Snapshot) {
+				mapper := s.Mapper(path)
+				diagnostics := slice.Map(s.Diagnostics()[path], toAnnotation(mapper))
 
-			changes := ide.Changes{
-				ide.SetFileContent{Path: path, Content: content},
-			}
-
-			ide := ide.New()
-			ide.Apply(changes)
-			s, cleanup := ide.Snapshot()
-			t.Cleanup(cleanup)
-
-			mapper := s.Mapper(path)
-			diagnostics := slice.Map(s.Diagnostics()[path], toAnnotation(mapper))
-
-			expectation.AssertEqual(t, annotate.Annotate(content, diagnostics))
+				expectation.AssertEqual(t, annotate.Annotate(content, diagnostics))
+			})
 		})
 	}
 

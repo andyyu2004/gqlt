@@ -12,12 +12,18 @@ type Source struct {
 	BuiltIn bool
 }
 
+type Point = int
+
 type Position struct {
 	Start  int     // The starting position, in runes, of this token in the input.
 	End    int     // The end position, in runes, of this token in the input.
 	Line   int     // The line number at the start of this item.
 	Column int     // The column number at the start of this item.
 	Src    *Source // The source document this token belongs to
+}
+
+func (p Position) Contains(point Point) bool {
+	return p.Start <= point && point <= p.End
 }
 
 func (p Position) String() string {

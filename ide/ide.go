@@ -3,9 +3,11 @@ package ide
 import (
 	"maps"
 	"sync"
+	"testing"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/ide/mapper"
+	"github.com/andyyu2004/gqlt/internal/typecheck"
 	"github.com/andyyu2004/gqlt/memosa"
 	"github.com/andyyu2004/gqlt/syn"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -80,7 +82,24 @@ func (s *Snapshot) Mapper(path string) *mapper.Mapper {
 	return memosa.Fetch[mapperQuery](s.ide.ctx, mapperKey{path})
 }
 
-func (s *Snapshot) Typecheck(path string) {}
+func (s *Snapshot) Typecheck(path string) typecheck.Info {
+	return memosa.Fetch[typecheckQuery](s.ide.ctx, typecheckKey{path})
+}
+
+type (
+	typecheckQuery struct{}
+	typecheckKey   struct{ Path string }
+)
+
+var _ memosa.Query[typecheckKey, typecheck.Info] = typecheckQuery{}
+
+func (typecheckQuery) Execute(ctx *memosa.Context, key typecheckKey) typecheck.Info {
+	tcx := typecheck.New()
+	ast := memosa.Fetch[parseQuery](ctx, parseKey{key.Path}).Ast
+	info, err := tcx.Check(ast)
+	_ = err // error will be handled by diagnostics
+	return info
+}
 
 type (
 	mapperQuery struct{}
@@ -91,6 +110,15 @@ var _ memosa.Query[mapperKey, *mapper.Mapper] = mapperQuery{}
 
 func (mapperQuery) Execute(ctx *memosa.Context, key mapperKey) *mapper.Mapper {
 	return mapper.New(memosa.Fetch[inputQuery](ctx, memosa.InputKey{}).Sources[key.Path])
+}
+
+func protoToPoint(mapper *mapper.Mapper, position protocol.Position) *ast.Point {
+	line, col := int(position.Line), int(position.Character)
+	point, err := mapper.ByteOffset(line, col)
+	if err != nil {
+		return nil
+	}
+	return &point
 }
 
 func posToProto(mapper *mapper.Mapper, position ast.HasPosition) protocol.Range {
@@ -109,4 +137,16 @@ func posToProto(mapper *mapper.Mapper, position ast.HasPosition) protocol.Range 
 		Start: protocol.Position{Line: uint32(startLine), Character: uint32(startCol)},
 		End:   protocol.Position{Line: uint32(endLine), Character: uint32(endCol)},
 	}
+}
+
+func TestWith(t testing.TB, content string, f func(string, Snapshot)) {
+	const path = "test.gqlt"
+
+	changes := Changes{SetFileContent{Path: path, Content: content}}
+
+	ide := New()
+	ide.Apply(changes)
+	s, cleanup := ide.Snapshot()
+	t.Cleanup(cleanup)
+	f(path, s)
 }

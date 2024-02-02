@@ -25,13 +25,20 @@ type Error struct {
 
 type typechecker struct {
 	errors Errors
+	info   Info
 }
 
 func New() *typechecker {
-	return &typechecker{}
+	return &typechecker{
+		info: Info{
+			ExprTypes: make(map[syn.Expr]Ty),
+		},
+	}
 }
 
-type Info struct{}
+type Info struct {
+	ExprTypes map[syn.Expr]Ty
+}
 
 func (tcx *typechecker) Check(ast syn.File) (Info, error) {
 	for _, stmt := range ast.Stmts {
@@ -39,10 +46,10 @@ func (tcx *typechecker) Check(ast syn.File) (Info, error) {
 	}
 
 	if len(tcx.errors) > 0 {
-		return Info{}, tcx.errors
+		return tcx.info, tcx.errors
 	}
 
-	return Info{}, nil
+	return tcx.info, nil
 }
 
 func (tcx *typechecker) stmt(stmt syn.Stmt) {

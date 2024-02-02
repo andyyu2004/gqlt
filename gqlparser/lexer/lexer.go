@@ -149,8 +149,14 @@ func (s *Lexer) ReadToken() (Token, error) {
 		return s.readString()
 	}
 
+	// reversing for the generated error messages
 	s.end--
 	s.endRunes--
+	// however, we want to ignore the character and continue lexing
+	defer func() {
+		s.end++
+		s.endRunes++
+	}()
 
 	if r < 0x0020 && r != 0x0009 && r != 0x000a && r != 0x000d {
 		return s.makeError(`Cannot contain the invalid character "\u%04d"`, r)

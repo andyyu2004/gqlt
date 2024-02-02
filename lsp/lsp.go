@@ -32,6 +32,7 @@ func New(ide *ide.IDE) *server.Server {
 		TextDocumentDidChange:          ls.onChange,
 		TextDocumentDidOpen:            ls.onOpen,
 		TextDocumentSemanticTokensFull: ls.semanticTokens,
+		TextDocumentHover:              ls.hover,
 	}
 	return server.NewServer(handler, "gqlt", false)
 }
@@ -57,6 +58,7 @@ func (s *ls) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (a
 				Legend: semanticTokensLegend,
 				Full:   true,
 			},
+			HoverProvider: protocol.HoverOptions{},
 		},
 		ServerInfo: &protocol.InitializeResultServerInfo{Name: "gqlt"},
 	}, nil
@@ -108,6 +110,13 @@ func (l *ls) publishDiagnostics(ctx *glsp.Context) {
 			Diagnostics: diags,
 		})
 	}
+}
+
+func (l *ls) hover(context *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
+	s, cleanup := l.Snapshot()
+	defer cleanup()
+
+	return s.Hover(params.TextDocument.URI, params.Position), nil
 }
 
 func (l *ls) semanticTokens(ctx *glsp.Context, params *protocol.SemanticTokensParams) (*protocol.SemanticTokens, error) {

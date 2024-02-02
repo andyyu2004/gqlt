@@ -556,6 +556,7 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 func (p *Parser) parseListExpr() *syn.ListExpr {
 	start := p.bump(lex.BracketL)
 	exprs := []syn.Expr{}
+	commas := []lex.Token{}
 	for !p.at(lex.EOF) && !p.at(lex.BracketR) {
 		expr := p.parseExpr()
 		if expr == nil {
@@ -564,14 +565,16 @@ func (p *Parser) parseListExpr() *syn.ListExpr {
 
 		exprs = append(exprs, expr)
 
-		if !p.eat_(lex.Comma) {
+		comma, ok := p.eat(lex.Comma)
+		if !ok {
 			break
 		}
+		commas = append(commas, comma)
 	}
 
 	end, _ := p.expect(lex.BracketR)
 
-	return &syn.ListExpr{Position: start.Merge(end), Exprs: exprs}
+	return &syn.ListExpr{OpenBracket: start, Position: start.Merge(end), Exprs: exprs, Commas: commas, CloseBracket: end}
 }
 
 func (p *Parser) parseObjectExpr() *syn.ObjectExpr {

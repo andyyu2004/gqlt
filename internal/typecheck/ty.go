@@ -39,7 +39,7 @@ type List struct {
 }
 
 func (l List) String() string {
-	return fmt.Sprintf("[%s]", l.Elem)
+	return fmt.Sprintf("%s[]", l.Elem)
 }
 
 func (List) isTy() {}

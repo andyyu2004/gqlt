@@ -160,16 +160,23 @@ func (expr MatchesExpr) Format(w io.Writer) {
 
 type ListExpr struct {
 	ast.Position
-	Exprs []Expr
+	OpenBracket  lex.Token
+	Exprs        []Expr
+	Commas       []lex.Token // alternates with exprs, there may or may not be a trailing comma
+	CloseBracket lex.Token
 }
 
 var _ Expr = ListExpr{}
 
 func (expr ListExpr) Children() Children {
-	children := make(Children, len(expr.Exprs))
-	for i, expr := range expr.Exprs {
-		children[i] = expr
+	children := Children{expr.OpenBracket}
+	for i, elem := range expr.Exprs {
+		children = append(children, elem)
+		if i < len(expr.Commas) {
+			children = append(children, expr.Commas[i])
+		}
 	}
+	children = append(children, expr.CloseBracket)
 	return children
 }
 

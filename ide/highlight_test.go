@@ -11,19 +11,9 @@ func TestHighlight(t *testing.T) {
 	check := func(name, content string, expectation expect.Expectation) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			const path = "test.gqlt"
-
-			changes := ide.Changes{
-				ide.SetFileContent{Path: path, Content: content},
-			}
-
-			ide := ide.New()
-			ide.Apply(changes)
-			s, cleanup := ide.Snapshot()
-			t.Cleanup(cleanup)
-
-			highlights := s.Highlight(path)
-			expectation.AssertEqual(t, highlights.String())
+			ide.TestWith(t, content, func(path string, s ide.Snapshot) {
+				expectation.AssertEqual(t, s.Highlight(path).String())
+			})
 		})
 	}
 
@@ -100,5 +90,11 @@ mutation { bar }`, expect.Expect(`1:1..1:4: keyword
 1:14..1:17: type
 1:22..1:25: property
 1:26..1:29: parameter
+`))
+
+	// FIXME the arg value isn't being highlighted
+	check("args", "query { foo(foo: $foo) }", expect.Expect(`1:1..1:6: keyword
+1:9..1:12: property
+1:13..1:16: parameter
 `))
 }

@@ -1,0 +1,8 @@
+
+[TestParser/regression/caret - 1]
+"expr"
+^
+# Cannot parse the unexpected character "^".
+
+
+---
