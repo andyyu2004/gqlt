@@ -103,6 +103,10 @@ func (l *ls) publishDiagnostics(ctx *glsp.Context) {
 
 	diagnostics := s.Diagnostics()
 	for uri, diags := range diagnostics {
+		if len(diags) == 0 {
+			continue
+		}
+
 		ctx.Notify(protocol.ServerTextDocumentPublishDiagnostics, &protocol.PublishDiagnosticsParams{
 			URI:         uri,
 			Diagnostics: diags,

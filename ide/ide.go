@@ -24,13 +24,13 @@ func New() *IDE {
 
 func (ide *IDE) Snapshot() (Snapshot, func()) {
 	ide.lock.RLock()
-	return Snapshot{ide.ctx}, ide.lock.RUnlock
+	return Snapshot{ide}, ide.lock.RUnlock
 }
 
 // A snapshot of the current state of the IDE.
 // All ide operations are performed on a snapshot.
 type Snapshot struct {
-	ctx *memosa.Context
+	ide *IDE
 }
 
 type Changes []Change
@@ -54,13 +54,17 @@ func (ide *IDE) Apply(changes Changes) {
 	ide.lock.Lock()
 	defer ide.lock.Unlock()
 
-	input := Input{maps.Clone(memosa.Fetch[inputQuery](ide.ctx, memosa.InputKey{}).Sources)}
+	input := Input{ide.Sources()}
 	for _, change := range changes {
 		change.Apply(&input)
 	}
 	memosa.Set[inputQuery](ide.ctx, input)
 }
 
-func (sn *Snapshot) Parse(path string) syn.File {
-	return memosa.Fetch[parseQuery](sn.ctx, parseKey{path})
+func (ide *IDE) Sources() map[string]string {
+	return maps.Clone(memosa.Fetch[inputQuery](ide.ctx, memosa.InputKey{}).Sources)
+}
+
+func (s *Snapshot) Parse(path string) syn.File {
+	return memosa.Fetch[parseQuery](s.ide.ctx, parseKey{path})
 }
