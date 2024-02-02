@@ -80,6 +80,8 @@ func (s *Snapshot) Mapper(path string) *mapper.Mapper {
 	return memosa.Fetch[mapperQuery](s.ide.ctx, mapperKey{path})
 }
 
+func (s *Snapshot) Typecheck(path string) {}
+
 type (
 	mapperQuery struct{}
 	mapperKey   struct{ Path string }

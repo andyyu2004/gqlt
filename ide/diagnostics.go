@@ -6,28 +6,47 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
+type diagnostics struct {
+	Snapshot
+	path        string
+	diagnostics []protocol.Diagnostic
+}
+
 func (s Snapshot) Diagnostics() map[string][]protocol.Diagnostic {
 	sources := s.ide.Sources()
 	diagnostics := map[string][]protocol.Diagnostic{}
 	for path := range sources {
-		diagnostics[path] = s.diagnoseFile(path)
+		diagnostics[path] = s.diagnostics(path)
 	}
 	return diagnostics
 }
 
-func (s Snapshot) diagnoseFile(path string) []protocol.Diagnostic {
-	root := s.Parse(path)
-	mapper := s.Mapper(path)
-	diagnostics := []protocol.Diagnostic{}
+func (s Snapshot) diagnostics(path string) []protocol.Diagnostic {
+	d := &diagnostics{s, path, []protocol.Diagnostic{}}
+	d.diagnose()
+	return d.diagnostics
+}
+
+func (d *diagnostics) diagnose() {
+	d.syntax()
+	d.typecheck()
+}
+
+func (d *diagnostics) syntax() {
+	root := d.Parse(d.path)
+	mapper := d.Mapper(d.path)
 	if root.Err != nil {
 		errs := root.Err.(parser.Errors)
 		for _, err := range errs {
-			diagnostics = append(diagnostics, protocol.Diagnostic{
+			d.diagnostics = append(d.diagnostics, protocol.Diagnostic{
 				Range:    posToProto(mapper, err.Position),
 				Severity: lib.Ref(protocol.DiagnosticSeverityError),
 				Message:  err.Message(),
 			})
 		}
 	}
-	return diagnostics
+}
+
+func (d *diagnostics) typecheck() {
+	root := d.Parse(d.path).Ast
 }
