@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
 	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 )
 
@@ -27,11 +28,14 @@ func New(src *ast.Source) (Lexer, error) {
 	// Read all the tokens eagerly to save us error handling on `ReadToken` later.
 	// We're not expecting large files so this should be fine.
 	var tokens []lexer.Token
+	var errors ast.Errors
 	lex := lexer.New(src)
 	for {
 		tok, err := lex.ReadToken()
 		if err != nil {
-			return Lexer{}, err
+			err := err.(*gqlerror.Error)
+			errors = append(errors, ast.Error{Position: tok.Position, Msg: err.Message})
+			continue
 		}
 
 		if tok.Kind != lexer.Comment {
@@ -44,6 +48,10 @@ func New(src *ast.Source) (Lexer, error) {
 	}
 
 	assert(len(tokens) > 0)
+
+	if len(errors) > 0 {
+		return Lexer{tokens: tokens}, errors
+	}
 
 	return Lexer{tokens: tokens}, nil
 }

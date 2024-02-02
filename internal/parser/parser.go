@@ -22,30 +22,7 @@ type Parser struct {
 	steps  int
 	lexer  lex.Lexer
 	stmts  []syn.Stmt
-	errors Errors
-}
-
-type Error struct {
-	ast.Position
-	message string
-}
-
-func (err Error) Error() string {
-	return fmt.Sprintf("%v: %s", err.Position, err.Message())
-}
-
-func (err Error) Message() string {
-	return err.message
-}
-
-type Errors []Error
-
-func (errs Errors) Error() string {
-	var b strings.Builder
-	for _, err := range errs {
-		fmt.Fprintf(&b, "%v\n", err)
-	}
-	return b.String()
+	errors ast.Errors
 }
 
 func NewFromPath(path string) (*Parser, error) {
@@ -58,9 +35,12 @@ func NewFromPath(path string) (*Parser, error) {
 	return &Parser{lexer: lexer}, err
 }
 
-func New(src *ast.Source) (*Parser, error) {
+func New(src *ast.Source) *Parser {
 	lexer, err := lex.New(src)
-	return &Parser{lexer: lexer}, err
+	if err != nil {
+		return &Parser{lexer: lexer, errors: err.(ast.Errors)}
+	}
+	return &Parser{lexer: lexer}
 }
 
 func (p *Parser) Parse() (syn.File, error) {
@@ -170,9 +150,9 @@ func (p *Parser) parseFragment() *syn.FragmentStmt {
 		// we can make this conversion as this is the only error type returned by parser
 		// (excluding lexer errors which we have already handled)
 		err := err.(*gqlerror.Error)
-		p.errors = append(p.errors, Error{
+		p.errors = append(p.errors, ast.Error{
 			Position: startPos.Pos(),
-			message:  err.Message,
+			Msg:      err.Message,
 		})
 		return nil
 	}
@@ -243,7 +223,7 @@ type patOpts struct {
 }
 
 func (p *Parser) error(tok ast.HasPosition, msg string, args ...any) {
-	err := Error{Position: tok.Pos(), message: fmt.Sprintf(msg, args...)}
+	err := ast.Error{Position: tok.Pos(), Msg: fmt.Sprintf(msg, args...)}
 	p.errors = append(p.errors, err)
 }
 
@@ -651,9 +631,9 @@ func (p *Parser) parseQueryExpr() *syn.QueryExpr {
 		// we can make this conversion as this is the only error type returned by parser
 		// (excluding lexer errors which we have already handled)
 		err := err.(*gqlerror.Error)
-		p.errors = append(p.errors, Error{
+		p.errors = append(p.errors, ast.Error{
 			Position: startPos.Pos(),
-			message:  err.Message,
+			Msg:      err.Message,
 		})
 		return nil
 	}

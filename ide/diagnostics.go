@@ -1,7 +1,7 @@
 package ide
 
 import (
-	"github.com/andyyu2004/gqlt/internal/parser"
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/internal/typecheck"
 	"github.com/andyyu2004/gqlt/memosa/lib"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -37,13 +37,14 @@ func (d *diagnostics) syntax() {
 	root := d.Parse(d.path)
 	mapper := d.Mapper(d.path)
 	if root.Err != nil {
-		errs := root.Err.(parser.Errors)
-		for _, err := range errs {
-			d.diagnostics = append(d.diagnostics, protocol.Diagnostic{
-				Range:    posToProto(mapper, err.Position),
-				Severity: lib.Ref(protocol.DiagnosticSeverityError),
-				Message:  err.Message(),
-			})
+		if errs, ok := root.Err.(ast.Errors); ok {
+			for _, err := range errs {
+				d.diagnostics = append(d.diagnostics, protocol.Diagnostic{
+					Range:    posToProto(mapper, err.Position),
+					Severity: lib.Ref(protocol.DiagnosticSeverityError),
+					Message:  err.Message(),
+				})
+			}
 		}
 	}
 }

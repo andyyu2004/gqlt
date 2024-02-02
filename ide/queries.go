@@ -24,11 +24,7 @@ func (parseQuery) Execute(ctx *memosa.Context, key parseKey) Parsed[syn.File] {
 	text := files.Sources[key.Path]
 	src := &ast.Source{Name: key.Path, Input: text}
 
-	parser, err := parser.New(src)
-	if err != nil {
-		// we fail hard if there's any lexing errors currently
-		return Parsed[syn.File]{Err: err}
-	}
+	parser := parser.New(src)
 
 	ast, err := parser.Parse()
 	return Parsed[syn.File]{Ast: ast, Err: err}

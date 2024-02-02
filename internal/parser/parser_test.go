@@ -33,12 +33,12 @@ func TestParser(t *testing.T) {
 			require.NoError(t, err)
 
 			src := string(source)
-			p, err := parser.New(&ast.Source{Name: name, Input: src})
+			p := parser.New(&ast.Source{Name: name, Input: src})
 			require.NoError(t, err)
 
 			file, err := p.Parse()
 			if err != nil {
-				annotated := annotate.Annotate(src, err.(parser.Errors))
+				annotated := annotate.Annotate(src, err.(ast.Errors))
 				snaps.WithConfig(snaps.Filename(name)).MatchSnapshot(t, annotated)
 			} else {
 				buf := bytes.Buffer{}
