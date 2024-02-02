@@ -22,7 +22,7 @@ func TestIDE(t *testing.T) {
 	s, cleanup := ide.Snapshot()
 	t.Cleanup(cleanup)
 
-	ast := s.Parse(path)
+	ast := s.Parse(path).Ast
 	expect.Expect(`let x = 5;
 `).AssertEqual(t, ast.String())
 }

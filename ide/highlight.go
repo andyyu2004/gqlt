@@ -38,7 +38,7 @@ func (s *Snapshot) Highlight(path string) Highlights {
 		ScopeArgs
 	)
 	scopes := stack.Stack[Scope]{}
-	return iterator.FilterMap(syn.Traverse(root), func(event syn.Event) (Highlight, bool) {
+	return iterator.FilterMap(syn.Traverse(root.Ast), func(event syn.Event) (Highlight, bool) {
 		switch event := event.(type) {
 		case syn.TokenEvent:
 			var kind protocol.SemanticTokenType

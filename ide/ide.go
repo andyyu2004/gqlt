@@ -4,8 +4,11 @@ import (
 	"maps"
 	"sync"
 
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/andyyu2004/gqlt/ide/mapper"
 	"github.com/andyyu2004/gqlt/memosa"
 	"github.com/andyyu2004/gqlt/syn"
+	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
 type IDE struct {
@@ -65,6 +68,43 @@ func (ide *IDE) Sources() map[string]string {
 	return maps.Clone(memosa.Fetch[inputQuery](ide.ctx, memosa.InputKey{}).Sources)
 }
 
-func (s *Snapshot) Parse(path string) syn.File {
+func (ide *IDE) Source(path string) string {
+	return ide.Sources()[path]
+}
+
+func (s *Snapshot) Parse(path string) Parsed[syn.File] {
 	return memosa.Fetch[parseQuery](s.ide.ctx, parseKey{path})
+}
+
+func (s *Snapshot) Mapper(path string) *mapper.Mapper {
+	return memosa.Fetch[mapperQuery](s.ide.ctx, mapperKey{path})
+}
+
+type (
+	mapperQuery struct{}
+	mapperKey   struct{ Path string }
+)
+
+var _ memosa.Query[mapperKey, *mapper.Mapper] = mapperQuery{}
+
+func (mapperQuery) Execute(ctx *memosa.Context, key mapperKey) *mapper.Mapper {
+	return mapper.New(memosa.Fetch[inputQuery](ctx, memosa.InputKey{}).Sources[key.Path])
+}
+
+func posToProto(mapper *mapper.Mapper, position ast.HasPosition) protocol.Range {
+	pos := position.Pos()
+	startLine, startCol, err := mapper.LineAndColumn(pos.Start)
+	if err != nil {
+		panic(err)
+	}
+
+	endLine, endCol, err := mapper.LineAndColumn(pos.End)
+	if err != nil {
+		panic(err)
+	}
+
+	return protocol.Range{
+		Start: protocol.Position{Line: uint32(startLine), Character: uint32(startCol)},
+		End:   protocol.Position{Line: uint32(endLine), Character: uint32(endCol)},
+	}
 }

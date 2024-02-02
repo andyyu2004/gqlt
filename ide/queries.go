@@ -12,9 +12,14 @@ type (
 	parseKey   struct{ Path string }
 )
 
-var _ memosa.Query[parseKey, syn.File] = parseQuery{}
+var _ memosa.Query[parseKey, Parsed[syn.File]] = parseQuery{}
 
-func (parseQuery) Execute(ctx *memosa.Context, key parseKey) syn.File {
+type Parsed[T any] struct {
+	Ast syn.File
+	Err error
+}
+
+func (parseQuery) Execute(ctx *memosa.Context, key parseKey) Parsed[syn.File] {
 	files := memosa.Fetch[inputQuery](ctx, memosa.InputKey{})
 	text := files.Sources[key.Path]
 	src := &ast.Source{Name: key.Path, Input: text}
@@ -22,15 +27,9 @@ func (parseQuery) Execute(ctx *memosa.Context, key parseKey) syn.File {
 	parser, err := parser.New(src)
 	if err != nil {
 		// we fail hard if there's any lexing errors currently
-		// TODO diagnostics
-		return syn.File{}
+		return Parsed[syn.File]{Err: err}
 	}
 
 	ast, err := parser.Parse()
-	_ = err
-	// if err != nil {
-	// TODO diagnostics
-	// }
-
-	return ast
+	return Parsed[syn.File]{Ast: ast, Err: err}
 }
