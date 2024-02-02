@@ -48,5 +48,5 @@ func (d *diagnostics) syntax() {
 }
 
 func (d *diagnostics) typecheck() {
-	root := d.Parse(d.path).Ast
+	// root := d.Parse(d.path).Ast
 }

@@ -1,18 +1,18 @@
 package gqlt
 
-import "github.com/andyyu2004/gqlt/internal"
+import "github.com/andyyu2004/gqlt/internal/eval"
 
 var (
-	New      = internal.New
-	Discover = internal.Discover
-	Ext      = internal.Ext
-	WithGlob = internal.WithGlob
+	New      = eval.New
+	Discover = eval.Discover
+	Ext      = eval.Ext
+	WithGlob = eval.WithGlob
 )
 
 type (
-	ClientFactory        = internal.ClientFactory
-	ClientFactoryFunc    = internal.ClientFactoryFunc
-	Client               = internal.Client
-	GraphQLGophersClient = internal.GraphQLGophersClient
-	HTTPClient           = internal.HTTPClient
+	ClientFactory        = eval.ClientFactory
+	ClientFactoryFunc    = eval.ClientFactoryFunc
+	Client               = eval.Client
+	GraphQLGophersClient = eval.GraphQLGophersClient
+	HTTPClient           = eval.HTTPClient
 )
