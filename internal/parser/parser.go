@@ -417,10 +417,20 @@ func (p *Parser) parseExprBP(minBp bp) syn.Expr {
 			continue
 		}
 
+		if token.Kind == lex.Dot {
+			assert(assoc == left)
+			lhs = p.parseFieldExpr(lhs)
+			continue
+		}
+
 		p.bump(token.Kind)
 
 		if assoc == left {
 			bp++
+		}
+
+		if isNil(lhs) {
+			return nil
 		}
 
 		rhs := p.parseExprBP(bp)
@@ -460,6 +470,8 @@ func (p *Parser) infixOp() (bp, lex.Token, assoc) {
 		return 120, tok, left
 	case lex.Star, lex.Slash:
 		return 130, tok, left
+	case lex.Dot:
+		return 150, tok, left
 	default:
 		return 0, tok, left
 	}
@@ -475,6 +487,16 @@ func (p *Parser) postfixOp() (*lex.Token, bp) {
 	default:
 		return nil, 0
 	}
+}
+
+func (p *Parser) parseFieldExpr(expr syn.Expr) *syn.FieldExpr {
+	dot := p.bump(lex.Dot)
+	field, ok := p.expect(lex.Name)
+	if !ok {
+		return nil
+	}
+
+	return &syn.FieldExpr{Expr: expr, Dot: dot, Field: field}
 }
 
 func (p *Parser) parseMatchesExpr(expr syn.Expr) *syn.MatchesExpr {

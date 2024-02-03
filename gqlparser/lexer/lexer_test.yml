@@ -455,12 +455,6 @@ lex reports useful number errors:
       message: 'Invalid number, expected digit but got: "e".'
       locations: [{ line: 1, column: 3 }]
 
-  - name: missing leading zero
-    input: ".123"
-    error:
-      message: 'Cannot parse the unexpected character ".".'
-      locations: [{ line: 1, column: 1 }]
-
   - name: characters
     input: "1.A"
     error:
@@ -585,12 +579,6 @@ lexes punctuation:
         value: undefined
 
 lex reports useful unknown character error:
-  - name: not a spread
-    input: ".."
-    error:
-      message: 'Cannot parse the unexpected character ".".'
-      locations: [{ line: 1, column: 1 }]
-
   - name: question mark
     input: "?"
     error:

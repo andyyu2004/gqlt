@@ -1,0 +1,4 @@
+let obj = { a: 1, b: 2, c: 3 }
+assert obj.a == 1
+assert obj.b == 2
+assert obj.c == 3

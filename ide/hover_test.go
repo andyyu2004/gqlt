@@ -138,4 +138,9 @@ let k = "a"
 let x = { a: 1, b: "s" }[k]
 #   ^
 `, expect.Expect(`any`))
+
+	check("object field access", `
+let x = { a: 1, b: "s" }.a
+#   ^
+`, expect.Expect(`number`))
 }

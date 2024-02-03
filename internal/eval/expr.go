@@ -128,6 +128,22 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 
 		return bindPat(dummyBinder{}, expr.Pat, val) == nil, nil
 
+	case *syn.FieldExpr:
+		val, err := e.eval(ctx, ecx, expr.Expr)
+		if err != nil {
+			return nil, err
+		}
+
+		switch val := val.(type) {
+		case map[string]any:
+			if val, ok := val[expr.Field.Value]; ok {
+				return val, nil
+			}
+			return nil, nil
+		default:
+			return nil, fmt.Errorf("cannot access field %s on %T", expr.Field.Value, val)
+		}
+
 	case *syn.IndexExpr:
 		val, err := e.eval(ctx, ecx, expr.Expr)
 		if err != nil {

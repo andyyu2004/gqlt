@@ -34,7 +34,10 @@ func (tcx *typechecker) expr(expr syn.Expr) Ty {
 		case *syn.TryExpr:
 			return tcx.tryExpr(expr)
 		case *syn.UnaryExpr:
+			// TODO
 			return Any{}
+		case *syn.FieldExpr:
+			return tcx.fieldExpr(expr)
 		default:
 			panic(fmt.Sprintf("missing case typechecker.expr %T", expr))
 		}
@@ -186,6 +189,18 @@ func (tcx *typechecker) matchesExpr(expr *syn.MatchesExpr) Ty {
 	ty := tcx.expr(expr.Expr)
 	tcx.bind(expr.Pat, ty)
 	return Bool{}
+}
+
+func (tcx *typechecker) fieldExpr(expr *syn.FieldExpr) Ty {
+	ty := tcx.expr(expr.Expr)
+	switch ty := ty.(type) {
+	case Object:
+		if v, ok := ty.Fields.Get(expr.Field.Value); ok {
+			return v
+		}
+	}
+
+	return tcx.error(expr.Pos(), fmt.Sprintf("cannot access field '%s' on type '%v'", expr.Field.Value, ty))
 }
 
 func (tcx *typechecker) binaryExpr(expr *syn.BinaryExpr) Ty {

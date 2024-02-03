@@ -98,6 +98,8 @@ func convertToken(tok [n]lexer.Token) (Token, int) {
 		switch tok[0].Value {
 		case "_":
 			kind = Underscore
+		case ".":
+			kind = Dot
 		case "let":
 			kind = Let
 		case "query":
@@ -164,6 +166,7 @@ const (
 	Amp
 	ParenL
 	ParenR
+	Dot
 	Spread
 	Colon
 	Comma
@@ -185,6 +188,7 @@ const (
 	String
 	BlockString
 	Comment
+	// gqlparser tokens: every token above here must be consistent with `lexer.Token` so they can be safely cast
 
 	// gqlt tokens
 	// gqlparser just puts most of these as names, but this is nicer imo

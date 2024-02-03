@@ -14,6 +14,7 @@ const (
 	Amp
 	ParenL
 	ParenR
+	Dot
 	Spread
 	Colon
 	Comma
@@ -53,6 +54,8 @@ func (t Type) Name() string {
 		return "ParenL"
 	case ParenR:
 		return "ParenR"
+	case Dot:
+		return "Dot"
 	case Spread:
 		return "Spread"
 	case Colon:
@@ -115,6 +118,8 @@ func (t Type) String() string {
 		return "("
 	case ParenR:
 		return ")"
+	case Dot:
+		return "."
 	case Spread:
 		return "..."
 	case Comma:

@@ -1,0 +1,5 @@
+
+[TestParser/expr/field - 1]
+x.a.b;
+
+---

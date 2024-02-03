@@ -139,6 +139,31 @@ func (expr CallExpr) Format(w io.Writer) {
 	_, _ = io.WriteString(w, ")")
 }
 
+type FieldExpr struct {
+	Expr  Expr
+	Dot   lex.Token
+	Field lex.Token
+}
+
+var _ Expr = FieldExpr{}
+
+func (expr FieldExpr) Pos() ast.Position {
+	return expr.Expr.Pos().Merge(expr.Field)
+}
+
+func (expr FieldExpr) Format(w io.Writer) {
+	expr.Expr.Format(w)
+	_, _ = io.WriteString(w, ".")
+	_, _ = io.WriteString(w, expr.Field.Value)
+}
+
+func (expr FieldExpr) Children() Children {
+	return Children{expr.Expr, expr.Field}
+}
+
+func (FieldExpr) isExpr() {}
+func (FieldExpr) isNode() {}
+
 type MatchesExpr struct {
 	ast.Position
 	Expr      Expr

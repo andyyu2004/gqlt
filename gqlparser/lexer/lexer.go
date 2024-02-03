@@ -103,6 +103,7 @@ func (s *Lexer) ReadToken() (Token, error) {
 			s.endRunes += 2
 			return s.makeValueToken(Spread, "")
 		}
+		return s.makeValueToken(Dot, "")
 	case ':':
 		return s.makeValueToken(Colon, "")
 	case ';':
