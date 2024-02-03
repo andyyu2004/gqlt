@@ -119,9 +119,18 @@ func compat(a, b Ty) bool {
 	case Bool, Number, String:
 		return a == b
 	case List:
+		if t, ok := b.(Tuple); ok {
+			// empty tuple is compatible with any list
+			return len(t.Elems) == 0
+		}
+
 		b, ok := b.(List)
 		return ok && compat(a.Elem, b.Elem)
 	case Tuple:
+		if _, ok := b.(List); ok {
+			return len(a.Elems) == 0
+		}
+
 		b, ok := b.(Tuple)
 		return ok && len(a.Elems) == len(b.Elems) && allCompat(a.Elems, b.Elems)
 	case Object:
