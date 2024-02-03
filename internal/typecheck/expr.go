@@ -34,8 +34,7 @@ func (tcx *typechecker) expr(expr syn.Expr) Ty {
 		case *syn.TryExpr:
 			return tcx.tryExpr(expr)
 		case *syn.UnaryExpr:
-			// TODO
-			return Any{}
+			return tcx.unaryExpr(expr)
 		case *syn.FieldExpr:
 			return tcx.fieldExpr(expr)
 		default:
@@ -49,6 +48,24 @@ func (tcx *typechecker) expr(expr syn.Expr) Ty {
 func (tcx *typechecker) queryExpr(expr *syn.QueryExpr) Ty {
 	// todo
 	return Any{}
+}
+
+func (tcx *typechecker) unaryExpr(expr *syn.UnaryExpr) Ty {
+	ty := tcx.expr(expr.Expr)
+	if isErr(ty) {
+		return ty
+	}
+
+	switch expr.Op.Kind {
+	case lex.Bang, lex.Not:
+		return Bool{}
+	case lex.Minus:
+		if _, ok := ty.(Number); ok {
+			return Number{}
+		}
+	}
+
+	return tcx.error(expr.Pos(), fmt.Sprintf("cannot apply '%s' to '%v'", expr.Op.Kind.String(), ty))
 }
 
 func (tcx *typechecker) tryExpr(expr *syn.TryExpr) Ty {
