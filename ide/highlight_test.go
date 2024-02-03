@@ -96,4 +96,12 @@ mutation { bar }`, expect.Expect(`1:1..1:4: keyword
 1:9..1:12: property
 1:13..1:16: parameter
 `))
+
+	check("object patterns", "let { foo: bar } = { foo: 42 }", expect.Expect(`1:1..1:4: keyword
+1:7..1:10: property
+1:12..1:15: property
+1:18..1:19: operator
+1:22..1:25: property
+1:27..1:29: number
+`))
 }

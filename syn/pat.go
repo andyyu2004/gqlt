@@ -115,7 +115,11 @@ var _ Pat = ObjectPat{}
 func (pat ObjectPat) Children() Children {
 	children := make(Children, 0, pat.Fields.Len())
 	for entry := pat.Fields.Oldest(); entry != nil; entry = entry.Next() {
-		// don't include the key in here as the pattern's position overlaps with it
+		// Only include the key in here as the pattern's position does not overlap with it
+		// This is an edge case arising from punning
+		if entry.Key.Position != entry.Value.Pos() {
+			children = append(children, entry.Key)
+		}
 		children = append(children, entry.Value)
 	}
 	return children

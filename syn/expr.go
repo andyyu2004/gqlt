@@ -214,7 +214,11 @@ func (expr ObjectExpr) Children() Children {
 	var i int
 	children = append(children, expr.OpenBrace)
 	for entry := expr.Fields.Oldest(); entry != nil; entry = entry.Next() {
-		children = append(children, entry.Key, entry.Value)
+		if entry.Key.Position != entry.Value.Pos() {
+			// avoid doubling up due to object punning
+			children = append(children, entry.Key)
+		}
+		children = append(children, entry.Value)
 		if i < len(expr.Commas) {
 			children = append(children, expr.Commas[i])
 			i++
