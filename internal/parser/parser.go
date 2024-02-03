@@ -344,10 +344,12 @@ func (p *Parser) parseObjectPat() *syn.ObjectPat {
 
 	end, _ := p.expect(lex.BraceR)
 
-	for entry := fields.Newest().Prev(); entry != nil; entry = entry.Prev() {
-		if _, ok := entry.Value.(*syn.RestPat); ok {
-			p.error(entry.Value, "rest pattern must be last")
-			return nil
+	if fields.Len() > 0 {
+		for entry := fields.Newest().Prev(); entry != nil; entry = entry.Prev() {
+			if _, ok := entry.Value.(*syn.RestPat); ok {
+				p.error(entry.Value, "rest pattern must be last")
+				return nil
+			}
 		}
 	}
 
