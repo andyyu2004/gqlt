@@ -203,7 +203,8 @@ func (e *Executor) Test(t *testing.T, root string, opts ...Opt) {
 			}
 
 			tcx := typecheck.New()
-			if _, err := tcx.Check(file); err != nil {
+			info := tcx.Check(file)
+			if len(info.Errors) > 0 {
 				if runConfig.typecheck {
 					t.Fatal(err)
 				}

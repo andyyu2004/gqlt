@@ -67,4 +67,8 @@ let x = [5, "test", false]
 	check("list literal type", `
 let x = [1, 2, 3]
         ^`, expect.Expect(`number[]`))
+
+	check("objct literal type", `
+let x = { a: 1, b: "test", c: false }
+        ^`, expect.Expect(`{ a: number, b: string, c: bool }`))
 }

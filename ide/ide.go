@@ -95,10 +95,8 @@ var _ memosa.Query[typecheckKey, typecheck.Info] = typecheckQuery{}
 
 func (typecheckQuery) Execute(ctx *memosa.Context, key typecheckKey) typecheck.Info {
 	tcx := typecheck.New()
-	ast := memosa.Fetch[parseQuery](ctx, parseKey{key.Path}).Ast
-	info, err := tcx.Check(ast)
-	_ = err // error will be handled by diagnostics
-	return info
+	ast := memosa.Fetch[parseQuery](ctx, parseKey(key)).Ast
+	return tcx.Check(ast)
 }
 
 type (

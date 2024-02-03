@@ -198,17 +198,26 @@ func (expr ListExpr) Format(w io.Writer) {
 
 type ObjectExpr struct {
 	ast.Position
-	Fields *orderedmap.OrderedMap[lex.Token, Expr]
+	OpenBrace  lex.Token
+	Fields     *orderedmap.OrderedMap[lex.Token, Expr]
+	Commas     []lex.Token // alternates with fields, there may or may not be a trailing comma
+	CloseBrace lex.Token
 }
 
 var _ Expr = ObjectExpr{}
 
 func (expr ObjectExpr) Children() Children {
-	children := make(Children, 0, expr.Fields.Len()*2)
+	children := make(Children, 0, expr.Fields.Len()*3+2)
+	var i int
+	children = append(children, expr.OpenBrace)
 	for entry := expr.Fields.Oldest(); entry != nil; entry = entry.Next() {
 		children = append(children, entry.Key, entry.Value)
+		if i < len(expr.Commas) {
+			children = append(children, expr.Commas[i])
+			i++
+		}
 	}
-	return children
+	return append(children, expr.CloseBrace)
 }
 
 func (ObjectExpr) isExpr() {}

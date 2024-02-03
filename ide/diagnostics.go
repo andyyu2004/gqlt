@@ -52,15 +52,21 @@ func (d *diagnostics) syntax() {
 func (d *diagnostics) typecheck() {
 	root := d.Parse(d.path)
 	tcx := typecheck.New()
-	_, err := tcx.Check(root.Ast)
-	if err != nil {
-		errs := err.(typecheck.Errors)
-		for _, err := range errs {
-			d.diagnostics = append(d.diagnostics, protocol.Diagnostic{
-				Range:    posToProto(d.Mapper(d.path), err.Pos),
-				Severity: lib.Ref(protocol.DiagnosticSeverityError),
-				Message:  err.Msg,
-			})
-		}
+	info := tcx.Check(root.Ast)
+
+	for _, err := range info.Errors {
+		d.diagnostics = append(d.diagnostics, protocol.Diagnostic{
+			Range:    posToProto(d.Mapper(d.path), err.Pos),
+			Severity: lib.Ref(protocol.DiagnosticSeverityError),
+			Message:  err.Msg,
+		})
+	}
+
+	for _, err := range info.Warnings {
+		d.diagnostics = append(d.diagnostics, protocol.Diagnostic{
+			Range:    posToProto(d.Mapper(d.path), err.Pos),
+			Severity: lib.Ref(protocol.DiagnosticSeverityWarning),
+			Message:  err.Msg,
+		})
 	}
 }

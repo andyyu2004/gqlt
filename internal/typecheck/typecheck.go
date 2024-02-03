@@ -24,8 +24,7 @@ type Error struct {
 }
 
 type typechecker struct {
-	errors Errors
-	info   Info
+	info Info
 }
 
 func New() *typechecker {
@@ -38,18 +37,16 @@ func New() *typechecker {
 
 type Info struct {
 	ExprTypes map[syn.Expr]Ty
+	Warnings  Errors
+	Errors    Errors
 }
 
-func (tcx *typechecker) Check(ast syn.File) (Info, error) {
+func (tcx *typechecker) Check(ast syn.File) Info {
 	for _, stmt := range ast.Stmts {
 		tcx.stmt(stmt)
 	}
 
-	if len(tcx.errors) > 0 {
-		return tcx.info, tcx.errors
-	}
-
-	return tcx.info, nil
+	return tcx.info
 }
 
 func (tcx *typechecker) stmt(stmt syn.Stmt) {
@@ -69,6 +66,10 @@ func (tcx *typechecker) stmt(stmt syn.Stmt) {
 }
 
 func (tcx *typechecker) error(pos ast.Position, msg string) errTy {
-	tcx.errors = append(tcx.errors, Error{pos.Pos(), msg})
+	tcx.info.Errors = append(tcx.info.Errors, Error{pos.Pos(), msg})
 	return errTy{}
+}
+
+func (tcx *typechecker) warn(pos ast.Position, msg string) {
+	tcx.info.Warnings = append(tcx.info.Warnings, Error{pos.Pos(), msg})
 }

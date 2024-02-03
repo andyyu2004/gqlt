@@ -7,6 +7,7 @@ import (
 	"github.com/andyyu2004/gqlt/internal/lex"
 	"github.com/andyyu2004/gqlt/internal/slice"
 	"github.com/andyyu2004/gqlt/syn"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 func (tcx *typechecker) expr(expr syn.Expr) Ty {
@@ -27,7 +28,7 @@ func (tcx *typechecker) expr(expr syn.Expr) Ty {
 		case *syn.MatchesExpr:
 			return Any{}
 		case *syn.ObjectExpr:
-			return Any{}
+			return tcx.objectExpr(expr)
 		case *syn.QueryExpr:
 			return tcx.queryExpr(expr)
 		case *syn.TryExpr:
@@ -48,17 +49,15 @@ func (tcx *typechecker) queryExpr(expr *syn.QueryExpr) Ty {
 }
 
 func (tcx *typechecker) tryExpr(expr *syn.TryExpr) Ty {
-	return Object{
-		Fields: map[string]Ty{
-			"data": tcx.expr(expr.Expr),
-			"errors": List{Elem: Object{
-				Fields: map[string]Ty{
-					"message": String{},
-					"path":    List{Elem: Any{}},
-				},
-			}},
-		},
-	}
+	errorFields := orderedmap.New[string, Ty](2)
+	errorFields.Set("message", String{})
+	errorFields.Set("path", List{Elem: Any{}})
+
+	fields := orderedmap.New[string, Ty](2)
+	fields.Set("data", tcx.expr(expr.Expr))
+	fields.Set("errors", List{Elem: Object{Fields: errorFields}})
+
+	return Object{Fields: fields}
 }
 
 func (tcx *typechecker) literalExpr(pos ast.HasPosition, val any) Ty {
@@ -76,6 +75,18 @@ func (tcx *typechecker) literalExpr(pos ast.HasPosition, val any) Ty {
 	}
 }
 
+func (tcx *typechecker) objectExpr(expr *syn.ObjectExpr) Ty {
+	fields := orderedmap.New[string, Ty](expr.Fields.Len())
+	for entry := expr.Fields.Oldest(); entry != nil; entry = entry.Next() {
+		ty := tcx.expr(entry.Value)
+		if isErr(ty) {
+			return ty
+		}
+		fields.Set(entry.Key.Value, ty)
+	}
+	return Object{Fields: fields}
+}
+
 func (tcx *typechecker) listExpr(expr *syn.ListExpr) Ty {
 	if len(expr.Exprs) == 0 {
 		return Tuple{}
@@ -90,6 +101,8 @@ func (tcx *typechecker) listExpr(expr *syn.ListExpr) Ty {
 		}
 
 		if isAny(ty) {
+			// could be smarter about this
+			// this to avoid a list like `[Bool, Any]` to get assigned type `Bool[]`
 			return List{Elem: ty}
 		}
 
@@ -118,7 +131,7 @@ func (tcx *typechecker) binaryExpr(expr *syn.BinaryExpr) Ty {
 	switch expr.Op.Kind {
 	case lex.Equals2, lex.BangEqual:
 		if !compat(lhs, rhs) {
-			return tcx.error(expr.Pos(), fmt.Sprintf("cannot compare '%v' to '%v'", lhs, rhs))
+			tcx.warn(expr.Pos(), fmt.Sprintf("comparing '%v' to '%v' will always be false", lhs, rhs))
 		}
 		return Bool{}
 	case lex.Plus:

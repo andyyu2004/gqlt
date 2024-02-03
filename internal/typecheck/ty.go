@@ -3,6 +3,8 @@ package typecheck
 import (
 	"fmt"
 	"strings"
+
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 type Ty interface {
@@ -64,16 +66,22 @@ func (t Tuple) String() string {
 func (Tuple) isTy() {}
 
 type Object struct {
-	Fields map[string]Ty
+	Fields *orderedmap.OrderedMap[string, Ty]
 }
 
 func (o Object) String() string {
 	s := new(strings.Builder)
 	_, _ = s.WriteString("{ ")
-	for k, v := range o.Fields {
-		_, _ = fmt.Fprintf(s, "%s: %s ", k, v)
+
+	first := true
+	for entry := o.Fields.Oldest(); entry != nil; entry = entry.Next() {
+		if !first {
+			_, _ = s.WriteString(", ")
+		}
+		first = false
+		_, _ = fmt.Fprintf(s, "%s: %s", entry.Key, entry.Value)
 	}
-	_, _ = s.WriteString("}")
+	_, _ = s.WriteString(" }")
 	return s.String()
 }
 
@@ -122,12 +130,17 @@ func compat(a, b Ty) bool {
 			return false
 		}
 
-		if len(a.Fields) != len(b.Fields) {
+		if a.Fields.Len() != b.Fields.Len() {
 			return false
 		}
 
-		for k, v := range a.Fields {
-			if !compat(v, b.Fields[k]) {
+		for entry := a.Fields.Oldest(); entry != nil; entry = entry.Next() {
+			v, ok := b.Fields.Get(entry.Key)
+			if !ok {
+				return false
+			}
+
+			if !compat(entry.Value, v) {
 				return false
 			}
 		}

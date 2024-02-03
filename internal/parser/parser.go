@@ -580,6 +580,7 @@ func (p *Parser) parseListExpr() *syn.ListExpr {
 func (p *Parser) parseObjectExpr() *syn.ObjectExpr {
 	start := p.bump(lex.BraceL)
 	fields := orderedmap.New[lex.Token, syn.Expr]()
+	commas := []lex.Token{}
 	for !p.at(lex.EOF) && !p.at(lex.BraceR) {
 		name, ok := p.expect(lex.Name)
 		if !ok {
@@ -596,14 +597,16 @@ func (p *Parser) parseObjectExpr() *syn.ObjectExpr {
 
 		fields.Set(name, expr)
 
-		if !p.eat_(lex.Comma) {
+		comma, ok := p.eat(lex.Comma)
+		if !ok {
 			break
 		}
+		commas = append(commas, comma)
 	}
 
 	end, _ := p.expect(lex.BraceR)
 
-	return &syn.ObjectExpr{Position: start.Merge(end), Fields: fields}
+	return &syn.ObjectExpr{Position: start.Merge(end), OpenBrace: start, Fields: fields, Commas: commas, CloseBrace: end}
 }
 
 func (p *Parser) parseLiteralExpr() *syn.LiteralExpr {
