@@ -8,21 +8,9 @@ import (
 )
 
 func TestIDE(t *testing.T) {
-	const path = "test.gqlt"
-
-	changes := ide.Changes{
-		ide.SetFileContent{
-			Path:    path,
-			Content: "let x = 5",
-		},
-	}
-
-	ide := ide.New()
-	ide.Apply(changes)
-	s, cleanup := ide.Snapshot()
-	t.Cleanup(cleanup)
-
-	ast := s.Parse(path).Ast
-	expect.Expect(`let x = 5;
+	ide.TestWith(t, "let x = 5", func(path string, s ide.Snapshot) {
+		ast := s.Parse(path).Ast
+		expect.Expect(`let x = 5;
 `).AssertEqual(t, ast.String())
+	})
 }

@@ -2,6 +2,7 @@ package lsp
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 
 	"github.com/andyyu2004/gqlt/ide"
@@ -33,17 +34,16 @@ func New(ide *ide.IDE) *server.Server {
 		TextDocumentDidOpen:            ls.onOpen,
 		TextDocumentSemanticTokensFull: ls.semanticTokens,
 		TextDocumentHover:              ls.hover,
+		SetTrace:                       ls.setTrace,
 	}
-	return server.NewServer(handler, "gqlt", false)
+	server := server.NewServer(handler, "gqlt", false)
+	server.Log.Infof("gqlt language server")
+	return server
 }
 
 type ls struct {
 	*ide.IDE
 }
-
-// func trace(ctx *glsp.Context, format string, args ...any) {
-// 	_ = protocol.Trace(ctx, protocol.MessageTypeError, fmt.Sprintf(format, args...))
-// }
 
 func (s *ls) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (any, error) {
 	protocol.SetTraceValue(protocol.TraceValueVerbose)
@@ -99,8 +99,28 @@ func (s *ls) onChange(ctx *glsp.Context, params *protocol.DidChangeTextDocumentP
 	return nil
 }
 
+type logger struct {
+	ctx *glsp.Context
+}
+
+func (l logger) Debugf(format string, args ...any) {
+	_ = protocol.Trace(l.ctx, protocol.MessageTypeLog, fmt.Sprintf(format, args...))
+}
+
+func (l logger) Infof(format string, args ...any) {
+	_ = protocol.Trace(l.ctx, protocol.MessageTypeInfo, fmt.Sprintf(format, args...))
+}
+
+func (l logger) Warnf(format string, args ...any) {
+	_ = protocol.Trace(l.ctx, protocol.MessageTypeWarning, fmt.Sprintf(format, args...))
+}
+
+func (l logger) Errorf(format string, args ...any) {
+	_ = protocol.Trace(l.ctx, protocol.MessageTypeError, fmt.Sprintf(format, args...))
+}
+
 func (l *ls) publishDiagnostics(ctx *glsp.Context) {
-	s, cleanup := l.Snapshot()
+	s, cleanup := l.Snapshot(logger{ctx})
 	defer cleanup()
 
 	diagnostics := s.Diagnostics()
@@ -112,8 +132,8 @@ func (l *ls) publishDiagnostics(ctx *glsp.Context) {
 	}
 }
 
-func (l *ls) hover(context *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
-	s, cleanup := l.Snapshot()
+func (l *ls) hover(ctx *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
+	s, cleanup := l.Snapshot(logger{ctx})
 	defer cleanup()
 
 	return s.Hover(params.TextDocument.URI, params.Position), nil
@@ -128,7 +148,7 @@ func (l *ls) semanticTokens(ctx *glsp.Context, params *protocol.SemanticTokensPa
 		tokenModifiersBitset uint32
 	}
 
-	s, cleanup := l.Snapshot()
+	s, cleanup := l.Snapshot(logger{ctx})
 	defer cleanup()
 
 	highlights := s.Highlight(params.TextDocument.URI)
@@ -163,4 +183,9 @@ func (l *ls) semanticTokens(ctx *glsp.Context, params *protocol.SemanticTokensPa
 	}
 
 	return &protocol.SemanticTokens{Data: data}, nil
+}
+
+func (l *ls) setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) error {
+	protocol.SetTraceValue(params.Value)
+	return nil
 }

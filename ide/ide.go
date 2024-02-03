@@ -1,6 +1,7 @@
 package ide
 
 import (
+	"log"
 	"maps"
 	"sync"
 	"testing"
@@ -12,6 +13,13 @@ import (
 	"github.com/andyyu2004/gqlt/syn"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
+
+type Logger interface {
+	Debugf(fmt string, args ...any)
+	Infof(fmt string, args ...any)
+	Warnf(fmt string, args ...any)
+	Errorf(fmt string, args ...any)
+}
 
 type IDE struct {
 	ctx *memosa.Context
@@ -27,15 +35,16 @@ func New() *IDE {
 	return &IDE{ctx, sync.RWMutex{}}
 }
 
-func (ide *IDE) Snapshot() (Snapshot, func()) {
+func (ide *IDE) Snapshot(log Logger) (Snapshot, func()) {
 	ide.lock.RLock()
-	return Snapshot{ide}, ide.lock.RUnlock
+	return Snapshot{ide, log}, ide.lock.RUnlock
 }
 
 // A snapshot of the current state of the IDE.
 // All ide operations are performed on a snapshot.
 type Snapshot struct {
 	ide *IDE
+	log Logger
 }
 
 type Changes []Change
@@ -137,6 +146,24 @@ func posToProto(mapper *mapper.Mapper, position ast.HasPosition) protocol.Range 
 	}
 }
 
+type logger struct{}
+
+func (logger) Debugf(fmt string, args ...any) {
+	log.Printf(fmt, args...)
+}
+
+func (logger) Infof(fmt string, args ...any) {
+	log.Printf(fmt, args...)
+}
+
+func (logger) Warnf(fmt string, args ...any) {
+	log.Printf(fmt, args...)
+}
+
+func (logger) Errorf(fmt string, args ...any) {
+	log.Printf(fmt, args...)
+}
+
 func TestWith(t testing.TB, content string, f func(string, Snapshot)) {
 	const path = "test.gqlt"
 
@@ -144,7 +171,7 @@ func TestWith(t testing.TB, content string, f func(string, Snapshot)) {
 
 	ide := New()
 	ide.Apply(changes)
-	s, cleanup := ide.Snapshot()
+	s, cleanup := ide.Snapshot(logger{})
 	t.Cleanup(cleanup)
 	f(path, s)
 }

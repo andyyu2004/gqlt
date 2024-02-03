@@ -9,6 +9,7 @@ import (
 )
 
 func (s *Snapshot) Hover(path string, position protocol.Position) *protocol.Hover {
+	s.log.Errorf("hover %s %v", path, position)
 	ast := s.Parse(path).Ast
 	cursor := syn.NewCursor(ast)
 	mapper := s.Mapper(path)
