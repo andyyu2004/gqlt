@@ -26,7 +26,7 @@ func (tcx *typechecker) expr(expr syn.Expr) Ty {
 		case *syn.ListExpr:
 			return tcx.listExpr(expr)
 		case *syn.MatchesExpr:
-			return Any{}
+			return tcx.matchesExpr(expr)
 		case *syn.ObjectExpr:
 			return tcx.objectExpr(expr)
 		case *syn.QueryExpr:
@@ -131,6 +131,12 @@ func (tcx *typechecker) callExpr(expr *syn.CallExpr) Ty {
 	}
 	// We just return Any for now as the return type
 	return Any{}
+}
+
+func (tcx *typechecker) matchesExpr(expr *syn.MatchesExpr) Ty {
+	ty := tcx.expr(expr.Expr)
+	tcx.bind(expr.Pat, ty)
+	return Bool{}
 }
 
 func (tcx *typechecker) binaryExpr(expr *syn.BinaryExpr) Ty {

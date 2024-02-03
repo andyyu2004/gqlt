@@ -44,7 +44,7 @@ func (tcx *typechecker) bindList(list *syn.ListPat, ty Ty) {
 				tcx.bind(pat, ty.Elems[i])
 			}
 		}
-	case Any:
+	case Any, errTy:
 		for _, pat := range list.Pats {
 			tcx.bind(pat, Any{})
 		}
@@ -86,7 +86,7 @@ func (tcx *typechecker) bindObject(pat *syn.ObjectPat, ty Ty) {
 				panic("we just checked, it should be there..")
 			}
 		}
-	case Any:
+	case Any, errTy:
 		for entry := pat.Fields.Oldest(); entry != nil; entry = entry.Next() {
 			tcx.bind(entry.Value, Any{})
 		}

@@ -107,4 +107,8 @@ let { a, b: c } = { a: 1, b: "s" }
 	check("object rest pattern", `
 let { a, ...r } = { a: 1, b: "s", c: false }
 #           ^`, expect.Expect(`{ b: string, c: bool }`))
+
+	check("matches", `
+assert 1 matches 1
+#        ^^^^^^^`, expect.Expect(`bool`))
 }
