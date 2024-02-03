@@ -9,15 +9,15 @@ import (
 )
 
 func (s *Snapshot) Hover(path string, position protocol.Position) *protocol.Hover {
-	s.log.Errorf("hover %s %v", path, position)
+	s.log.Debugf("hover %s %v", path, position)
 	ast := s.Parse(path).Ast
-	cursor := syn.NewCursor(ast)
 	mapper := s.Mapper(path)
 	point := protoToPoint(mapper, position)
 	if point == nil {
 		return nil
 	}
 
+	cursor := syn.NewCursor(ast)
 	typeInfo := s.Typecheck(path)
 	if r, ty := hover(cursor, typeInfo, *point); ty != nil {
 		return &protocol.Hover{

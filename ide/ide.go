@@ -1,7 +1,6 @@
 package ide
 
 import (
-	"log"
 	"maps"
 	"sync"
 	"testing"
@@ -146,22 +145,24 @@ func posToProto(mapper *mapper.Mapper, position ast.HasPosition) protocol.Range 
 	}
 }
 
-type logger struct{}
-
-func (logger) Debugf(fmt string, args ...any) {
-	log.Printf(fmt, args...)
+type logger struct {
+	t testing.TB
 }
 
-func (logger) Infof(fmt string, args ...any) {
-	log.Printf(fmt, args...)
+func (l logger) Debugf(fmt string, args ...any) {
+	l.t.Logf(fmt, args...)
 }
 
-func (logger) Warnf(fmt string, args ...any) {
-	log.Printf(fmt, args...)
+func (l logger) Infof(fmt string, args ...any) {
+	l.t.Logf(fmt, args...)
 }
 
-func (logger) Errorf(fmt string, args ...any) {
-	log.Printf(fmt, args...)
+func (l logger) Warnf(fmt string, args ...any) {
+	l.t.Logf(fmt, args...)
+}
+
+func (l logger) Errorf(fmt string, args ...any) {
+	l.t.Errorf(fmt, args...)
 }
 
 func TestWith(t testing.TB, content string, f func(string, Snapshot)) {
@@ -171,7 +172,7 @@ func TestWith(t testing.TB, content string, f func(string, Snapshot)) {
 
 	ide := New()
 	ide.Apply(changes)
-	s, cleanup := ide.Snapshot(logger{})
+	s, cleanup := ide.Snapshot(logger{t})
 	t.Cleanup(cleanup)
 	f(path, s)
 }

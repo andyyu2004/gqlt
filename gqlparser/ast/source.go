@@ -23,7 +23,7 @@ type Position struct {
 }
 
 func (p Position) Contains(point Point) bool {
-	return p.Start <= point && point <= p.End
+	return p.Start <= point && point < p.End
 }
 
 func (p Position) String() string {

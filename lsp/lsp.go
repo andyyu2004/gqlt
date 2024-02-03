@@ -30,6 +30,7 @@ func New(ide *ide.IDE) *server.Server {
 	handler := &protocol.Handler{
 		Initialize:                     ls.initialize,
 		Initialized:                    ls.initialized,
+		TextDocumentDefinition:         ls.definition,
 		TextDocumentDidChange:          ls.onChange,
 		TextDocumentDidOpen:            ls.onOpen,
 		TextDocumentSemanticTokensFull: ls.semanticTokens,
@@ -58,7 +59,8 @@ func (s *ls) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (a
 				Legend: semanticTokensLegend,
 				Full:   true,
 			},
-			HoverProvider: protocol.HoverOptions{},
+			HoverProvider:      protocol.HoverOptions{},
+			DefinitionProvider: true,
 		},
 		ServerInfo: &protocol.InitializeResultServerInfo{Name: "gqlt"},
 	}, nil
@@ -188,4 +190,12 @@ func (l *ls) semanticTokens(ctx *glsp.Context, params *protocol.SemanticTokensPa
 func (l *ls) setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) error {
 	protocol.SetTraceValue(params.Value)
 	return nil
+}
+
+// Returns: Location | []Location | []LocationLink | nil
+func (l *ls) definition(ctx *glsp.Context, params *protocol.DefinitionParams) (any, error) {
+	s, cleanup := l.Snapshot(logger{ctx})
+	defer cleanup()
+
+	return s.Definition(params.TextDocument.URI, params.Position), nil
 }

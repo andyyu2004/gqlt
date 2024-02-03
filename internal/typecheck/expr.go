@@ -18,7 +18,7 @@ func (tcx *typechecker) expr(expr syn.Expr) Ty {
 		case *syn.BinaryExpr:
 			return tcx.binaryExpr(expr)
 		case *syn.CallExpr:
-			return Any{}
+			return tcx.callExpr(expr)
 		case *syn.IndexExpr:
 			return Any{}
 		case *syn.LiteralExpr:
@@ -61,8 +61,9 @@ func (tcx *typechecker) tryExpr(expr *syn.TryExpr) Ty {
 }
 
 func (tcx *typechecker) nameExpr(expr *syn.NameExpr) Ty {
-	if ty, ok := tcx.scope[expr.Name.Value]; ok {
-		return ty
+	if entry, ok := tcx.scope[expr.Name.Value]; ok {
+		tcx.info.Resolutions[expr] = entry.Pat
+		return entry.Ty
 	}
 	return tcx.error(expr.Pos(), fmt.Sprintf("unbound name '%s'", expr.Name.Value))
 }
@@ -120,6 +121,16 @@ func (tcx *typechecker) listExpr(expr *syn.ListExpr) Ty {
 	}
 
 	return List{Elem: expected}
+}
+
+func (tcx *typechecker) callExpr(expr *syn.CallExpr) Ty {
+	// There is no way of getting the types of functions as they are only available at runtime.
+	// tcx.expr(expr.Fn)
+	for _, arg := range expr.Args {
+		tcx.expr(arg)
+	}
+	// We just return Any for now as the return type
+	return Any{}
 }
 
 func (tcx *typechecker) binaryExpr(expr *syn.BinaryExpr) Ty {

@@ -97,7 +97,7 @@ func (tcx *typechecker) bindObject(pat *syn.ObjectPat, ty Ty) {
 
 func (tcx *typechecker) bindName(pat *syn.NamePat, ty Ty) {
 	// we overwrite the name in scope if it already exists (i.e. shadowing is allowed)
-	tcx.scope[pat.Name.Value] = ty
+	tcx.scope[pat.Name.Value] = scopeEntry{Ty: ty, Pat: pat}
 
 	// the name pat itself should be unique (even if the name is shared with other name pats)
 	if _, ok := tcx.info.BindingTypes[pat]; ok {

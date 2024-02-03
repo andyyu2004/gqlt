@@ -25,15 +25,21 @@ type Error struct {
 
 type typechecker struct {
 	info  Info
-	scope map[string]Ty
+	scope map[string]scopeEntry
+}
+
+type scopeEntry struct {
+	Ty  Ty
+	Pat *syn.NamePat
 }
 
 func New() *typechecker {
 	return &typechecker{
-		scope: make(map[string]Ty),
+		scope: make(map[string]scopeEntry),
 		info: Info{
 			ExprTypes:    make(map[syn.Expr]Ty),
 			BindingTypes: make(map[*syn.NamePat]Ty),
+			Resolutions:  make(map[*syn.NameExpr]*syn.NamePat),
 		},
 	}
 }
@@ -41,8 +47,10 @@ func New() *typechecker {
 type Info struct {
 	ExprTypes    map[syn.Expr]Ty
 	BindingTypes map[*syn.NamePat]Ty
-	Warnings     Errors
-	Errors       Errors
+	// Resolutions maps name expressions to the binding that it references
+	Resolutions map[*syn.NameExpr]*syn.NamePat
+	Warnings    Errors
+	Errors      Errors
 }
 
 func (tcx *typechecker) Check(ast syn.File) Info {
