@@ -1,4 +1,6 @@
 let x = 1
 let y = "string"
 
+let { a, b } = { a: 1, b: "s" }
+
 

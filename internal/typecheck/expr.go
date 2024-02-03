@@ -14,7 +14,7 @@ func (tcx *typechecker) expr(expr syn.Expr) Ty {
 	ty := func() Ty {
 		switch expr := expr.(type) {
 		case *syn.NameExpr:
-			return Any{}
+			return tcx.nameExpr(expr)
 		case *syn.BinaryExpr:
 			return tcx.binaryExpr(expr)
 		case *syn.CallExpr:
@@ -58,6 +58,13 @@ func (tcx *typechecker) tryExpr(expr *syn.TryExpr) Ty {
 	fields.Set("errors", List{Elem: Object{Fields: errorFields}})
 
 	return Object{Fields: fields}
+}
+
+func (tcx *typechecker) nameExpr(expr *syn.NameExpr) Ty {
+	if ty, ok := tcx.scope[expr.Name.Value]; ok {
+		return ty
+	}
+	return tcx.error(expr.Pos(), fmt.Sprintf("unbound name '%s'", expr.Name.Value))
 }
 
 func (tcx *typechecker) literalExpr(pos ast.HasPosition, val any) Ty {

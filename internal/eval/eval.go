@@ -206,7 +206,7 @@ func (e *Executor) Test(t *testing.T, root string, opts ...Opt) {
 			info := tcx.Check(file)
 			if len(info.Errors) > 0 {
 				if runConfig.typecheck {
-					t.Fatal(err)
+					t.Fatal(info.Errors)
 				}
 				t.Logf("ignoring typecheck error: %v", err)
 			}

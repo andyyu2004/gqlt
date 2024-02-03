@@ -29,7 +29,6 @@ func TestHighlight(t *testing.T) {
 
 	check("objects", `let { x } = { x: 4 }`, expect.Expect(`1:1..1:4: keyword
 1:7..1:8: property
-1:7..1:8: property
 1:11..1:12: operator
 1:15..1:16: property
 1:18..1:19: number

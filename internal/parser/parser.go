@@ -144,7 +144,7 @@ func (p *Parser) parseStmt() syn.Stmt {
 			return nil
 		}
 
-		return &syn.ExprStmt{Position: expr.Pos(), Expr: expr}
+		return &syn.ExprStmt{Expr: expr}
 	}
 }
 
@@ -255,7 +255,7 @@ func (p *Parser) parsePat(opts patOpts) syn.Pat {
 
 	case lex.Name:
 		p.bump(lex.Name)
-		return &syn.NamePat{Position: tok.Pos(), Name: tok}
+		return &syn.NamePat{Name: tok}
 	case lex.BraceL:
 		return p.parseObjectPat()
 	case lex.BracketL:
@@ -546,7 +546,7 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 		return &syn.TryExpr{TryKw: tryKw, Expr: expr}
 	case lex.Name:
 		p.bump(lex.Name)
-		return &syn.NameExpr{Position: tok.Pos(), Name: tok}
+		return &syn.NameExpr{Name: tok}
 	default:
 		p.error(tok, "expected expression, found `%s`", tok.String())
 		return nil

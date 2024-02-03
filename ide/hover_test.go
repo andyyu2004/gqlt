@@ -14,7 +14,6 @@ import (
 func TestHover(t *testing.T) {
 	check := func(name, content string, expectation expect.Expectation) {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
 			ide.TestWith(t, content, func(path string, s ide.Snapshot) {
 				fixture := fixture.Parse(content)
 				require.Empty(t, fixture.Ranges)
@@ -46,7 +45,7 @@ func TestHover(t *testing.T) {
 
 	check("hover empty space", `
 let x = 5
-#  ^ ^ ^  ^^`, expect.Expect(`no hover`))
+#         ^^`, expect.Expect(`no hover`))
 
 	check("number literal type", `
 let x = 5
@@ -68,7 +67,44 @@ let x = [5, "test", false]
 let x = [1, 2, 3]
         ^`, expect.Expect(`number[]`))
 
-	check("objct literal type", `
+	check("object literal type", `
 let x = { a: 1, b: "test", c: false }
         ^`, expect.Expect(`{ a: number, b: string, c: bool }`))
+
+	check("name ref", `
+let x = 2
+1 + x
+    ^`, expect.Expect(`number`))
+
+	check("name def", `
+let x = 2
+    ^`, expect.Expect(`number`))
+
+	check("list pattern", `
+let [x] = [1, 2, 3]
+     ^`, expect.Expect(`number`))
+
+	check("list rest pattern", `
+let [x, ...xs] = [1, 2, 3]
+#          ^`, expect.Expect(`number[]`))
+
+	check("tuple pattern", `
+let [x, y] = [1, "s"]
+#       ^`, expect.Expect(`string`))
+
+	check("tuple rest pattern", `
+let [x, ...xs] = [1, "s", false]
+#          ^`, expect.Expect(`[string, bool]`))
+
+	check("object pattern (punned)", `
+let { a, b } = { a: 1, b: "s" }
+#        ^`, expect.Expect(`string`))
+
+	check("object pattern", `
+let { a, b: c } = { a: 1, b: "s" }
+#           ^`, expect.Expect(`string`))
+
+	check("object rest pattern", `
+let { a, ...r } = { a: 1, b: "s", c: false }
+#           ^`, expect.Expect(`{ b: string, c: bool }`))
 }

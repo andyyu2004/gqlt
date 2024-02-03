@@ -16,11 +16,14 @@ type Expr interface {
 }
 
 type NameExpr struct {
-	ast.Position
 	Name lex.Token
 }
 
 var _ Expr = NameExpr{}
+
+func (expr NameExpr) Pos() ast.Position {
+	return expr.Name.Pos()
+}
 
 func (expr NameExpr) Children() Children {
 	return Children{expr.Name}
@@ -237,13 +240,16 @@ func (expr ObjectExpr) Format(w io.Writer) {
 }
 
 type BinaryExpr struct {
-	ast.Position
 	Op    lex.Token
 	Left  Expr
 	Right Expr
 }
 
 var _ Expr = BinaryExpr{}
+
+func (expr BinaryExpr) Pos() ast.Position {
+	return expr.Left.Pos().Merge(expr.Right)
+}
 
 func (expr BinaryExpr) Children() Children {
 	return Children{expr.Left, expr.Op, expr.Right}

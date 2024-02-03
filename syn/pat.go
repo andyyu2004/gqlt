@@ -33,11 +33,14 @@ func (WildcardPat) Format(w io.Writer) {
 
 // A name pattern matches any value and binds it to the name
 type NamePat struct {
-	ast.Position
 	Name lex.Token
 }
 
 var _ Pat = NamePat{}
+
+func (pat NamePat) Pos() ast.Position {
+	return pat.Name.Pos()
+}
 
 func (pat NamePat) Children() Children {
 	return Children{pat.Name}
@@ -112,7 +115,8 @@ var _ Pat = ObjectPat{}
 func (pat ObjectPat) Children() Children {
 	children := make(Children, 0, pat.Fields.Len())
 	for entry := pat.Fields.Oldest(); entry != nil; entry = entry.Next() {
-		children = append(children, entry.Key, entry.Value)
+		// don't include the key in here as the pattern's position overlaps with it
+		children = append(children, entry.Value)
 	}
 	return children
 }
