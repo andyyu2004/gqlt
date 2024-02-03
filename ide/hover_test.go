@@ -143,4 +143,45 @@ let x = { a: 1, b: "s" }[k]
 let x = { a: 1, b: "s" }.a
 #   ^
 `, expect.Expect(`number`))
+
+	check("bang operator", `
+let x = !1
+#   ^`, expect.Expect(`bool`))
+
+	check("not operator", `
+let x = not 1 matches 1
+#   ^`, expect.Expect(`bool`))
+
+	check("negate operator", `
+let y = 2
+let x = -y
+#   ^`, expect.Expect(`number`))
+
+	check("minus numbers", `
+let x = 1 - 1
+#   ^`, expect.Expect(`number`))
+
+	check("plus numbers", `
+let x = 1 + 1
+#   ^`, expect.Expect(`number`))
+
+	check("plus strings", `
+let x = "foo" + "bar"
+#   ^`, expect.Expect(`string`))
+
+	check("plus lists", `
+let x = [1] + [2]
+#   ^`, expect.Expect(`number[]`))
+
+	check("multiply numbers", `
+let x = 2 * 3
+#   ^`, expect.Expect(`number`))
+
+	check("multiply lists", `
+let x = [1] * 3
+#   ^`, expect.Expect(`number[]`))
+
+	check("divide numbers", `
+let x = 2 / 3
+#   ^`, expect.Expect(`number`))
 }
