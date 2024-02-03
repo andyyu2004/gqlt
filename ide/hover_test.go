@@ -46,7 +46,7 @@ func TestHover(t *testing.T) {
 
 	check("hover empty space", `
 let x = 5
-#  ^ ^ ^  ^^`, expect.Expect(`no hover`))
+#         ^^`, expect.Expect(`no hover`))
 
 	check("number literal type", `
 let x = 5
@@ -68,7 +68,16 @@ let x = [5, "test", false]
 let x = [1, 2, 3]
         ^`, expect.Expect(`number[]`))
 
-	check("objct literal type", `
+	check("object literal type", `
 let x = { a: 1, b: "test", c: false }
         ^`, expect.Expect(`{ a: number, b: string, c: bool }`))
+
+	check("name ref", `
+let x = 2
+1 + x
+    ^`, expect.Expect(`number`))
+
+	check("name def", `
+let x = 2
+    ^`, expect.Expect(`number`))
 }

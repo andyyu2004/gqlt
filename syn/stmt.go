@@ -13,11 +13,14 @@ type Stmt interface {
 }
 
 type ExprStmt struct {
-	ast.Position
 	Expr Expr
 }
 
 var _ Stmt = ExprStmt{}
+
+func (stmt ExprStmt) Pos() ast.Position {
+	return stmt.Expr.Pos()
+}
 
 func (stmt ExprStmt) Children() Children {
 	return Children{stmt.Expr}
