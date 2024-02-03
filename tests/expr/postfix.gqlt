@@ -8,5 +8,4 @@ assert xs[3] == null
 let obj = { foo: "bar", bar: "baz" }
 assert obj["foo"] == "bar"
 assert obj["bar"] == "baz"
-assert obj["bad"] == null
 

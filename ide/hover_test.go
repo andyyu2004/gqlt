@@ -111,4 +111,31 @@ let { a, ...r } = { a: 1, b: "s", c: false }
 	check("matches", `
 assert 1 matches 1
 #        ^^^^^^^`, expect.Expect(`bool`))
+
+	check("list index", `
+let x = [1, 2, 3][0]
+#   ^
+`, expect.Expect(`number`))
+
+	check("tuple literal index", `
+let x = [1, "b"][1]
+#   ^
+`, expect.Expect(`string`))
+
+	check("tuple variable index", `
+let i = 1
+let x = [1, "b"][i]
+#   ^
+`, expect.Expect(`any`))
+
+	check("object literal index", `
+let x = { a: 1, b: "s" }["a"]
+#   ^
+`, expect.Expect(`number`))
+
+	check("object variable index", `
+let k = "a"
+let x = { a: 1, b: "s" }[k]
+#   ^
+`, expect.Expect(`any`))
 }

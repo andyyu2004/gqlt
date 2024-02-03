@@ -20,7 +20,7 @@ func (tcx *typechecker) expr(expr syn.Expr) Ty {
 		case *syn.CallExpr:
 			return tcx.callExpr(expr)
 		case *syn.IndexExpr:
-			return Any{}
+			return tcx.indexExpr(expr)
 		case *syn.LiteralExpr:
 			return tcx.literalExpr(expr, expr.Value)
 		case *syn.ListExpr:
@@ -131,6 +131,55 @@ func (tcx *typechecker) callExpr(expr *syn.CallExpr) Ty {
 	}
 	// We just return Any for now as the return type
 	return Any{}
+}
+
+func (tcx *typechecker) indexExpr(expr *syn.IndexExpr) Ty {
+	ty := tcx.expr(expr.Expr)
+	if isErr(ty) {
+		return ty
+	}
+
+	indexTy := tcx.expr(expr.Index)
+	if isErr(indexTy) {
+		return indexTy
+	}
+
+	switch ty := ty.(type) {
+	case Object:
+		if lit, ok := expr.Index.(*syn.LiteralExpr); ok {
+			if k, ok := lit.Value.(string); ok {
+				v, ok := ty.Fields.Get(k)
+				if !ok {
+					return tcx.error(expr.Pos(), fmt.Sprintf("cannot access field '%s' on object %s", k, ty))
+				}
+
+				return v
+			}
+		}
+
+		return Any{}
+	case List:
+		switch indexTy.(type) {
+		case Number:
+			return ty.Elem
+		default:
+			return tcx.error(expr.Pos(), fmt.Sprintf("cannot index '%v' with '%v'", ty, expr.Index))
+		}
+	case Tuple:
+		if lit, ok := expr.Index.(*syn.LiteralExpr); ok {
+			if f, ok := lit.Value.(float64); ok {
+				i := int(f)
+				if i >= 0 && i < len(ty.Elems) {
+					return ty.Elems[i]
+				}
+				return tcx.error(expr.Pos(), fmt.Sprintf("tuple index out of range: %d", i))
+			}
+		}
+
+		return Any{}
+	}
+
+	return tcx.error(expr.Pos(), fmt.Sprintf("cannot index '%v' with '%v'", ty, expr.Index))
 }
 
 func (tcx *typechecker) matchesExpr(expr *syn.MatchesExpr) Ty {
