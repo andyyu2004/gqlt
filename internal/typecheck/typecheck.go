@@ -71,7 +71,7 @@ func (tcx *typechecker) stmt(stmt syn.Stmt) {
 		tcx.expr(stmt.Expr)
 	case *syn.SetStmt:
 		tcx.expr(stmt.Expr)
-	case *syn.FragmentStmt:
+	case *syn.FragmentStmt, *syn.UseStmt:
 	default:
 		panic(fmt.Sprintf("missing case typechecker.stmt %T", stmt))
 	}

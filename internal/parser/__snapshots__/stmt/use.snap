@@ -1,0 +1,5 @@
+
+[TestParser/stmt/use - 1]
+use ../empty.gqlt;
+
+---

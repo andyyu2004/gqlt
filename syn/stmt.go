@@ -120,3 +120,26 @@ func (let LetStmt) Format(w io.Writer) {
 	_, _ = io.WriteString(w, " = ")
 	let.Expr.Format(w)
 }
+
+type UseStmt struct {
+	UseKw lex.Token
+	Path  lex.Token
+}
+
+var _ Stmt = UseStmt{}
+
+func (stmt UseStmt) Pos() ast.Position {
+	return stmt.UseKw.Merge(stmt.Path.Position)
+}
+
+func (stmt UseStmt) Children() Children {
+	return Children{stmt.UseKw, stmt.Path}
+}
+
+func (UseStmt) isStmt() {}
+func (UseStmt) isNode() {}
+
+func (stmt UseStmt) Format(w io.Writer) {
+	_, _ = io.WriteString(w, "use ")
+	_, _ = io.WriteString(w, stmt.Path.Value)
+}

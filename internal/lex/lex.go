@@ -102,6 +102,8 @@ func convertToken(tok [n]lexer.Token) (Token, int) {
 			kind = Dot
 		case "let":
 			kind = Let
+		case "use":
+			kind = Use
 		case "query":
 			kind = Query
 		case "mutation":
@@ -194,6 +196,7 @@ const (
 	// gqlparser just puts most of these as names, but this is nicer imo
 	Underscore
 	Let
+	Use
 	Query
 	Mutation
 	Subscription
@@ -219,6 +222,8 @@ func (t TokenKind) Name() string {
 		return "_"
 	case Let:
 		return "let"
+	case Use:
+		return "use"
 	case Query:
 		return "query"
 	case Mutation:
@@ -260,6 +265,8 @@ func (t TokenKind) String() string {
 		return "_"
 	case Let:
 		return "let"
+	case Use:
+		return "use"
 	case Query:
 		return "query"
 	case Mutation:

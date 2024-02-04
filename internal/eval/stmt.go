@@ -3,6 +3,7 @@ package eval
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	"github.com/andyyu2004/gqlt/internal/lex"
 	"github.com/andyyu2004/gqlt/syn"
@@ -10,6 +11,11 @@ import (
 
 func (e *Executor) stmt(ctx context.Context, ecx *executionContext, stmt syn.Stmt) error {
 	switch stmt := stmt.(type) {
+	case *syn.UseStmt:
+		if err := e.use(ctx, ecx, stmt); err != nil {
+			return err
+		}
+
 	case *syn.LetStmt:
 		if err := e.let(ctx, ecx, stmt); err != nil {
 			return err
@@ -67,6 +73,18 @@ func (e *Executor) stmt(ctx context.Context, ecx *executionContext, stmt syn.Stm
 	}
 
 	return nil
+}
+
+func (e *Executor) use(ctx context.Context, ecx *executionContext, use *syn.UseStmt) error {
+	value := use.Path.Value
+	// default to .gqlt extension
+	if filepath.Ext(value) == "" {
+		value += Ext
+	}
+
+	// the `use` path is relative to the calling file's directory
+	path := filepath.Join(filepath.Dir(ecx.path), value)
+	return e.RunFile(ctx, ecx.client, path)
 }
 
 func (e *Executor) let(ctx context.Context, ecx *executionContext, let *syn.LetStmt) error {

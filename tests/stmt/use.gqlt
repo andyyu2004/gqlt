@@ -1,0 +1,11 @@
+assert mutation { inc } == 1
+
+use "../common/increment.gqlt"
+
+assert mutation { inc } == 3
+
+# optional extension
+use "../common/increment"
+
+
+

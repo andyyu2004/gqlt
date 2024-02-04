@@ -3,6 +3,10 @@ type Query {
   animals: AnimalQuery!
 }
 
+type Mutation {
+  inc: Int!
+}
+
 enum AnimalKind {
   DOG
   CAT

@@ -55,7 +55,8 @@ func (s *Snapshot) Highlight(path string) Highlights {
 				lex.Query,
 				lex.Mutation,
 				lex.Set,
-				lex.Try:
+				lex.Try,
+				lex.Use:
 				kind = protocol.SemanticTokenTypeKeyword
 			case lex.TypeName:
 				kind = protocol.SemanticTokenTypeType

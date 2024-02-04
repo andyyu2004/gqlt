@@ -136,6 +136,8 @@ func (p *Parser) parseStmt() syn.Stmt {
 		return p.parseAssertStmt()
 	case lex.Set:
 		return p.parseSetStmt()
+	case lex.Use:
+		return p.parseUseStmt()
 	case lex.Fragment:
 		return p.parseFragment()
 	default:
@@ -171,6 +173,16 @@ func (p *Parser) parseFragment() *syn.FragmentStmt {
 		RawFragment: rawFragment,
 		Fragment:    fragment,
 	}
+}
+
+func (p *Parser) parseUseStmt() *syn.UseStmt {
+	useKw := p.bump(lex.Use)
+	path, ok := p.expect(lex.String)
+	if !ok {
+		return nil
+	}
+
+	return &syn.UseStmt{UseKw: useKw, Path: path}
 }
 
 func (p *Parser) parseSetStmt() *syn.SetStmt {

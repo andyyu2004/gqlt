@@ -79,6 +79,8 @@ func (s *settings) Set(key string, val any) error {
 }
 
 type executionContext struct {
+	// path to the file being executed
+	path     string
 	client   Client
 	scope    *scope
 	settings settings
@@ -183,48 +185,52 @@ func (e *Executor) Test(t *testing.T, root string, opts ...Opt) {
 			t.Fatal(err)
 		}
 
-		if !matches {
-			t.SkipNow()
-		}
-
 		idx := strings.Index(path, root)
 		name := path[idx+len(root)+1 : len(path)-len(Ext)]
 
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-			parser, err := parser.NewFromPath(path)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			file, err := parser.Parse()
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			tcx := typecheck.New()
-			info := tcx.Check(file)
-			if len(info.Errors) > 0 {
-				if runConfig.typecheck {
-					t.Fatal(info.Errors)
-				}
-				t.Logf("ignoring typecheck error: %v", err)
+			if !matches {
+				t.SkipNow()
 			}
 
 			ctx, client := e.factory.CreateClient(t)
-			if err := e.RunFile(ctx, client, file); err != nil {
+
+			if err := e.RunFile(ctx, client, path, opts...); err != nil {
 				t.Fatal(err)
 			}
 		})
 	}
 }
 
-func (e *Executor) RunFile(ctx context.Context, client Client, file syn.File) error {
+func (e *Executor) RunFile(ctx context.Context, client Client, path string, opts ...Opt) error {
+	// FIXME, doesn't make much sense to take the `glob` config here as it's not needed
+	runConfig := runConfig{}
+	for _, opt := range opts {
+		opt(&runConfig)
+	}
+
+	parser, err := parser.NewFromPath(path)
+	if err != nil {
+		return err
+	}
+
+	file, err := parser.Parse()
+	if err != nil {
+		return err
+	}
+
+	tcx := typecheck.New()
+	info := tcx.Check(file)
+	if len(info.Errors) > 0 && runConfig.typecheck {
+		return info.Errors
+	}
+
 	if err := e.prepareSchema(ctx, client); err != nil {
 		return err
 	}
 
 	ecx := &executionContext{
+		path:   path,
 		client: client,
 		scope: &scope{
 			parent:    builtinScope,

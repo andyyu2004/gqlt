@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"sync/atomic"
 	"testing"
 
 	"github.com/andyyu2004/gqlt"
@@ -48,6 +49,8 @@ func TestGqlt(t *testing.T) {
 
 	for _, client := range clients {
 		gqlt.New(gqlt.ClientFactoryFunc(func(testing.TB) (context.Context, gqlt.Client) {
+			// reset the counter for each test
+			q.counter.Store(0)
 			return context.Background(), client
 		})).Test(t, testpath, gqlt.WithGlob(debugGlob), gqlt.TypeCheck(true))
 	}
@@ -59,22 +62,27 @@ type AnimalFilter struct {
 }
 
 type query struct {
-	cats []cat
-	dogs []dog
+	counter atomic.Int32
+	cats    []cat
+	dogs    []dog
 }
 
-func (q query) Fail(args struct{ Yes bool }) (int32, error) {
+func (q *query) Inc() int32 {
+	return q.counter.Add(1)
+}
+
+func (q *query) Fail(args struct{ Yes bool }) (int32, error) {
 	if args.Yes {
 		return 1, errors.New("failed")
 	}
 
 	return 0, nil
 }
-func (q query) Animals() query         { return q }
-func (q query) Dogs() dogQuery         { return dogQuery{q} }
-func (q query) Cats() catQuery         { return catQuery{q} }
-func (q query) AllKinds() []AnimalKind { return []AnimalKind{dog{}.Kind(), cat{}.Kind()} }
-func (q query) KindToString(args struct{ Kind AnimalKind }) string {
+func (q *query) Animals() *query        { return q }
+func (q *query) Dogs() dogQuery         { return dogQuery{q} }
+func (q *query) Cats() catQuery         { return catQuery{q} }
+func (q *query) AllKinds() []AnimalKind { return []AnimalKind{dog{}.Kind(), cat{}.Kind()} }
+func (q *query) KindToString(args struct{ Kind AnimalKind }) string {
 	return strings.ToLower(string(args.Kind))
 }
 
@@ -92,7 +100,7 @@ type animal interface {
 	Name() string
 }
 
-func (q query) Search(args struct{ Filter *AnimalFilter }) []Animal {
+func (q *query) Search(args struct{ Filter *AnimalFilter }) []Animal {
 	var animals []Animal
 
 	for _, dog := range q.dogs {
@@ -121,7 +129,7 @@ func (q query) Search(args struct{ Filter *AnimalFilter }) []Animal {
 	return animals
 }
 
-type dogQuery struct{ query }
+type dogQuery struct{ *query }
 
 func (q dogQuery) First() *dog {
 	if len(q.dogs) > 0 {
@@ -157,7 +165,7 @@ type cat struct {
 	name string
 }
 
-type catQuery struct{ query }
+type catQuery struct{ *query }
 
 func (q catQuery) First() *cat {
 	if len(q.cats) > 0 {
