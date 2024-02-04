@@ -70,6 +70,10 @@ type Object struct {
 }
 
 func (o Object) String() string {
+	if o.Fields.Len() == 0 {
+		return "{}"
+	}
+
 	s := new(strings.Builder)
 	_, _ = s.WriteString("{ ")
 

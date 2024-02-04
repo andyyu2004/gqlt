@@ -6,6 +6,7 @@ import (
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/internal/lex"
 	"github.com/andyyu2004/gqlt/internal/slice"
+	"github.com/andyyu2004/gqlt/memosa/lib"
 	"github.com/andyyu2004/gqlt/syn"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
@@ -42,6 +43,9 @@ func (tcx *typechecker) expr(expr syn.Expr) Ty {
 		}
 	}()
 	tcx.info.ExprTypes[expr] = ty
+	if lib.IsNil(ty) {
+		panic(fmt.Sprintf("oops, got nil type when typechecking expr: %v", expr))
+	}
 	return ty
 }
 
@@ -274,6 +278,17 @@ func (tcx *typechecker) binaryExpr(expr *syn.BinaryExpr) Ty {
 			switch rhs.(type) {
 			case Number:
 				return Number{}
+			}
+		case Tuple:
+			if rhs, ok := expr.Right.(*syn.LiteralExpr); ok {
+				if f, ok := rhs.Value.(float64); ok {
+					n := int(f)
+					newType := Tuple{Elems: make([]Ty, 0, len(lhs.Elems)*n)}
+					for i := 0; i < n; i++ {
+						newType.Elems = append(newType.Elems, lhs.Elems...)
+					}
+					return newType
+				}
 			}
 		case List:
 			switch rhs.(type) {

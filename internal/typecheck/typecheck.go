@@ -68,16 +68,18 @@ func (tcx *typechecker) stmt(stmt syn.Stmt) {
 	case *syn.LetStmt:
 		tcx.let(stmt)
 	case *syn.AssertStmt:
-		tcx.expr(stmt.Expr)
+		ty := tcx.expr(stmt.Expr)
+		_ = ty
+		// allow any type to be asserted against for now
 	case *syn.SetStmt:
-		tcx.expr(stmt.Expr)
+		tcx.set(stmt)
 	case *syn.FragmentStmt, *syn.UseStmt:
 	default:
 		panic(fmt.Sprintf("missing case typechecker.stmt %T", stmt))
 	}
 }
 
-func (tcx *typechecker) error(pos ast.Position, msg string) errTy {
+func (tcx *typechecker) error(pos ast.HasPosition, msg string) errTy {
 	tcx.info.Errors = append(tcx.info.Errors, Error{pos.Pos(), msg})
 	return errTy{}
 }

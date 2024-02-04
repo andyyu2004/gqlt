@@ -31,3 +31,12 @@ func TypeOf[T any]() reflect.Type {
 	var t T
 	return reflect.TypeOf(t)
 }
+
+func IsNil(i any) bool {
+	if i == nil {
+		return true
+	}
+
+	val := reflect.ValueOf(i)
+	return val.Kind() == reflect.Ptr && val.IsNil()
+}

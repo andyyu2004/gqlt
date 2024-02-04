@@ -256,6 +256,10 @@ func (ObjectExpr) isExpr() {}
 func (ObjectExpr) isNode() {}
 
 func (expr ObjectExpr) Format(w io.Writer) {
+	if expr.Fields.Len() == 0 {
+		_, _ = io.WriteString(w, "{}")
+		return
+	}
 	_, _ = io.WriteString(w, "{")
 
 	for entry := expr.Fields.Oldest(); entry != nil; entry = entry.Next() {

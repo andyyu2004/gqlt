@@ -18,7 +18,7 @@ func (tcx *typechecker) bind(pat syn.Pat, ty Ty) {
 	case *syn.ObjectPat:
 		tcx.bindObject(pat, ty)
 	case *syn.RestPat:
-		// panic("rest pattern should have special handling in list and object cases")
+		panic("rest pattern should have special handling in list, tuple and object cases")
 	default:
 	}
 }
@@ -37,6 +37,10 @@ func (tcx *typechecker) bindList(list *syn.ListPat, ty Ty) {
 			}
 		}
 	case Tuple:
+		if len(list.Pats) > len(ty.Elems) {
+			tcx.error(list.Pos(), fmt.Sprintf("cannot bind tuple with %d elements to a pattern with %d elements", len(list.Pats), len(ty.Elems)))
+			return
+		}
 		for i, pat := range list.Pats {
 			if rest, ok := pat.(*syn.RestPat); ok {
 				tcx.bind(rest.Pat, Tuple{Elems: ty.Elems[i:]})
@@ -46,6 +50,10 @@ func (tcx *typechecker) bindList(list *syn.ListPat, ty Ty) {
 		}
 	case Any, errTy:
 		for _, pat := range list.Pats {
+			if rest, ok := pat.(*syn.RestPat); ok {
+				tcx.bind(rest.Pat, Any{})
+				continue
+			}
 			tcx.bind(pat, Any{})
 		}
 	default:

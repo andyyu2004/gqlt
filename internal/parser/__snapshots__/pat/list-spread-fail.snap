@@ -3,5 +3,4 @@
 let [...ys, y] = [];
 #    ^^^^^ rest pattern must be last
 
-
 ---

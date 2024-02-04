@@ -56,15 +56,15 @@ func (stmt FragmentStmt) Format(w io.Writer) {
 
 type SetStmt struct {
 	ast.Position
-	SetKw lex.Token
-	Key   lex.Token
-	Expr  Expr
+	SetKw    lex.Token
+	Variable lex.Token
+	Expr     Expr
 }
 
 var _ Stmt = SetStmt{}
 
 func (stmt SetStmt) Children() Children {
-	return Children{stmt.SetKw, stmt.Key, stmt.Expr}
+	return Children{stmt.SetKw, stmt.Variable, stmt.Expr}
 }
 
 func (SetStmt) isStmt() {}
@@ -72,7 +72,7 @@ func (SetStmt) isNode() {}
 
 func (stmt SetStmt) Format(w io.Writer) {
 	_, _ = io.WriteString(w, "set ")
-	_, _ = io.WriteString(w, stmt.Key.Value)
+	_, _ = io.WriteString(w, stmt.Variable.Value)
 	_, _ = io.WriteString(w, " ")
 	stmt.Expr.Format(w)
 }

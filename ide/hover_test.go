@@ -181,6 +181,10 @@ let x = 2 * 3
 let x = [1] * 3
 #   ^`, expect.Expect(`number[]`))
 
+	check("multiply tuples", `
+let x = [1, "foo", false] * 2
+#   ^`, expect.Expect(`[number, string, bool, number, string, bool]`))
+
 	check("divide numbers", `
 let x = 2 / 3
 #   ^`, expect.Expect(`number`))

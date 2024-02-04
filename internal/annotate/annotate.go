@@ -25,7 +25,7 @@ func Annotate[S ~[]T, T Annotation](src string, annotations S) string {
 			padding = strings.Repeat(" ", pos.Column-2)
 		}
 		caret := fmt.Sprintf("%s%s", padding, strings.Repeat("^", len))
-		annotationComment := fmt.Sprintf("#%s %s\n", caret, annotation.Message())
+		annotationComment := fmt.Sprintf("#%s %s", caret, annotation.Message())
 		lines = append(lines[:pos.Line], append([]string{annotationComment}, lines[pos.Line:]...)...)
 	}
 

@@ -3,11 +3,11 @@ package parser
 import (
 	"fmt"
 	"os"
-	"reflect"
 	"strconv"
 	"strings"
 
 	"github.com/andyyu2004/gqlt/internal/lex"
+	"github.com/andyyu2004/gqlt/memosa/lib"
 	"github.com/andyyu2004/gqlt/syn"
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
@@ -48,7 +48,7 @@ var stmtFst = []lex.TokenKind{lex.Let, lex.Assert, lex.Set, lex.Fragment}
 func (p *Parser) Parse() (syn.File, error) {
 	for !p.at(lex.EOF) {
 		stmt := p.parseStmt()
-		if !isNil(stmt) {
+		if !lib.IsNil(stmt) {
 			p.eat(lex.Semi)
 			p.stmts = append(p.stmts, stmt)
 		} else {
@@ -142,7 +142,7 @@ func (p *Parser) parseStmt() syn.Stmt {
 		return p.parseFragment()
 	default:
 		expr := p.parseExpr()
-		if isNil(expr) {
+		if lib.IsNil(expr) {
 			return nil
 		}
 
@@ -196,17 +196,17 @@ func (p *Parser) parseSetStmt() *syn.SetStmt {
 	p.eat(lex.Equals)
 
 	expr := p.parseExpr()
-	if isNil(expr) {
+	if lib.IsNil(expr) {
 		return nil
 	}
 
-	return &syn.SetStmt{Position: setKw.Merge(expr), SetKw: setKw, Key: key, Expr: expr}
+	return &syn.SetStmt{Position: setKw.Merge(expr), SetKw: setKw, Variable: key, Expr: expr}
 }
 
 func (p *Parser) parseAssertStmt() *syn.AssertStmt {
 	assert := p.bump(lex.Assert)
 	expr := p.parseExpr()
-	if isNil(expr) {
+	if lib.IsNil(expr) {
 		return nil
 	}
 
@@ -216,7 +216,7 @@ func (p *Parser) parseAssertStmt() *syn.AssertStmt {
 func (p *Parser) parseLetStmt() *syn.LetStmt {
 	let := p.bump(lex.Let)
 	pat := p.parsePat(patOpts{})
-	if isNil(pat) {
+	if lib.IsNil(pat) {
 		return nil
 	}
 
@@ -226,7 +226,7 @@ func (p *Parser) parseLetStmt() *syn.LetStmt {
 	}
 
 	expr := p.parseExpr()
-	if isNil(expr) {
+	if lib.IsNil(expr) {
 		return nil
 	}
 
@@ -259,7 +259,7 @@ func (p *Parser) parsePat(opts patOpts) syn.Pat {
 		}
 
 		pat := p.parsePat(patOpts{allowImplicitWildcard: true})
-		if isNil(pat) {
+		if lib.IsNil(pat) {
 			return nil
 		}
 
@@ -293,7 +293,7 @@ func (p *Parser) parseListPat() *syn.ListPat {
 	pats := []syn.Pat{}
 	for !p.at(lex.EOF) && !p.at(lex.BracketR) {
 		pat := p.parsePat(patOpts{allowSpread: true})
-		if isNil(pat) {
+		if lib.IsNil(pat) {
 			return nil
 		}
 
@@ -340,7 +340,7 @@ func (p *Parser) parseObjectPat() *syn.ObjectPat {
 			pat = &syn.NamePat{Name: name}
 			if p.eat_(lex.Colon) {
 				pat = p.parsePat(patOpts{})
-				if isNil(pat) {
+				if lib.IsNil(pat) {
 					return nil
 				}
 			}
@@ -387,7 +387,7 @@ func (p *Parser) parseExprBP(minBp bp) syn.Expr {
 	if tok, bp := p.prefixOp(); tok != nil {
 		p.bump(tok.Kind)
 		expr := p.parseExprBP(bp)
-		if isNil(expr) {
+		if lib.IsNil(expr) {
 			return nil
 		}
 
@@ -396,7 +396,7 @@ func (p *Parser) parseExprBP(minBp bp) syn.Expr {
 		lhs = p.parseAtomExpr()
 	}
 
-	if isNil(lhs) {
+	if lib.IsNil(lhs) {
 		return nil
 	}
 
@@ -441,12 +441,12 @@ func (p *Parser) parseExprBP(minBp bp) syn.Expr {
 			bp++
 		}
 
-		if isNil(lhs) {
+		if lib.IsNil(lhs) {
 			return nil
 		}
 
 		rhs := p.parseExprBP(bp)
-		if isNil(rhs) {
+		if lib.IsNil(rhs) {
 			return nil
 		}
 
@@ -514,7 +514,7 @@ func (p *Parser) parseFieldExpr(expr syn.Expr) *syn.FieldExpr {
 func (p *Parser) parseMatchesExpr(expr syn.Expr) *syn.MatchesExpr {
 	matches := p.bump(lex.Matches)
 	pat := p.parsePat(patOpts{})
-	if pat == nil {
+	if lib.IsNil(pat) {
 		return nil
 	}
 
@@ -524,7 +524,7 @@ func (p *Parser) parseMatchesExpr(expr syn.Expr) *syn.MatchesExpr {
 func (p *Parser) parseIndexExpr(expr syn.Expr) *syn.IndexExpr {
 	p.bump(lex.BracketL)
 	index := p.parseExpr()
-	if index == nil {
+	if lib.IsNil(index) {
 		return nil
 	}
 
@@ -538,7 +538,7 @@ func (p *Parser) parseCallExpr(f syn.Expr) *syn.CallExpr {
 	args := []syn.Expr{}
 	for !p.at(lex.EOF) && !p.at(lex.ParenR) {
 		arg := p.parseExpr()
-		if arg == nil {
+		if lib.IsNil(arg) {
 			return nil
 		}
 
@@ -564,7 +564,7 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 	case lex.ParenL:
 		p.bump(lex.ParenL)
 		expr := p.parseExpr()
-		if isNil(expr) {
+		if lib.IsNil(expr) {
 			return nil
 		}
 		p.expect(lex.ParenR)
@@ -576,7 +576,7 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 	case lex.Try:
 		tryKw := p.bump(lex.Try)
 		expr := p.parseAtomExpr()
-		if isNil(expr) {
+		if lib.IsNil(expr) {
 			return nil
 		}
 		return &syn.TryExpr{TryKw: tryKw, Expr: expr}
@@ -584,7 +584,7 @@ func (p *Parser) parseAtomExpr() syn.Expr {
 		p.bump(lex.Name)
 		return &syn.NameExpr{Name: tok}
 	default:
-		p.error(tok, "expected expression, found `%s`", tok.String())
+		p.error(tok, "expected expression, found '%s'", tok.String())
 		return nil
 	}
 }
@@ -595,7 +595,7 @@ func (p *Parser) parseListExpr() *syn.ListExpr {
 	commas := []lex.Token{}
 	for !p.at(lex.EOF) && !p.at(lex.BracketR) {
 		expr := p.parseExpr()
-		if expr == nil {
+		if lib.IsNil(expr) {
 			return nil
 		}
 
@@ -626,7 +626,7 @@ func (p *Parser) parseObjectExpr() *syn.ObjectExpr {
 		var expr syn.Expr = &syn.NameExpr{Name: name}
 		if p.eat_(lex.Colon) {
 			expr = p.parseExpr()
-			if expr == nil {
+			if lib.IsNil(expr) {
 				return nil
 			}
 		}
@@ -704,13 +704,4 @@ func must[T any](t T, err error) T {
 	}
 
 	return t
-}
-
-func isNil(i any) bool {
-	if i == nil {
-		return true
-	}
-
-	val := reflect.ValueOf(i)
-	return val.Kind() == reflect.Ptr && val.IsNil()
 }

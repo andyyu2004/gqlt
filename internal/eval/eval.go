@@ -51,6 +51,7 @@ type settings struct {
 	namespace []string
 }
 
+// keep in sync with typecheck
 func (s *settings) Set(key string, val any) error {
 	switch key {
 	case "namespace":

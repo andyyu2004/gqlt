@@ -35,7 +35,7 @@ func (e *Executor) stmt(ctx context.Context, ecx *executionContext, stmt syn.Stm
 			return err
 		}
 
-		if err := ecx.settings.Set(stmt.Key.Value, val); err != nil {
+		if err := ecx.settings.Set(stmt.Variable.Value, val); err != nil {
 			return err
 		}
 

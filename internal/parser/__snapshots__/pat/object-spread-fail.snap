@@ -3,5 +3,4 @@
 let { ...xs, x } = {};
 #        ^^ rest pattern must be last
 
-
 ---

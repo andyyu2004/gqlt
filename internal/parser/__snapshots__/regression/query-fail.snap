@@ -3,5 +3,4 @@
 query {}
 #^^^^^ expected at least one definition, found }
 
-
 ---

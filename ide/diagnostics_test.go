@@ -46,7 +46,13 @@ func (a ann) Pos() ast.Position {
 	}
 }
 
-func TestDiagnostics(t *testing.T) {
+type diagnosticTestCase struct {
+	name        string
+	content     string
+	expectation expect.Expectation
+}
+
+func testDiagnostics(t *testing.T, cases ...diagnosticTestCase) {
 	check := func(name, content string, expectation expect.Expectation) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -59,9 +65,28 @@ func TestDiagnostics(t *testing.T) {
 		})
 	}
 
-	check("syntax", `
-let x == 5`, expect.Expect(`
-let x == 5
-#     ^ expected '=', found '=='
-`))
+	for _, c := range cases {
+		check(c.name, c.content, c.expectation)
+	}
+}
+
+func TestDiagnostics(t *testing.T) {
+	testDiagnostics(t, []diagnosticTestCase{
+		{
+			"syntax",
+			"let x == 5",
+			expect.Expect(`let x == 5
+#     ^ expected '=', found '=='`),
+		},
+	}...)
+	//	check("set namespace", `
+	//
+	// set namespace = "foo"
+	// set namespace ["a", "b", "c"]
+	// set namespace false`, expect.Expect(`
+	// set namespace = "foo"
+	// set namespace ["a", "b", "c"]
+	// set namespace false
+	// #^^^^^^^^^^^^^^^^^^^ expected string or list of strings as value for "namespace", found bool
+	// `))
 }
