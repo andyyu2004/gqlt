@@ -7,9 +7,11 @@ import (
 
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/ide/mapper"
+	"github.com/andyyu2004/gqlt/internal/config"
 	"github.com/andyyu2004/gqlt/internal/typecheck"
 	"github.com/andyyu2004/gqlt/memosa"
 	"github.com/andyyu2004/gqlt/syn"
+	"github.com/stretchr/testify/require"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
@@ -30,7 +32,7 @@ type IDE struct {
 
 func New() *IDE {
 	ctx := memosa.New()
-	memosa.Set[inputQuery](ctx, Input{make(map[string]string)})
+	memosa.Set[sourcesInputQuery](ctx, Input{make(map[string]string)})
 	return &IDE{ctx, sync.RWMutex{}}
 }
 
@@ -71,11 +73,19 @@ func (ide *IDE) Apply(changes Changes) {
 	for _, change := range changes {
 		change.Apply(&input)
 	}
-	memosa.Set[inputQuery](ide.ctx, input)
+	memosa.Set[sourcesInputQuery](ide.ctx, input)
 }
 
 func (ide *IDE) Sources() map[string]string {
-	return maps.Clone(memosa.Fetch[inputQuery](ide.ctx, memosa.InputKey{}).Sources)
+	return maps.Clone(memosa.Get[sourcesInputQuery](ide.ctx).Sources)
+}
+
+func (ide *IDE) SetSchema(schema *syn.Schema) {
+	memosa.Set[schemaInputQuery](ide.ctx, schema)
+}
+
+func (ide *IDE) Schema() *syn.Schema {
+	return memosa.Get[schemaInputQuery](ide.ctx)
 }
 
 func (ide *IDE) Source(uri string) string {
@@ -102,7 +112,8 @@ type (
 var _ memosa.Query[typecheckKey, typecheck.Info] = typecheckQuery{}
 
 func (typecheckQuery) Execute(ctx *memosa.Context, key typecheckKey) typecheck.Info {
-	tcx := typecheck.New()
+	schema := memosa.Get[schemaInputQuery](ctx)
+	tcx := typecheck.New(schema)
 	ast := memosa.Fetch[parseQuery](ctx, parseKey(key)).Ast
 	return tcx.Check(ast)
 }
@@ -115,7 +126,7 @@ type (
 var _ memosa.Query[mapperKey, *mapper.Mapper] = mapperQuery{}
 
 func (mapperQuery) Execute(ctx *memosa.Context, key mapperKey) *mapper.Mapper {
-	return mapper.New(memosa.Fetch[inputQuery](ctx, memosa.InputKey{}).Sources[key.Path])
+	return mapper.New(memosa.Get[sourcesInputQuery](ctx).Sources[key.Path])
 }
 
 func protoToPoint(mapper *mapper.Mapper, position protocol.Position) *ast.Point {
@@ -172,6 +183,14 @@ func TestWith(t testing.TB, content string, f func(string, Snapshot)) {
 
 	ide := New()
 	ide.Apply(changes)
+
+	// working directory is `gqlt/ide`
+	schema, err := config.LoadSchema("../")
+	require.NoError(t, err)
+	require.NotNil(t, schema, "should load gqlt/.graphqlrc.yaml")
+	ide.SetSchema(schema)
+	require.Equal(t, schema, ide.Schema())
+
 	s, cleanup := ide.Snapshot(logger{t})
 	t.Cleanup(cleanup)
 	f(path, s)

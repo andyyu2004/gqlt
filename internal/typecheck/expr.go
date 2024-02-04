@@ -50,8 +50,13 @@ func (tcx *typechecker) expr(expr syn.Expr) Ty {
 }
 
 func (tcx *typechecker) queryExpr(expr *syn.QueryExpr) Ty {
-	// todo
-	return Any{}
+	if tcx.schema == nil {
+		// Impossible to typecheck a query without a schema.
+		// It would be possible to approximate it except for the fact we have no way of telling when a field is a list or not.
+		// Could do it based off whether the field name is plural or not, but that's only a heuristic and disgusting.
+		return Any{}
+	}
+	panic("todo")
 }
 
 func (tcx *typechecker) unaryExpr(expr *syn.UnaryExpr) Ty {

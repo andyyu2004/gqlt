@@ -36,7 +36,7 @@ var _ memosa.Query[KeyA, int32] = QueryA{}
 type KeyA struct{ X int32 }
 
 func (q QueryA) Execute(ctx *memosa.Context, key KeyA) int32 {
-	return memosa.Fetch[InputA](ctx, memosa.InputKey{}) + key.X
+	return memosa.Get[InputA](ctx) + key.X
 }
 
 type QueryB struct{}
@@ -56,7 +56,7 @@ var _ memosa.Query[KeyC, bool] = QueryC{}
 type KeyC struct{}
 
 func (QueryC) Execute(ctx *memosa.Context, key KeyC) bool {
-	b := memosa.Fetch[InputB](ctx, memosa.InputKey{})
+	b := memosa.Get[InputB](ctx)
 	if b%2 == 0 {
 		return true
 	} else {

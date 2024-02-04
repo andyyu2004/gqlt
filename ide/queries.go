@@ -20,7 +20,7 @@ type Parsed[T any] struct {
 }
 
 func (parseQuery) Execute(ctx *memosa.Context, key parseKey) Parsed[syn.File] {
-	files := memosa.Fetch[inputQuery](ctx, memosa.InputKey{})
+	files := memosa.Fetch[sourcesInputQuery](ctx, memosa.InputKey{})
 	text := files.Sources[key.URI]
 	src := &ast.Source{Name: key.URI, Input: text}
 

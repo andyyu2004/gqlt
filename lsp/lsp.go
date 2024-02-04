@@ -3,9 +3,12 @@ package lsp
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"slices"
 
 	"github.com/andyyu2004/gqlt/ide"
+	"github.com/andyyu2004/gqlt/internal/config"
+	"github.com/andyyu2004/gqlt/internal/slice"
 	"github.com/andyyu2004/gqlt/memosa/lib"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -48,6 +51,20 @@ type ls struct {
 
 func (s *ls) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (any, error) {
 	protocol.SetTraceValue(protocol.TraceValueVerbose)
+
+	workspaces := slice.Map(params.WorkspaceFolders, func(f protocol.WorkspaceFolder) string {
+		return lib.Must(url.Parse(f.URI)).Path
+	})
+
+	// TODO need to add a lsp file watcher to manage changes to the schema files and config file
+	schema, err := config.LoadSchema(workspaces...)
+	if err != nil {
+		// don't return, just continue without loading a schema
+		_ = protocol.Trace(ctx, protocol.MessageTypeError, fmt.Sprintf("failed to load config: %v", err))
+	}
+
+	// the input must always be set, nil or not
+	s.SetSchema(schema)
 
 	return protocol.InitializeResult{
 		Capabilities: protocol.ServerCapabilities{

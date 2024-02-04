@@ -20,6 +20,10 @@ var (
 	WithEventHandler = internal.WithEventHandler
 )
 
+func Get[I Input[T], T any](ctx *Context) T {
+	return Fetch[I, InputKey, T](ctx, InputKey{})
+}
+
 func Fetch[Q Query[K, V], K, V any](ctx *Context, key K) V {
 	return internal.Fetch[Q, K, V](ctx, key)
 }

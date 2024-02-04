@@ -111,7 +111,7 @@ func runSpec(t *testing.T, schemas []*syn.Schema, deviations []*Deviation, filen
 					spec.Errors[i].Rule = spec.Rule
 
 					// remove inconsistent use of ;
-					spec.Errors[i].Message = strings.Replace(spec.Errors[i].Message, "; Did you mean", ". Did you mean", -1)
+					spec.Errors[i].Message = strings.ReplaceAll(spec.Errors[i].Message, "; Did you mean", ". Did you mean")
 				}
 				sort.Slice(spec.Errors, compareErrors(spec.Errors))
 				sort.Slice(finalErrors, compareErrors(finalErrors))

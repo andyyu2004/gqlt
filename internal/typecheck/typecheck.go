@@ -24,8 +24,9 @@ type Error struct {
 }
 
 type typechecker struct {
-	info  Info
-	scope map[string]scopeEntry
+	schema *syn.Schema
+	info   Info
+	scope  map[string]scopeEntry
 }
 
 type scopeEntry struct {
@@ -33,9 +34,13 @@ type scopeEntry struct {
 	Pat *syn.NamePat
 }
 
-func New() *typechecker {
+// Create a new typechecker.
+// Pass the schema to the typechecker to resolve query types against.
+// The schema may be nil, in which case the typechecker will typecheck all queries/mutations as any.
+func New(schema *syn.Schema) *typechecker {
 	return &typechecker{
-		scope: make(map[string]scopeEntry),
+		schema: schema,
+		scope:  make(map[string]scopeEntry),
 		info: Info{
 			ExprTypes:    make(map[syn.Expr]Ty),
 			BindingTypes: make(map[*syn.NamePat]Ty),

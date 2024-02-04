@@ -2,7 +2,6 @@ package ide
 
 import (
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/internal/typecheck"
 	"github.com/andyyu2004/gqlt/memosa/lib"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
@@ -50,9 +49,7 @@ func (d *diagnostics) syntax() {
 }
 
 func (d *diagnostics) typecheck() {
-	root := d.Parse(d.path)
-	tcx := typecheck.New()
-	info := tcx.Check(root.Ast)
+	info := d.Typecheck(d.path)
 
 	for _, err := range info.Errors {
 		d.diagnostics = append(d.diagnostics, protocol.Diagnostic{
