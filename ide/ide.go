@@ -78,25 +78,25 @@ func (ide *IDE) Sources() map[string]string {
 	return maps.Clone(memosa.Fetch[inputQuery](ide.ctx, memosa.InputKey{}).Sources)
 }
 
-func (ide *IDE) Source(path string) string {
-	return ide.Sources()[path]
+func (ide *IDE) Source(uri string) string {
+	return ide.Sources()[uri]
 }
 
-func (s *Snapshot) Parse(path string) Parsed[syn.File] {
-	return memosa.Fetch[parseQuery](s.ide.ctx, parseKey{path})
+func (s *Snapshot) Parse(uri string) Parsed[syn.File] {
+	return memosa.Fetch[parseQuery](s.ide.ctx, parseKey{uri})
 }
 
-func (s *Snapshot) Mapper(path string) *mapper.Mapper {
-	return memosa.Fetch[mapperQuery](s.ide.ctx, mapperKey{path})
+func (s *Snapshot) Mapper(uri string) *mapper.Mapper {
+	return memosa.Fetch[mapperQuery](s.ide.ctx, mapperKey{uri})
 }
 
-func (s *Snapshot) Typecheck(path string) typecheck.Info {
-	return memosa.Fetch[typecheckQuery](s.ide.ctx, typecheckKey{path})
+func (s *Snapshot) Typecheck(uri string) typecheck.Info {
+	return memosa.Fetch[typecheckQuery](s.ide.ctx, typecheckKey{uri})
 }
 
 type (
 	typecheckQuery struct{}
-	typecheckKey   struct{ Path string }
+	typecheckKey   struct{ URI string }
 )
 
 var _ memosa.Query[typecheckKey, typecheck.Info] = typecheckQuery{}

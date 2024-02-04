@@ -7,22 +7,22 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-func (s *Snapshot) Definition(path string, position protocol.Position) []protocol.Location {
-	s.log.Debugf("definition %s %v", path, position)
+func (s *Snapshot) Definition(uri string, position protocol.Position) []protocol.Location {
+	s.log.Debugf("definition %s %v", uri, position)
 
-	ast := s.Parse(path).Ast
-	mapper := s.Mapper(path)
+	ast := s.Parse(uri).Ast
+	mapper := s.Mapper(uri)
 	point := protoToPoint(mapper, position)
 	if point == nil {
 		return nil
 	}
 
 	cursor := syn.NewCursor(ast)
-	typeInfo := s.Typecheck(path)
+	typeInfo := s.Typecheck(uri)
 	if node := definition(cursor, typeInfo, *point); node != nil {
 		return []protocol.Location{
 			{
-				URI:   path, // definitions are always in the same file
+				URI:   uri, // definitions are always in the same file
 				Range: posToProto(mapper, node.Pos()),
 			},
 		}

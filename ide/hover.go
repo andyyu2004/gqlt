@@ -8,17 +8,17 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-func (s *Snapshot) Hover(path string, position protocol.Position) *protocol.Hover {
-	s.log.Debugf("hover %s %v", path, position)
-	ast := s.Parse(path).Ast
-	mapper := s.Mapper(path)
+func (s *Snapshot) Hover(uri string, position protocol.Position) *protocol.Hover {
+	s.log.Debugf("hover %s %v", uri, position)
+	ast := s.Parse(uri).Ast
+	mapper := s.Mapper(uri)
 	point := protoToPoint(mapper, position)
 	if point == nil {
 		return nil
 	}
 
 	cursor := syn.NewCursor(ast)
-	typeInfo := s.Typecheck(path)
+	typeInfo := s.Typecheck(uri)
 	if r, ty := hover(cursor, typeInfo, *point); ty != nil {
 		return &protocol.Hover{
 			// using typescript for syntax highlighting as we use the same syntax for types

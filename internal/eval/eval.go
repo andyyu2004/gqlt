@@ -202,14 +202,14 @@ func (e *Executor) Test(t *testing.T, root string, factory ClientFactory, opts .
 	}
 }
 
-func (e *Executor) RunFile(ctx context.Context, client Client, path string, opts ...Opt) error {
+func (e *Executor) RunFile(ctx context.Context, client Client, uri string, opts ...Opt) error {
 	// FIXME, doesn't make much sense to take the `glob` config here as it's not needed
 	runConfig := runConfig{}
 	for _, opt := range opts {
 		opt(&runConfig)
 	}
 
-	parser, err := parser.NewFromPath(path)
+	parser, err := parser.NewFromPath(uri)
 	if err != nil {
 		return err
 	}
@@ -230,7 +230,7 @@ func (e *Executor) RunFile(ctx context.Context, client Client, path string, opts
 	}
 
 	ecx := &executionContext{
-		path:   path,
+		path:   uri,
 		client: client,
 		scope: &scope{
 			parent:    builtinScope,

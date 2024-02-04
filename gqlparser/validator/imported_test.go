@@ -53,12 +53,12 @@ func TestValidation(t *testing.T) {
 		schemas = append(schemas, schema)
 	}
 
-	err := filepath.Walk("./", func(path string, info os.FileInfo, _ error) error {
-		if info.IsDir() || !strings.HasSuffix(path, ".spec.yml") {
+	err := filepath.Walk("./", func(uri string, info os.FileInfo, _ error) error {
+		if info.IsDir() || !strings.HasSuffix(uri, ".spec.yml") {
 			return nil
 		}
 
-		runSpec(t, schemas, deviations, path)
+		runSpec(t, schemas, deviations, uri)
 		return nil
 	})
 	require.NoError(t, err)

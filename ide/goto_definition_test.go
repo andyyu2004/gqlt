@@ -12,14 +12,14 @@ import (
 
 func TestGotoDefinition(t *testing.T) {
 	check := func(content string) {
-		ide.TestWith(t, content, func(path string, s ide.Snapshot) {
+		ide.TestWith(t, content, func(uri string, s ide.Snapshot) {
 			fixture := fixture.Parse(content)
 			require.NotEmpty(t, fixture.Ranges)
 			require.NotEmpty(t, fixture.Points, 1)
 
 			for _, point := range fixture.Points {
-				locs := slice.Map(s.Definition(path, point), func(loc protocol.Location) protocol.Range {
-					require.Equal(t, path, loc.URI, "definition should always be in the same file")
+				locs := slice.Map(s.Definition(uri, point), func(loc protocol.Location) protocol.Range {
+					require.Equal(t, uri, loc.URI, "definition should always be in the same file")
 					return loc.Range
 				})
 				require.Equal(t, fixture.Ranges, locs)

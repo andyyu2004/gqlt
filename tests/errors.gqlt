@@ -1,4 +1,3 @@
-
  assert try query { fail(yes: false) } == { data: 0, errors: null }
  let { data, errors } = try query { fail(yes: true) }
  assert data == null

@@ -14,7 +14,7 @@ import (
 func TestHover(t *testing.T) {
 	check := func(name, content string, expectation expect.Expectation) {
 		t.Run(name, func(t *testing.T) {
-			ide.TestWith(t, content, func(path string, s ide.Snapshot) {
+			ide.TestWith(t, content, func(uri string, s ide.Snapshot) {
 				fixture := fixture.Parse(content)
 				require.Empty(t, fixture.Ranges)
 				require.NotEmpty(t, fixture.Points)
@@ -22,7 +22,7 @@ func TestHover(t *testing.T) {
 				var expected string
 				// expect all points to yield the same hover
 				for _, point := range fixture.Points {
-					hover := s.Hover(path, point)
+					hover := s.Hover(uri, point)
 					var result string
 					if hover != nil {
 						content := hover.Contents.(protocol.MarkupContent).Value

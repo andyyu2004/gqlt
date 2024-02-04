@@ -9,7 +9,7 @@ import (
 
 type (
 	parseQuery struct{}
-	parseKey   struct{ Path string }
+	parseKey   struct{ URI string }
 )
 
 var _ memosa.Query[parseKey, Parsed[syn.File]] = parseQuery{}
@@ -21,8 +21,8 @@ type Parsed[T any] struct {
 
 func (parseQuery) Execute(ctx *memosa.Context, key parseKey) Parsed[syn.File] {
 	files := memosa.Fetch[inputQuery](ctx, memosa.InputKey{})
-	text := files.Sources[key.Path]
-	src := &ast.Source{Name: key.Path, Input: text}
+	text := files.Sources[key.URI]
+	src := &ast.Source{Name: key.URI, Input: text}
 
 	parser := parser.New(src)
 

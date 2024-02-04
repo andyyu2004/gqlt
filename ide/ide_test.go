@@ -8,8 +8,8 @@ import (
 )
 
 func TestIDE(t *testing.T) {
-	ide.TestWith(t, "let x = 5", func(path string, s ide.Snapshot) {
-		ast := s.Parse(path).Ast
+	ide.TestWith(t, "let x = 5", func(uri string, s ide.Snapshot) {
+		ast := s.Parse(uri).Ast
 		expect.Expect(`let x = 5;
 `).AssertEqual(t, ast.String())
 	})

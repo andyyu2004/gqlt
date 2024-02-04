@@ -11,8 +11,8 @@ func TestHighlight(t *testing.T) {
 	check := func(name, content string, expectation expect.Expectation) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			ide.TestWith(t, content, func(path string, s ide.Snapshot) {
-				expectation.AssertEqual(t, s.Highlight(path).String())
+			ide.TestWith(t, content, func(uri string, s ide.Snapshot) {
+				expectation.AssertEqual(t, s.Highlight(uri).String())
 			})
 		})
 	}

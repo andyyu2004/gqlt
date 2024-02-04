@@ -61,6 +61,11 @@ func (s *ls) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (a
 			},
 			HoverProvider:      protocol.HoverOptions{},
 			DefinitionProvider: true,
+			Workspace: &protocol.ServerCapabilitiesWorkspace{
+				WorkspaceFolders: &protocol.WorkspaceFoldersServerCapabilities{
+					Supported: lib.Ref(true),
+				},
+			},
 		},
 		ServerInfo: &protocol.InitializeResultServerInfo{Name: "gqlt"},
 	}, nil

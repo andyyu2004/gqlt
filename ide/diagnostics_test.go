@@ -56,9 +56,9 @@ func testDiagnostics(t *testing.T, cases ...diagnosticTestCase) {
 	check := func(name, content string, expectation expect.Expectation) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			ide.TestWith(t, content, func(path string, s ide.Snapshot) {
-				mapper := s.Mapper(path)
-				diagnostics := slice.Map(s.Diagnostics()[path], toAnnotation(mapper))
+			ide.TestWith(t, content, func(uri string, s ide.Snapshot) {
+				mapper := s.Mapper(uri)
+				diagnostics := slice.Map(s.Diagnostics()[uri], toAnnotation(mapper))
 
 				expectation.AssertEqual(t, annotate.Annotate(content, diagnostics))
 			})

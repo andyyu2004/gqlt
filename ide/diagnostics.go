@@ -22,8 +22,8 @@ func (s Snapshot) Diagnostics() map[string][]protocol.Diagnostic {
 	return diagnostics
 }
 
-func (s Snapshot) diagnostics(path string) []protocol.Diagnostic {
-	d := &diagnostics{s, path, []protocol.Diagnostic{}}
+func (s Snapshot) diagnostics(uri string) []protocol.Diagnostic {
+	d := &diagnostics{s, uri, []protocol.Diagnostic{}}
 	d.diagnose()
 	return d.diagnostics
 }
