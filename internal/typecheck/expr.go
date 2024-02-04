@@ -236,7 +236,7 @@ func (tcx *typechecker) binaryExpr(expr *syn.BinaryExpr) Ty {
 	switch expr.Op.Kind {
 	case lex.Equals2, lex.BangEqual:
 		if !compat(lhs, rhs) {
-			tcx.warn(expr.Pos(), fmt.Sprintf("comparing '%v' to '%v' will always be false", lhs, rhs))
+			tcx.error(expr.Pos(), fmt.Sprintf("comparing '%v' to '%v' will always be false", lhs, rhs))
 		}
 		return Bool{}
 	case lex.Plus:

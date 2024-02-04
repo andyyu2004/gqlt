@@ -18,12 +18,9 @@ import (
 //go:embed tests/schema.graphql
 var schema string
 
+const testpath = "tests"
+
 func TestGqlt(t *testing.T) {
-	// change this to something else to debug a particular test
-	const debugGlob = "**"
-
-	const testpath = "tests"
-
 	q := &query{
 		dogs: []dog{
 			{
@@ -48,12 +45,25 @@ func TestGqlt(t *testing.T) {
 	}
 
 	for _, client := range clients {
-		gqlt.New(gqlt.ClientFactoryFunc(func(testing.TB) (context.Context, gqlt.Client) {
+		factory := gqlt.ClientFactoryFunc(func(testing.TB) (context.Context, gqlt.Client) {
 			// reset the counter for each test
 			q.counter.Store(0)
 			return context.Background(), client
-		})).Test(t, testpath, gqlt.WithGlob(debugGlob), gqlt.TypeCheck(true))
+		})
+		gqlt.New().Test(t, testpath, factory, gqlt.TypeCheck(true))
 	}
+}
+
+// convenience function for debugging
+// Put whatever in `scratch.gqlt` and debug this test
+func TestScratch(t *testing.T) {
+	q := &query{}
+	schema := graphql.MustParseSchema(schema, q, graphql.UseFieldResolvers())
+	client := gqlt.GraphQLGophersClient{Schema: schema}
+	factory := gqlt.ClientFactoryFunc(func(testing.TB) (context.Context, gqlt.Client) {
+		return context.Background(), client
+	})
+	gqlt.New().Test(t, testpath, factory, gqlt.TypeCheck(true), gqlt.WithGlob("scratch.gqlt"))
 }
 
 type AnimalFilter struct {

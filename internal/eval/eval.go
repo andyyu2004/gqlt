@@ -39,13 +39,12 @@ type runConfig struct {
 
 // A thread-safe graphql client
 type Executor struct {
-	factory    ClientFactory
 	schemaOnce sync.Once
 	schema     schema
 }
 
-func New(factory ClientFactory) *Executor {
-	return &Executor{factory: factory}
+func New() *Executor {
+	return &Executor{}
 }
 
 type settings struct {
@@ -163,7 +162,7 @@ func Discover(dir string) ([]string, error) {
 }
 
 // `Test` all `gqlt` tests in the given directory (recursively).
-func (e *Executor) Test(t *testing.T, root string, opts ...Opt) {
+func (e *Executor) Test(t *testing.T, root string, factory ClientFactory, opts ...Opt) {
 	runConfig := runConfig{
 		glob: "**",
 	}
@@ -193,7 +192,7 @@ func (e *Executor) Test(t *testing.T, root string, opts ...Opt) {
 				t.SkipNow()
 			}
 
-			ctx, client := e.factory.CreateClient(t)
+			ctx, client := factory.CreateClient(t)
 
 			if err := e.RunFile(ctx, client, path, opts...); err != nil {
 				t.Fatal(err)

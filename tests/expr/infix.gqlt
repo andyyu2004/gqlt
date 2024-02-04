@@ -8,7 +8,6 @@ assert { foo: "bar" } == { foo: "bar" }
 assert { foo: "bar" } != { foo: "baz" }
 assert [1, 2, 3] == [1, 2, 3]
 assert [1, 2, 3] != [1, 2, 4]
-assert [1, 2, 3] != { foo: "bar" }
 
 assert 1 + 2 == 3
 assert 2 - 1 == 1

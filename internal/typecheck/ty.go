@@ -109,7 +109,7 @@ func compat(a, b Ty) bool {
 		return true
 	}
 
-	if _, ok := a.(Any); ok {
+	if _, ok := b.(Any); ok {
 		return true
 	}
 

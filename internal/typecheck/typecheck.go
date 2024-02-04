@@ -82,6 +82,6 @@ func (tcx *typechecker) error(pos ast.Position, msg string) errTy {
 	return errTy{}
 }
 
-func (tcx *typechecker) warn(pos ast.Position, msg string) {
-	tcx.info.Warnings = append(tcx.info.Warnings, Error{pos.Pos(), msg})
-}
+// func (tcx *typechecker) warn(pos ast.Position, msg string) {
+// 	tcx.info.Warnings = append(tcx.info.Warnings, Error{pos.Pos(), msg})
+// }
