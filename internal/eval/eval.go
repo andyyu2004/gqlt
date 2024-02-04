@@ -219,7 +219,8 @@ func (e *Executor) RunFile(ctx context.Context, client Client, uri string, opts 
 		return err
 	}
 
-	// Maybe try get the schema in here
+	// No need to pass as schema here for detailed typechecking (the typechecker is aimed at providing errors during editing)
+	// We can just fail at runtime.
 	tcx := typecheck.New(nil)
 	info := tcx.Check(file)
 	if len(info.Errors) > 0 && runConfig.typecheck {

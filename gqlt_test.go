@@ -77,6 +77,22 @@ type query struct {
 	dogs    []dog
 }
 
+func (q *query) Int() int32 {
+	return 1
+}
+
+type Foo struct {
+	ID   graphql.ID
+	Name string
+}
+
+func (q *query) Foo() Foo {
+	return Foo{
+		ID:   "1",
+		Name: "Foo",
+	}
+}
+
 func (q *query) Inc() int32 {
 	return q.counter.Add(1)
 }

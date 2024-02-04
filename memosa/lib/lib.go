@@ -1,12 +1,13 @@
 package lib
 
 import (
+	"fmt"
 	"reflect"
 )
 
-func Assert(b bool) {
+func Assert(b bool, msg ...any) {
 	if !b {
-		panic("assertion failed")
+		panic(fmt.Sprint(append([]any{"assertion failed"}, msg...)))
 	}
 }
 

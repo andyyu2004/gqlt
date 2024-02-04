@@ -265,6 +265,16 @@ let x = 2 / 3
 #   ^`,
 			expect.Expect(`number`),
 		},
+		{
+			"query scalar", `
+let x = query { int }
+#   ^}`, expect.Expect(`number`),
+		},
+		{
+			"query object field", `
+let x = query { foo }
+#   ^`, expect.Expect(`{ id: string, name: string }`),
+		},
 	}
 
 	for _, test := range tests {

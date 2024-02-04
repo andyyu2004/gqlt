@@ -1,6 +1,13 @@
 type Query {
+  foo: Foo!
+  int: Int!
   fail(yes: Boolean! = true): Int!
   animals: AnimalQuery!
+}
+
+type Foo {
+  id: ID!
+  name: String!
 }
 
 type Mutation {

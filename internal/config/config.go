@@ -77,7 +77,7 @@ func discover(workspaces []string) (*Config, string, error) {
 				panic("missing file case")
 			}
 
-			return &config, "", nil
+			return &config, root, nil
 		}
 	}
 
@@ -88,6 +88,10 @@ func buildSchema(config *Config, path string) (*syn.Schema, error) {
 	schemaPaths, err := doublestar.FilepathGlob(filepath.Join(path, config.Schema), doublestar.WithFilesOnly())
 	if err != nil {
 		return nil, err
+	}
+
+	if schemaPaths == nil {
+		panic(0)
 	}
 
 	sources := []*ast.Source{}

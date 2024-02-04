@@ -1,1 +1,1 @@
-schema: "tests/*.graphql"
+schema: "tests/schema.graphql"
