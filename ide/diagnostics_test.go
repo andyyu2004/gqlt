@@ -78,15 +78,15 @@ func TestDiagnostics(t *testing.T) {
 			expect.Expect(`let x == 5
 #     ^ expected '=', found '=='`),
 		},
+		{
+			"set namespace", `
+set namespace = "foo"
+set namespace ["a", "b", "c"]
+set namespace false`, expect.Expect(`
+set namespace = "foo"
+set namespace ["a", "b", "c"]
+set namespace false
+#^^^^^^^^^^^^^^^^^^^ expected string or list of strings as value for "namespace", found bool`),
+		},
 	}...)
-	//	check("set namespace", `
-	//
-	// set namespace = "foo"
-	// set namespace ["a", "b", "c"]
-	// set namespace false`, expect.Expect(`
-	// set namespace = "foo"
-	// set namespace ["a", "b", "c"]
-	// set namespace false
-	// #^^^^^^^^^^^^^^^^^^^ expected string or list of strings as value for "namespace", found bool
-	// `))
 }
