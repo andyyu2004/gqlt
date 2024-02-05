@@ -1,6 +1,7 @@
 package ide
 
 import (
+	"fmt"
 	"maps"
 	"sync"
 	"testing"
@@ -142,12 +143,12 @@ func posToProto(mapper *mapper.Mapper, position ast.HasPosition) protocol.Range 
 	pos := position.Pos()
 	startLine, startCol, err := mapper.LineAndColumn(pos.Start)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("posToProto: %v: %v", pos, err))
 	}
 
 	endLine, endCol, err := mapper.LineAndColumn(pos.End)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("posToProto: %v: %v", pos, err))
 	}
 
 	return protocol.Range{

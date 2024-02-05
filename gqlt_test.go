@@ -111,6 +111,23 @@ func (q *query) Foos() []Foo {
 	}
 }
 
+type Recursive struct {
+	ID   graphql.ID
+	Next *Recursive
+}
+
+func (q *query) Recursive() Recursive {
+	return Recursive{
+		ID: "1",
+		Next: &Recursive{
+			ID: "2",
+			Next: &Recursive{
+				ID: "3",
+			},
+		},
+	}
+}
+
 func (q *query) Inc() int32 {
 	return q.counter.Add(1)
 }

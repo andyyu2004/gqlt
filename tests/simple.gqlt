@@ -6,6 +6,7 @@ assert { x: 2 } matches { x }
 
 set namespace "animals/dogs"
 
+
 let dogs = query {
     list {
         name

@@ -280,6 +280,11 @@ let x = query { foo { id string float int boolean } }
 		let x = query { foo { id boolean } }
 		#   ^`, expect.Expect(`{ id: string, boolean: bool }`),
 		},
+		{
+			"query recursive object", `
+let x = query { recursive { id next { id next { id } } } }
+    ^`, expect.Expect(`{ id: string, next: { id: string, next: { id: string } } }`),
+		},
 	}
 
 	for _, test := range tests {

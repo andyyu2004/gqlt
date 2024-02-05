@@ -4,6 +4,12 @@ type Query {
   int: Int!
   fail(yes: Boolean! = true): Int!
   animals: AnimalQuery!
+  recursive: Recursive!
+}
+
+type Recursive {
+  id: ID!
+  next: Recursive
 }
 
 type Foo {

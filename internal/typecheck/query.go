@@ -73,6 +73,11 @@ func (tcx *typechecker) inferSelectionSetType(ty Object, selectionSet syn.Select
 			}
 
 			fieldTy = tcx.expand(fieldTy)
+			if isErr(fieldTy) {
+				outTy.Fields.Set(selection.Alias.Value, fieldTy)
+				continue
+			}
+
 			switch f := fieldTy.(type) {
 			case Object:
 				if len(selection.SelectionSet) == 0 {
