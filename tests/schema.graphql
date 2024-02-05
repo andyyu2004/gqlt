@@ -1,5 +1,6 @@
 type Query {
   foo: Foo!
+  foos: [Foo!]!
   int: Int!
   fail(yes: Boolean! = true): Int!
   animals: AnimalQuery!
@@ -7,7 +8,10 @@ type Query {
 
 type Foo {
   id: ID!
-  name: String!
+  string: String!
+  int: Int!
+  float: Float!
+  boolean: Boolean!
 }
 
 type Mutation {

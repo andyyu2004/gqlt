@@ -3,12 +3,28 @@ package typecheck
 import (
 	"fmt"
 
+	"github.com/andyyu2004/gqlt/internal/lex"
 	"github.com/andyyu2004/gqlt/internal/slice"
 	"github.com/andyyu2004/gqlt/memosa/lib"
 	"github.com/andyyu2004/gqlt/syn"
 
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
+
+// Placeholder type to represent recursive types.
+// We cannot eagerly expand out the graphql type because it may be recursive (and therefore infinite) without this type.
+// This type should not leak out of this file, it should be expanded as much as necessary as dictated by the query.
+type namedType struct {
+	Name lex.Token
+}
+
+var _ Ty = namedType{}
+
+func (ty namedType) isTy() {}
+
+func (ty namedType) String() string {
+	return ty.Name.Value
+}
 
 func (tcx *typechecker) queryExpr(expr *syn.QueryExpr) Ty {
 	if tcx.schema == nil {
@@ -41,22 +57,49 @@ func (tcx *typechecker) inferQueryType(operation *syn.OperationDefinition) Ty {
 		tcx.error(operation, fmt.Sprintf("schema does not define a %v type", operation.Operation))
 	}
 
-	return tcx.inferSelectionSetType(def, operation.SelectionSet)
+	// top level type is always an object
+	ty := tcx.defToTy(def).(Object)
+	return tcx.inferSelectionSetType(ty, operation.SelectionSet)
 }
 
-func (tcx *typechecker) inferSelectionSetType(def *syn.Definition, selectionSet syn.SelectionSet) Ty {
+func (tcx *typechecker) inferSelectionSetType(ty Object, selectionSet syn.SelectionSet) Ty {
 	outTy := Object{Fields: orderedmap.New[string, Ty]()}
 	for _, selection := range selectionSet {
 		switch selection := selection.(type) {
 		case *syn.Field:
-			field := def.Fields.ForName(selection.Name.Value)
-			var fieldTy Ty
-			if field == nil {
-				fieldTy = tcx.error(selection, fmt.Sprintf("field %v does not exist on type %v", selection.Name.Value, def.Name))
-			} else {
-				fieldTy = tcx.graphqlTyToTy(field.Type)
+			fieldTy, ok := ty.Fields.Get(selection.Name.Value)
+			if !ok {
+				fieldTy = tcx.error(selection, fmt.Sprintf("field '%v' does not exist on type '%v'", selection.Name.Value, ty))
 			}
-			outTy.Fields.Set(field.Name, fieldTy)
+
+			fieldTy = tcx.expand(fieldTy)
+			switch f := fieldTy.(type) {
+			case Object:
+				if len(selection.SelectionSet) == 0 {
+					fieldTy = tcx.error(selection, fmt.Sprintf("field '%s' of type '%v' must have a selection of subfields", selection.Name.Value, f))
+				} else {
+					fieldTy = tcx.inferSelectionSetType(f, selection.SelectionSet)
+				}
+			case List:
+				switch elem := tcx.expand(f.Elem).(type) {
+				case Object:
+					if len(selection.SelectionSet) == 0 {
+						fieldTy = List{Elem: tcx.error(selection, fmt.Sprintf("field '%s' of type '%v' must have a selection of subfields", selection.Name.Value, f))}
+					} else {
+						fieldTy = List{Elem: tcx.inferSelectionSetType(elem, selection.SelectionSet)}
+					}
+				case namedType:
+					panic("should be expanded")
+				}
+			case namedType:
+				panic("should be expanded")
+			default:
+				if len(selection.SelectionSet) > 0 {
+					fieldTy = tcx.error(selection, fmt.Sprintf("cannot query field '%s' on type '%v'", selection.Name.Value, fieldTy))
+				}
+			}
+
+			outTy.Fields.Set(selection.Alias.Value, fieldTy)
 		case *syn.FragmentSpread:
 			return Any{}
 		case *syn.InlineFragment:
@@ -68,17 +111,16 @@ func (tcx *typechecker) inferSelectionSetType(def *syn.Definition, selectionSet 
 }
 
 func (tcx *typechecker) graphqlTyToTy(ty *syn.Type) Ty {
+	return tcx.expand(tcx.graphqlTyToTy1(ty))
+}
+
+func (tcx *typechecker) graphqlTyToTy1(ty *syn.Type) Ty {
 	lib.Assert(ty != nil, "type must not be nil")
 	if ty.Elem != nil {
 		return List{Elem: tcx.graphqlTyToTy(ty.Elem)}
 	}
 
-	def, ok := tcx.schema.Types[ty.NamedType.Value]
-	if !ok {
-		return tcx.error(ty, fmt.Sprintf("unknown type %v", ty.NamedType.Value))
-	}
-
-	return tcx.defToTy(def)
+	return namedType{Name: ty.NamedType}
 }
 
 func (tcx *typechecker) defToTy(def *syn.Definition) Ty {
@@ -99,7 +141,9 @@ func (tcx *typechecker) defToTy(def *syn.Definition) Ty {
 	case syn.Object:
 		ty := Object{Fields: orderedmap.New[string, Ty]()}
 		for _, field := range def.Fields {
-			ty.Fields.Set(field.Name, tcx.graphqlTyToTy(field.Type))
+			// don't convert types recursively as this can lead to infinite recursion
+			// just do 1 layer
+			ty.Fields.Set(field.Name, tcx.graphqlTyToTy1(field.Type))
 		}
 		return ty
 	case syn.Interface, syn.Union, syn.Enum:
@@ -109,6 +153,20 @@ func (tcx *typechecker) defToTy(def *syn.Definition) Ty {
 		panic("unreachable, can't query for input types")
 	default:
 		panic(fmt.Sprintf("unknown definition kind %v", def.Kind))
+	}
+}
+
+// `expand` at least one layer of the type
+func (tcx *typechecker) expand(ty Ty) Ty {
+	switch ty := ty.(type) {
+	case namedType:
+		def, ok := tcx.schema.Types[ty.Name.Value]
+		if !ok {
+			return tcx.error(ty.Name, fmt.Sprintf("unknown type %v", ty.Name.Value))
+		}
+		return tcx.defToTy(def)
+	default:
+		return ty
 	}
 }
 

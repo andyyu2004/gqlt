@@ -272,8 +272,13 @@ let x = query { int }
 		},
 		{
 			"query object field", `
-let x = query { foo }
-#   ^`, expect.Expect(`{ id: string, name: string }`),
+let x = query { foo { id string float int boolean } }
+#   ^`, expect.Expect(`{ id: string, string: string, float: number, int: number, boolean: bool }`),
+		},
+		{
+			"query object field partial selection", `
+		let x = query { foo { id boolean } }
+		#   ^`, expect.Expect(`{ id: string, boolean: bool }`),
 		},
 	}
 

@@ -82,14 +82,32 @@ func (q *query) Int() int32 {
 }
 
 type Foo struct {
-	ID   graphql.ID
-	Name string
+	ID      graphql.ID
+	String  string
+	Int     int32
+	Float   float64
+	Boolean bool
 }
 
 func (q *query) Foo() Foo {
 	return Foo{
-		ID:   "1",
-		Name: "Foo",
+		ID:      "1",
+		String:  "foo",
+		Int:     1,
+		Float:   1.1,
+		Boolean: true,
+	}
+}
+
+func (q *query) Foos() []Foo {
+	return []Foo{
+		{
+			ID:      "2",
+			String:  "3",
+			Int:     2,
+			Float:   3.3,
+			Boolean: false,
+		},
 	}
 }
 

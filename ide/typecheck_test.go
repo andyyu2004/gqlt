@@ -90,5 +90,31 @@ let { a, a, b } = { a, b }
 #   ^^^^^^^^^^^ field 'a' specified twice
 `),
 		},
+		{
+			"missing subselection", `
+let x = query { foo }
+		#   ^`, expect.Expect(`
+let x = query { foo }
+#               ^^^ field 'foo' of type '{ id: ID, string: String, int: Int, float: Float, boolean: Boolean }' must have a selection of subfields
+		#   ^`),
+		},
+
+		{
+			"list missing subselection", `
+let x = query { foos }
+		#   ^`, expect.Expect(`
+let x = query { foos }
+#               ^^^^ field 'foos' of type '{ id: ID, string: String, int: Int, float: Float, boolean: Boolean }[]' must have a selection of subfields
+		#   ^`),
+		},
+
+		{
+			"query missing field", `
+let x = query { nonexistent }
+`, expect.Expect(`
+let x = query { nonexistent }
+#               ^^^^^^^^^^^ field 'nonexistent' does not exist on type '{ foo: Foo, foos: { id: ID, string: String, int: Int, float: Float, boolean: Boolean }[], int: Int, fail: Int, animals: AnimalQuery, __schema: __Schema, __type: __Type }'
+`),
+		},
 	}...)
 }
