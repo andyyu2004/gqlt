@@ -9,6 +9,7 @@ import (
 	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/ide/mapper"
 	"github.com/andyyu2004/gqlt/internal/config"
+	"github.com/andyyu2004/gqlt/internal/eval"
 	"github.com/andyyu2004/gqlt/internal/typecheck"
 	"github.com/andyyu2004/gqlt/memosa"
 	"github.com/andyyu2004/gqlt/syn"
@@ -114,7 +115,7 @@ var _ memosa.Query[typecheckKey, typecheck.Info] = typecheckQuery{}
 
 func (typecheckQuery) Execute(ctx *memosa.Context, key typecheckKey) typecheck.Info {
 	schema := memosa.Get[schemaInputQuery](ctx)
-	tcx := typecheck.New(schema)
+	tcx := typecheck.New(schema, &eval.Settings{})
 	ast := memosa.Fetch[parseQuery](ctx, parseKey(key)).Ast
 	return tcx.Check(ast)
 }

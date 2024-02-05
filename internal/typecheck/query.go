@@ -34,7 +34,9 @@ func (tcx *typechecker) queryExpr(expr *syn.QueryExpr) Ty {
 		return Any{}
 	}
 
-	ty := tcx.inferQueryType(expr.Operation)
+	ty := tcx.inferQueryType(syn.NamespaceTransform{
+		Namespace: tcx.settings.Namespace(),
+	}.TransformOperation(expr.Operation))
 	return flatten(ty)
 }
 

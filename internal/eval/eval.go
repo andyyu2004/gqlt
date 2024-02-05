@@ -47,12 +47,16 @@ func New() *Executor {
 	return &Executor{}
 }
 
-type settings struct {
+type Settings struct {
 	namespace []string
 }
 
+func (s *Settings) Namespace() []string {
+	return s.namespace
+}
+
 // keep in sync with typecheck
-func (s *settings) Set(key string, val any) error {
+func (s *Settings) Set(key string, val any) error {
 	switch key {
 	case "namespace":
 		switch val := val.(type) {
@@ -83,7 +87,7 @@ type executionContext struct {
 	path     string
 	client   Client
 	scope    *scope
-	settings settings
+	settings Settings
 }
 
 type scope struct {
@@ -219,9 +223,9 @@ func (e *Executor) RunFile(ctx context.Context, client Client, uri string, opts 
 		return err
 	}
 
-	// No need to pass as schema here for detailed typechecking (the typechecker is aimed at providing errors during editing)
+	// No need to pass as schema here for detailed typechecking (the typechecker is aimed at providing errors during editirng)
 	// We can just fail at runtime.
-	tcx := typecheck.New(nil)
+	tcx := typecheck.New(nil, &Settings{})
 	info := tcx.Check(file)
 	if len(info.Errors) > 0 && runConfig.typecheck {
 		return info.Errors

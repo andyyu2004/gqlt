@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/andyyu2004/gqlt/gqlparser/formatter"
-	"github.com/andyyu2004/gqlt/gqlparser/lexer"
 	"github.com/andyyu2004/gqlt/gqlparser/validator"
 	"github.com/andyyu2004/gqlt/internal/slice"
 	"github.com/andyyu2004/gqlt/memosa/lib"
@@ -15,11 +14,11 @@ import (
 
 func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.QueryExpr) (any, error) {
 	operation := expr.Operation
-	for _, transform := range []transform{
-		namespaceTransform{ecx.settings.namespace},
+	for _, transform := range []syn.Transform{
+		syn.NamespaceTransform{Namespace: ecx.settings.namespace},
 		variableTransform{schema: e.schema, scope: ecx.scope},
 	} {
-		operation = transform.transformOperation(operation)
+		operation = transform.TransformOperation(operation)
 	}
 
 	usedFragments := map[string]struct{}{}
@@ -67,44 +66,6 @@ func formatOperation(operation *syn.OperationDefinition) *bytes.Buffer {
 	return buf
 }
 
-type transform interface {
-	// Create a new operation definition that is a transformation of the given operation.
-	// The original operation definition must not be mutated.
-	// However, it is not required to make a deep copy.
-	transformOperation(*syn.OperationDefinition) *syn.OperationDefinition
-}
-
-// add a namespace to the operation
-// e.g. namespace ["foo", "bar"] will transform
-// query { baz { qux } } to query { foo { bar { baz { qux } } } }
-type namespaceTransform struct {
-	namespace []string
-}
-
-func (t namespaceTransform) transformOperation(operation *syn.OperationDefinition) *syn.OperationDefinition {
-	selectionSet := operation.SelectionSet
-	// iterate in reverse order to build up the selection set from the inside out
-	for i := len(t.namespace) - 1; i >= 0; i-- {
-		selectionSet = syn.SelectionSet{
-			&syn.Field{
-				Alias:        lexer.Token{Value: t.namespace[i]},
-				Name:         lexer.Token{Value: t.namespace[i]},
-				SelectionSet: selectionSet,
-			},
-		}
-	}
-
-	return &syn.OperationDefinition{
-		Operation:           operation.Operation,
-		Name:                operation.Name,
-		VariableDefinitions: operation.VariableDefinitions,
-		Directives:          operation.Directives,
-		SelectionSet:        selectionSet,
-		Position:            operation.Position,
-		Comment:             operation.Comment,
-	}
-}
-
 // replace all variables with their values if no explicit parameter list
 type variableTransform struct {
 	schema schema
@@ -112,7 +73,7 @@ type variableTransform struct {
 	err    error
 }
 
-func (t variableTransform) transformOperation(operation *syn.OperationDefinition) *syn.OperationDefinition {
+func (t variableTransform) TransformOperation(operation *syn.OperationDefinition) *syn.OperationDefinition {
 	// if there are variable defined then we pass the variables through as graphql variables
 	if len(operation.VariableDefinitions) > 0 {
 		return operation

@@ -24,9 +24,15 @@ type Error struct {
 }
 
 type typechecker struct {
-	schema *syn.Schema
-	info   Info
-	scope  map[string]scopeEntry
+	schema   *syn.Schema
+	info     Info
+	scope    map[string]scopeEntry
+	settings Settings
+}
+
+type Settings interface {
+	Namespace() []string
+	Set(key string, value any) error
 }
 
 type scopeEntry struct {
@@ -37,10 +43,11 @@ type scopeEntry struct {
 // Create a new typechecker.
 // Pass the schema to the typechecker to resolve query types against.
 // The schema may be nil, in which case the typechecker will typecheck all queries/mutations as any.
-func New(schema *syn.Schema) *typechecker {
+func New(schema *syn.Schema, settings Settings) *typechecker {
 	return &typechecker{
-		schema: schema,
-		scope:  make(map[string]scopeEntry),
+		schema:   schema,
+		settings: settings,
+		scope:    make(map[string]scopeEntry),
 		info: Info{
 			ExprTypes:    make(map[syn.Expr]Ty),
 			BindingTypes: make(map[*syn.NamePat]Ty),

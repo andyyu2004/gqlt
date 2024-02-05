@@ -285,6 +285,12 @@ let x = query { foo { id string float int boolean } }
 let x = query { recursive { id next { id next { id } } } }
     ^`, expect.Expect(`{ id: string, next: { id: string, next: { id: string } } }`),
 		},
+		{
+			"query with namespace", `
+set namespace "animals/dogs"
+let x = query { first { id kind } }
+    ^`, expect.Expect(`{ id: string, kind: any }`),
+		},
 	}
 
 	for _, test := range tests {
