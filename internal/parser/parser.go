@@ -476,7 +476,7 @@ func (p *Parser) infixOp() (bp, lex.Token, assoc) {
 	switch tok.Kind {
 	case lex.Matches:
 		return 100, tok, left
-	case lex.Equals2, lex.BangEqual:
+	case lex.Equals2, lex.BangEqual, lex.EqualsTilde, lex.BangTilde:
 		return 110, tok, left
 	case lex.Plus, lex.Minus:
 		return 120, tok, left

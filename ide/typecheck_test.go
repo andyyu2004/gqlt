@@ -116,5 +116,24 @@ let x = query { nonexistent }
 #               ^^^^^^^^^^^ field 'nonexistent' does not exist on type '{ foo: Foo, foos: { id: ID, string: String, int: Int, float: Float, boolean: Boolean }[], int: Int, fail: Int, animals: AnimalQuery, recursive: Recursive, __schema: __Schema, __type: __Type }'
 `),
 		},
+		{
+			"regex match", `
+let x = "foo" =~ 2
+let x = 2 =~ "foo"
+let x = "foo" !~ 2
+let x = "foo" !~ "foo"
+let x = 2 !~ "foo"
+`, expect.Expect(`
+let x = "foo" =~ 2
+#       ^^^^^^^^^^ cannot apply '=~' to 'string' and 'number' (expected string and string)
+let x = 2 =~ "foo"
+#       ^^^^^^^^^^ cannot apply '=~' to 'number' and 'string' (expected string and string)
+let x = "foo" !~ 2
+#       ^^^^^^^^^^ cannot apply '!~' to 'string' and 'number' (expected string and string)
+let x = "foo" !~ "foo"
+let x = 2 !~ "foo"
+#       ^^^^^^^^^^ cannot apply '!~' to 'number' and 'string' (expected string and string)
+`),
+		},
 	}...)
 }

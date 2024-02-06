@@ -4,13 +4,25 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"regexp"
+
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
 )
+
+func regexMatch(pos ast.HasPosition, lhs, rhs string) (bool, error) {
+	regex, err := regexp.Compile(rhs)
+	if err != nil {
+		return false, errorf(pos, "invalid regex: %v", err)
+	}
+
+	return regex.MatchString(lhs), nil
+}
 
 func eq(lhs, rhs any) bool {
 	return reflect.DeepEqual(lhs, rhs)
 }
 
-func add(lhs, rhs any) (any, error) {
+func add(pos ast.HasPosition, lhs, rhs any) (any, error) {
 	switch lhs := lhs.(type) {
 	case float64:
 		switch rhs := rhs.(type) {
@@ -29,10 +41,10 @@ func add(lhs, rhs any) (any, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("cannot add %T and %T", lhs, rhs)
+	return nil, errorf(pos, "cannot add %T and %T", lhs, rhs)
 }
 
-func sub(lhs, rhs any) (any, error) {
+func sub(pos ast.HasPosition, lhs, rhs any) (any, error) {
 	switch lhs := lhs.(type) {
 	case float64:
 		switch rhs := rhs.(type) {
@@ -41,7 +53,7 @@ func sub(lhs, rhs any) (any, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("cannot subtract %T and %T", lhs, rhs)
+	return nil, errorf(pos, "cannot subtract %T and %T", lhs, rhs)
 }
 
 func mul(lhs, rhs any) (any, error) {

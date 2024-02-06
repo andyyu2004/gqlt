@@ -8,12 +8,26 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/andyyu2004/gqlt/gqlparser/ast"
 	"github.com/andyyu2004/gqlt/internal/parser"
 	"github.com/andyyu2004/gqlt/internal/typecheck"
 	"github.com/andyyu2004/gqlt/memosa/lib"
 	"github.com/andyyu2004/gqlt/syn"
 	"github.com/bmatcuk/doublestar/v4"
 )
+
+type Error struct {
+	Pos ast.HasPosition
+	Msg string
+}
+
+func (e Error) Error() string {
+	return fmt.Sprintf("%s: %s", e.Pos.Pos(), e.Msg)
+}
+
+func errorf(pos ast.HasPosition, format string, args ...interface{}) error {
+	return Error{Pos: pos, Msg: fmt.Sprintf(format, args...)}
+}
 
 type Opt func(*runConfig)
 

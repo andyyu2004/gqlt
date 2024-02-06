@@ -30,6 +30,7 @@ const (
 	Minus
 	Star
 	Slash
+	Tilde
 	Name
 	Int
 	Float
@@ -86,6 +87,8 @@ func (t Type) Name() string {
 		return "Star"
 	case Slash:
 		return "Slash"
+	case Tilde:
+		return "Tilde"
 	case Name:
 		return "Name"
 	case Int:
@@ -150,6 +153,8 @@ func (t Type) String() string {
 		return "*"
 	case Slash:
 		return "/"
+	case Tilde:
+		return "~"
 	case Name:
 		return "Name"
 	case Int:

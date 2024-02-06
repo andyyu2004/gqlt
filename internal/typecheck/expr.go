@@ -238,6 +238,13 @@ func (tcx *typechecker) binaryExpr(expr *syn.BinaryExpr) Ty {
 			tcx.error(expr.Pos(), fmt.Sprintf("comparing '%v' to '%v' will always be false", lhs, rhs))
 		}
 		return Bool{}
+	case lex.BangTilde, lex.EqualsTilde:
+		if _, ok := lhs.(String); ok {
+			if _, ok := rhs.(String); ok {
+				return Bool{}
+			}
+		}
+		return tcx.error(expr.Pos(), fmt.Sprintf("cannot apply '%s' to '%v' and '%v' (expected string and string)", expr.Op.Kind.String(), lhs, rhs))
 	case lex.Plus:
 		switch lhs := lhs.(type) {
 		case Number:

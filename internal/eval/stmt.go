@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strings"
 
-	"github.com/andyyu2004/gqlt/internal/lex"
 	"github.com/andyyu2004/gqlt/syn"
 )
 
@@ -40,32 +40,15 @@ func (e *Executor) stmt(ctx context.Context, ecx *executionContext, stmt syn.Stm
 		}
 
 	case *syn.AssertStmt:
-		bin, ok := stmt.Expr.(*syn.BinaryExpr)
-		if ok && bin.Op.Kind == lex.Equals2 {
-			// special case for common equality assertions to have a better error message
-			lhs, err := e.eval(ctx, ecx, bin.Left)
-			if err != nil {
-				return err
-			}
+		val, err := e.eval(ctx, ecx, stmt.Expr)
+		if err != nil {
+			return err
+		}
 
-			rhs, err := e.eval(ctx, ecx, bin.Right)
-			if err != nil {
-				return err
-			}
-
-			if !eq(lhs, rhs) {
-				return fmt.Errorf("assertion failed: %v != %v", lhs, rhs)
-			}
-		} else {
-			val, err := e.eval(ctx, ecx, stmt.Expr)
-			if err != nil {
-				return err
-			}
-
-			if !truthy(val) {
-				return fmt.Errorf("assertion failed")
-			}
-
+		if !truthy(val) {
+			var fmt strings.Builder
+			stmt.Expr.Format(&fmt)
+			return errorf(stmt, "assertion failed: %v", fmt.String())
 		}
 
 	default:
@@ -102,7 +85,7 @@ func (e *Executor) let(ctx context.Context, ecx *executionContext, let *syn.LetS
 
 func (e *Executor) fragment(ctx context.Context, ecx *executionContext, stmt *syn.FragmentStmt) error {
 	if _, ok := ecx.scope.fragments[stmt.Fragment.Name.Value]; ok {
-		return fmt.Errorf("fragment %s already defined", stmt.Fragment.Name.Value)
+		return errorf(stmt, "fragment %s already defined", stmt.Fragment.Name.Value)
 	}
 
 	ecx.scope.fragments[stmt.Fragment.Name.Value] = stmt.RawFragment

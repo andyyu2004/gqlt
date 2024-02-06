@@ -23,3 +23,6 @@ assert [1, 2, 3] * 2 == [1, 2, 3, 1, 2, 3]
 
 assert 1 matches 1 matches true
 assert 1 == 1 matches true
+
+assert "x" =~ "."
+assert "x" !~ "y"

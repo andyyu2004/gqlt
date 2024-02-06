@@ -132,16 +132,23 @@ func convertToken(tok [n]lexer.Token) (Token, int) {
 			kind = Name
 		}
 	case lexer.Equals:
-		if tok[1].Kind == lexer.Equals {
+		switch tok[1].Kind {
+		case lexer.Equals:
 			kind = Equals2
+			len = 2
+		case lexer.Tilde:
+			kind = EqualsTilde
 			len = 2
 		}
 	case lexer.Bang:
-		if tok[1].Kind == lexer.Equals {
+		switch tok[1].Kind {
+		case lexer.Equals:
 			kind = BangEqual
 			len = 2
+		case lexer.Tilde:
+			kind = BangTilde
+			len = 2
 		}
-
 	}
 	return Token{Kind: kind, Value: tok[0].Value, Position: tok[0].Position}, len
 }
@@ -184,6 +191,7 @@ const (
 	Minus
 	Star
 	Slash
+	Tilde
 	Name
 	Int
 	Float
@@ -212,6 +220,8 @@ const (
 	BangEqual
 	Not
 	Try
+	EqualsTilde
+	BangTilde
 
 	TypeName
 )
@@ -293,6 +303,10 @@ func (t TokenKind) String() string {
 		return "=="
 	case BangEqual:
 		return "!="
+	case EqualsTilde:
+		return "=~"
+	case BangTilde:
+		return "!~"
 	case Not:
 		return "not"
 	case Try:

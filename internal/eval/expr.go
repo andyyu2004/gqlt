@@ -76,13 +76,33 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 		case lex.BangEqual:
 			return !eq(lhs, rhs), nil
 		case lex.Plus:
-			return add(lhs, rhs)
+			return add(expr, lhs, rhs)
 		case lex.Minus:
-			return sub(lhs, rhs)
+			return sub(expr, lhs, rhs)
 		case lex.Star:
 			return mul(lhs, rhs)
 		case lex.Slash:
 			return div(lhs, rhs)
+		case lex.BangTilde, lex.EqualsTilde:
+			lhs, ok := lhs.(string)
+			if !ok {
+				return nil, fmt.Errorf("expected string to match regex against")
+			}
+
+			rhs, ok := rhs.(string)
+			if !ok {
+				return nil, fmt.Errorf("regex must be string")
+			}
+
+			b, err := regexMatch(expr, lhs, rhs)
+			if err != nil {
+				return nil, err
+			}
+
+			if expr.Op.Kind == lex.BangTilde {
+				return !b, nil
+			}
+			return b, nil
 		default:
 			panic(fmt.Sprintf("missing binary expr eval case: %s", expr.Op))
 		}

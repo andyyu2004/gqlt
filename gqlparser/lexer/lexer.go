@@ -126,6 +126,8 @@ func (s *Lexer) ReadToken() (Token, error) {
 		return s.makeValueToken(Plus, "")
 	case '-':
 		return s.makeValueToken(Minus, "")
+	case '~':
+		return s.makeValueToken(Tilde, "")
 	case '*':
 		return s.makeValueToken(Star, "")
 	case '/':

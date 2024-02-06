@@ -266,6 +266,20 @@ let x = 2 / 3
 			expect.Expect(`number`),
 		},
 		{
+			"regex match",
+			`
+let x = "hello" =~ "world"
+#   ^`,
+			expect.Expect(`bool`),
+		},
+		{
+			"not regex match",
+			`
+let x = "hello" !~ "world"
+#   ^`,
+			expect.Expect(`bool`),
+		},
+		{
 			"query scalar", `
 let x = query { int }
 #   ^}`, expect.Expect(`number`),
