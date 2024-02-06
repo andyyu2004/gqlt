@@ -46,7 +46,7 @@ func New(ide *ide.IDE) *server.Server {
 }
 
 type ls struct {
-	*ide.IDE
+	ide *ide.IDE
 }
 
 func (s *ls) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (any, error) {
@@ -64,7 +64,7 @@ func (s *ls) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (a
 	}
 
 	// the input must always be set, nil or not
-	s.SetSchema(schema)
+	s.ide.SetSchema(schema)
 
 	return protocol.InitializeResult{
 		Capabilities: protocol.ServerCapabilities{
@@ -93,7 +93,7 @@ func (s *ls) initialized(ctx *glsp.Context, params *protocol.InitializedParams) 
 }
 
 func (s *ls) onOpen(ctx *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
-	s.Apply(ide.Changes{
+	s.ide.Apply(ide.Changes{
 		ide.SetFileContent{
 			Path:    params.TextDocument.URI,
 			Content: params.TextDocument.Text,
@@ -116,7 +116,7 @@ func (s *ls) onChange(ctx *glsp.Context, params *protocol.DidChangeTextDocumentP
 		}
 	}
 
-	s.Apply(changes)
+	s.ide.Apply(changes)
 
 	s.publishDiagnostics(ctx)
 
@@ -144,10 +144,15 @@ func (l logger) Errorf(format string, args ...any) {
 }
 
 func (l *ls) publishDiagnostics(ctx *glsp.Context) {
-	s, cleanup := l.Snapshot(logger{ctx})
-	defer cleanup()
+	log := logger{ctx}
+	diagnostics, err := ide.WithSnapshot(l.ide, log, func(s ide.Snapshot) map[string][]protocol.Diagnostic {
+		return s.Diagnostics()
+	})
+	if err != nil {
+		log.Errorf("failed to compute diagnostics: %v", err)
+		return
+	}
 
-	diagnostics := s.Diagnostics()
 	for uri, diags := range diagnostics {
 		ctx.Notify(protocol.ServerTextDocumentPublishDiagnostics, &protocol.PublishDiagnosticsParams{
 			URI:         uri,
@@ -157,10 +162,9 @@ func (l *ls) publishDiagnostics(ctx *glsp.Context) {
 }
 
 func (l *ls) hover(ctx *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
-	s, cleanup := l.Snapshot(logger{ctx})
-	defer cleanup()
-
-	return s.Hover(params.TextDocument.URI, params.Position), nil
+	return ide.WithSnapshot(l.ide, logger{ctx}, func(s ide.Snapshot) *protocol.Hover {
+		return s.Hover(params.TextDocument.URI, params.Position)
+	})
 }
 
 func (l *ls) semanticTokens(ctx *glsp.Context, params *protocol.SemanticTokensParams) (*protocol.SemanticTokens, error) {
@@ -172,10 +176,13 @@ func (l *ls) semanticTokens(ctx *glsp.Context, params *protocol.SemanticTokensPa
 		tokenModifiersBitset uint32
 	}
 
-	s, cleanup := l.Snapshot(logger{ctx})
-	defer cleanup()
+	highlights, err := ide.WithSnapshot(l.ide, logger{ctx}, func(s ide.Snapshot) []ide.Highlight {
+		return s.Highlight(params.TextDocument.URI)
+	})
+	if err != nil {
+		return nil, err
+	}
 
-	highlights := s.Highlight(params.TextDocument.URI)
 	tokens := []SemanticToken{}
 	for i, hl := range highlights {
 		var deltaLine uint32
@@ -214,10 +221,8 @@ func (l *ls) setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) error 
 	return nil
 }
 
-// Returns: Location | []Location | []LocationLink | nil
 func (l *ls) definition(ctx *glsp.Context, params *protocol.DefinitionParams) (any, error) {
-	s, cleanup := l.Snapshot(logger{ctx})
-	defer cleanup()
-
-	return s.Definition(params.TextDocument.URI, params.Position), nil
+	return ide.WithSnapshot(l.ide, logger{ctx}, func(s ide.Snapshot) []protocol.Location {
+		return s.Definition(params.TextDocument.URI, params.Position)
+	})
 }

@@ -38,7 +38,28 @@ func New() *IDE {
 	return &IDE{ctx, sync.RWMutex{}}
 }
 
-func (ide *IDE) Snapshot(log Logger) (Snapshot, func()) {
+func WithSnapshot[R any](ide *IDE, log Logger, f func(Snapshot) R) (R, error) {
+	var err error
+	s, cleanup := ide.snapshot(log)
+	defer func() {
+		defer cleanup()
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic: %v", r)
+		}
+	}()
+
+	return f(s), err
+}
+
+func (ide *IDE) WithSnapshot(log Logger, f func(Snapshot)) error {
+	_, err := WithSnapshot(ide, log, func(s Snapshot) struct{} {
+		f(s)
+		return struct{}{}
+	})
+	return err
+}
+
+func (ide *IDE) snapshot(log Logger) (Snapshot, func()) {
 	ide.lock.RLock()
 	return Snapshot{ide, log}, ide.lock.RUnlock
 }
@@ -193,7 +214,7 @@ func TestWith(t testing.TB, content string, f func(string, Snapshot)) {
 	ide.SetSchema(schema)
 	require.Equal(t, schema, ide.Schema())
 
-	s, cleanup := ide.Snapshot(logger{t})
-	t.Cleanup(cleanup)
-	f(path, s)
+	require.NoError(t, ide.WithSnapshot(logger{t}, func(s Snapshot) {
+		f(path, s)
+	}))
 }
