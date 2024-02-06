@@ -202,10 +202,7 @@ func (l logger) Errorf(fmt string, args ...any) {
 func TestWith(t testing.TB, content string, f func(string, Snapshot)) {
 	const path = "test.gqlt"
 
-	changes := Changes{SetFileContent{Path: path, Content: content}}
-
 	ide := New()
-	ide.Apply(changes)
 
 	// working directory is `gqlt/ide`
 	schema, err := config.LoadSchema("../")
@@ -214,7 +211,13 @@ func TestWith(t testing.TB, content string, f func(string, Snapshot)) {
 	ide.SetSchema(schema)
 	require.Equal(t, schema, ide.Schema())
 
-	require.NoError(t, ide.WithSnapshot(logger{t}, func(s Snapshot) {
-		f(path, s)
-	}))
+	const n = 10
+	// Run this a few times with random modifications as we had a memosa bug
+	// where after applying a second change analyses wouldn't work.
+	for i := 0; i <= n; i++ {
+		ide.Apply(Changes{SetFileContent{Path: path, Content: content + fmt.Sprintf("#%d", i)}})
+		require.NoError(t, ide.WithSnapshot(logger{t}, func(s Snapshot) {
+			f(path, s)
+		}))
+	}
 }

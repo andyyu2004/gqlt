@@ -57,6 +57,7 @@ func New(schema *syn.Schema, settings Settings) *typechecker {
 }
 
 type Info struct {
+	Ast          syn.File
 	ExprTypes    map[syn.Expr]Ty
 	BindingTypes map[*syn.NamePat]Ty
 	// Resolutions maps name expressions to the binding that it references
@@ -66,6 +67,7 @@ type Info struct {
 }
 
 func (tcx *typechecker) Check(ast syn.File) Info {
+	tcx.info.Ast = ast
 	for _, stmt := range ast.Stmts {
 		tcx.stmt(stmt)
 	}

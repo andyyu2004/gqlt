@@ -97,6 +97,9 @@ func (ctx *Context) verifyQuery(queryType reflect.Type, key any) bool {
 
 	if reflect.DeepEqual(newValue, prevValue) {
 		lib.Assert(memo.deps.maxRev >= prevMaxRev)
+		// Important to set the value back to the previous value,
+		// even if they're deeply equal, we must retain identity too.
+		memo.value = prevValue
 		memo.deps.maxRev = prevMaxRev
 		return true
 	}
@@ -147,6 +150,11 @@ func get(ctx *Context, inputType reflect.Type) any {
 
 // Set the value of an input.
 func set[I Input[T], T any](rt *runtime, value T) {
+	// this optimization is interfering with some correctness tests for now
+	// if storage, ok := rt.inputStorages[lib.TypeOf[I]()]; ok && reflect.DeepEqual(storage.value, value) {
+	// 	return
+	// }
+
 	rt.revision++
 	rt.inputStorages[lib.TypeOf[I]()] = &inputStorage{rt.revision, value}
 }

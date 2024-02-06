@@ -10,16 +10,14 @@ import (
 func (s *Snapshot) Definition(uri string, position protocol.Position) []protocol.Location {
 	s.log.Debugf("definition %s %v", uri, position)
 
-	ast := s.Parse(uri).Ast
 	mapper := s.Mapper(uri)
 	point := protoToPoint(mapper, position)
 	if point == nil {
 		return nil
 	}
 
-	cursor := syn.NewCursor(ast)
 	typeInfo := s.Typecheck(uri)
-	if node := definition(cursor, typeInfo, *point); node != nil {
+	if node := definition(typeInfo, *point); node != nil {
 		return []protocol.Location{
 			{
 				URI:   uri, // definitions are always in the same file
@@ -30,9 +28,11 @@ func (s *Snapshot) Definition(uri string, position protocol.Position) []protocol
 	return nil
 }
 
-func definition(cursor *syn.Cursor[syn.Node], typeInfo typecheck.Info, point ast.Point) syn.Node {
+func definition(typeInfo typecheck.Info, point ast.Point) syn.Node {
 	// - Find the token that contains the given point
 	// - Traverse the parent nodes to find a `*syn.NameExpr`, and lookup what it resolves to
+
+	cursor := syn.NewCursor(typeInfo.Ast)
 	tokenCursor := cursor.TokenAt(point)
 	if tokenCursor == nil {
 		return nil

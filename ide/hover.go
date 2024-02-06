@@ -9,17 +9,15 @@ import (
 )
 
 func (s *Snapshot) Hover(uri string, position protocol.Position) *protocol.Hover {
-	s.log.Debugf("hover %s %v", uri, position)
-	ast := s.Parse(uri).Ast
+	// ast := s.Parse(uri).Ast
 	mapper := s.Mapper(uri)
 	point := protoToPoint(mapper, position)
 	if point == nil {
 		return nil
 	}
 
-	cursor := syn.NewCursor(ast)
 	typeInfo := s.Typecheck(uri)
-	if r, ty := hover(cursor, typeInfo, *point); ty != nil {
+	if r, ty := hover(typeInfo, *point); ty != nil {
 		return &protocol.Hover{
 			// using typescript for syntax highlighting as we use the same syntax for types
 			Contents: protocol.MarkupContent{
@@ -33,9 +31,11 @@ func (s *Snapshot) Hover(uri string, position protocol.Position) *protocol.Hover
 	return nil
 }
 
-func hover(cursor *syn.Cursor[syn.Node], typeInfo typecheck.Info, point ast.Point) (syn.Node, typecheck.Ty) {
+func hover(typeInfo typecheck.Info, point ast.Point) (syn.Node, typecheck.Ty) {
 	// - Find the token that contains the given point
 	// - Traverse the parent nodes to find a node type that we know how to handle (e.g. syn.Expr)
+
+	cursor := syn.NewCursor(typeInfo.Ast)
 	tokenCursor := cursor.TokenAt(point)
 	if tokenCursor == nil {
 		return nil, nil

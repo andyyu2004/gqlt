@@ -162,8 +162,13 @@ func (l *ls) publishDiagnostics(ctx *glsp.Context) {
 }
 
 func (l *ls) hover(ctx *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
-	return ide.WithSnapshot(l.ide, logger{ctx}, func(s ide.Snapshot) *protocol.Hover {
-		return s.Hover(params.TextDocument.URI, params.Position)
+	log := logger{ctx}
+	return ide.WithSnapshot(l.ide, log, func(s ide.Snapshot) *protocol.Hover {
+		uri := params.TextDocument.URI
+		position := params.Position
+		res := s.Hover(uri, position)
+		log.Debugf("hover %s %v -> %v", uri, position, res)
+		return res
 	})
 }
 
