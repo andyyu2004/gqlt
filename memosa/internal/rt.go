@@ -87,8 +87,7 @@ func (ctx *Context) verifyQuery(queryType reflect.Type, key any) bool {
 	lib.Assert(ok) // we wouldn't end up here if the key wasn't in the map
 
 	if ctx.verifyMemo(memo) {
-		// dependencies are up-to-date, so we don't need to reexecute
-		return true
+		return memo.deps.maxRev < ctx.rt.revision
 	}
 
 	prevMaxRev := memo.deps.maxRev
