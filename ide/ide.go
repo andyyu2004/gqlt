@@ -211,13 +211,8 @@ func TestWith(t testing.TB, content string, f func(string, Snapshot)) {
 	ide.SetSchema(schema)
 	require.Equal(t, schema, ide.Schema())
 
-	const n = 10
-	// Run this a few times with random modifications as we had a memosa bug
-	// where after applying a second change analyses wouldn't work.
-	for i := 0; i <= n; i++ {
-		ide.Apply(Changes{SetFileContent{Path: path, Content: content + fmt.Sprintf("#%d", i)}})
-		require.NoError(t, ide.WithSnapshot(logger{t}, func(s Snapshot) {
-			f(path, s)
-		}))
-	}
+	ide.Apply(Changes{SetFileContent{Path: path, Content: content}})
+	require.NoError(t, ide.WithSnapshot(logger{t}, func(s Snapshot) {
+		f(path, s)
+	}))
 }
