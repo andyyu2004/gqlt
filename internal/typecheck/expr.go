@@ -103,15 +103,33 @@ func (tcx *typechecker) literalExpr(pos ast.HasPosition, val any) Ty {
 }
 
 func (tcx *typechecker) objectExpr(expr *syn.ObjectExpr) Ty {
-	fields := orderedmap.New[string, Ty](expr.Fields.Len())
-	for entry := expr.Fields.Oldest(); entry != nil; entry = entry.Next() {
-		ty := tcx.expr(entry.Value)
+	var ty Ty = Object{Fields: orderedmap.New[string, Ty]()}
+	if expr.Base != nil {
+		ty = tcx.expr(expr.Base)
 		if isErr(ty) {
 			return ty
 		}
-		fields.Set(entry.Key.Value, ty)
 	}
-	return Object{Fields: fields}
+
+	switch ty := ty.(type) {
+	case Any, errTy:
+		return ty
+	case Object:
+		for entry := expr.Fields.Oldest(); entry != nil; entry = entry.Next() {
+			fieldTy := tcx.expr(entry.Value)
+			if isErr(ty) {
+				return ty
+			}
+
+			// overwrite any existing field from the base regardless of prior type
+			ty.Fields.Set(entry.Key.Value, fieldTy)
+		}
+
+		return ty
+
+	default:
+		return tcx.error(expr.Pos(), fmt.Sprintf("object base must be an object, got '%v'", ty))
+	}
 }
 
 func (tcx *typechecker) listExpr(expr *syn.ListExpr) Ty {

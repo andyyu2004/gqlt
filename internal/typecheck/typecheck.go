@@ -93,6 +93,11 @@ func (tcx *typechecker) stmt(stmt syn.Stmt) {
 	}
 }
 
+// Type error handling invariants:
+// - If you construct an `errTy`, you must output a message.
+// - If you receive an `errTy`, just handle/propogate it appropriately without emitting any further errors.
+// This ensures that we don't emit multiple errors for the same expression, and we don't return an errTy
+// without emitting an error message.
 func (tcx *typechecker) error(pos ast.HasPosition, msg string) errTy {
 	tcx.info.Errors = append(tcx.info.Errors, Error{pos.Pos(), msg})
 	return errTy{}

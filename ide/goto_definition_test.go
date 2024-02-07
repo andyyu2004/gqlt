@@ -12,9 +12,11 @@ import (
 
 func TestGotoDefinition(t *testing.T) {
 	tests := []struct {
+		name    string
 		content string
 	}{
 		{
+			"name ref",
 			`
 let foo = 1
 #   ...
@@ -23,6 +25,7 @@ let foo = 1
 `,
 		},
 		{
+			"object destructure",
 			`
 let { foo } = { foo: 1 }
 #     ...
@@ -31,6 +34,7 @@ let { foo } = { foo: 1 }
 `,
 		},
 		{
+			"object rest destructure",
 			`
 let { ...foo } = { bar: 2, foo: 1 }
 #        ...
@@ -39,6 +43,7 @@ let { ...foo } = { bar: 2, foo: 1 }
 `,
 		},
 		{
+			"list destructure",
 			`
 let [foo] = [1]
 #    ...
@@ -47,6 +52,7 @@ let [foo] = [1]
 `,
 		},
 		{
+			"nested destructure",
 			`
 let [a, { b, c }] = [15, { b: 16, c: 17 }];
 #    .
@@ -54,14 +60,24 @@ assert [a, b, c] == [15, 16, 17]
 #       ^
 `,
 		},
+
+		{
+			"object spread name ref",
+			`
+let obj = { a: 1, b: 2, c: 3 }
+#   ...
+let b = { ...obj }
+#            ^^^
+			`,
+		},
 	}
 
 	for _, test := range tests {
-		t.Run("TestGotoDefinition", func(t *testing.T) {
+		t.Run(test.name, func(t *testing.T) {
 			ide.TestWith(t, test.content, func(uri string, s ide.Snapshot) {
 				fixture := fixture.Parse(test.content)
-				require.NotEmpty(t, fixture.Ranges)
-				require.NotEmpty(t, fixture.Points, 1)
+				require.Len(t, fixture.Ranges, 1)
+				require.NotEmpty(t, fixture.Points)
 
 				for _, point := range fixture.Points {
 					locs := slice.Map(s.Definition(uri, point), func(loc protocol.Location) protocol.Range {

@@ -129,6 +129,18 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 
 	case *syn.ObjectExpr:
 		fields := make(map[string]any, expr.Fields.Len())
+		if base := expr.Base; base != nil {
+			val, err := e.eval(ctx, ecx, base)
+			if err != nil {
+				return nil, err
+			}
+			var ok bool
+			fields, ok = val.(map[string]any)
+			if !ok {
+				return nil, fmt.Errorf("object base must be an object, got %T", val)
+			}
+		}
+
 		for entry := expr.Fields.Oldest(); entry != nil; entry = entry.Next() {
 			name := entry.Key
 			val, err := e.eval(ctx, ecx, entry.Value)

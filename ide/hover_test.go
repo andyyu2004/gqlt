@@ -305,6 +305,27 @@ set namespace "animals/dogs"
 let x = query { first { id kind } }
     ^`, expect.Expect(`{ id: string, kind: any }`),
 		},
+
+		{
+			"object base", `
+let x = { a: 1, b: "s" }
+let y = { x: false, ...x }
+    ^`, expect.Expect(`{ a: number, b: string, x: bool }`),
+		},
+
+		{
+			"object base overwrite", `
+let x = { a: 1, b: "s" }
+let y = { a: 2, ...x }
+    ^`, expect.Expect(`{ a: number, b: string }`),
+		},
+
+		{
+			"object base overwrite with different type", `
+let x = { a: 1, b: "s" }
+let y = { a: false, ...x }
+    ^`, expect.Expect(`{ a: bool, b: string }`),
+		},
 	}
 
 	for _, test := range tests {

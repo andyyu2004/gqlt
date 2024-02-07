@@ -230,6 +230,7 @@ type ObjectExpr struct {
 	Fields     *orderedmap.OrderedMap[lex.Token, Expr]
 	Commas     []lex.Token // alternates with fields, there may or may not be a trailing comma
 	CloseBrace lex.Token
+	Base       Expr // may be nil, the `{ ...expr }` field if one exists
 }
 
 var _ Expr = ObjectExpr{}
@@ -249,6 +250,11 @@ func (expr ObjectExpr) Children() Children {
 			i++
 		}
 	}
+
+	if expr.Base != nil {
+		children = append(children, expr.Base)
+	}
+
 	return append(children, expr.CloseBrace)
 }
 

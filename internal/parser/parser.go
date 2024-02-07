@@ -617,7 +617,16 @@ func (p *Parser) parseObjectExpr() *syn.ObjectExpr {
 	start := p.bump(lex.BraceL)
 	fields := orderedmap.New[lex.Token, syn.Expr]()
 	commas := []lex.Token{}
+	var base syn.Expr
 	for !p.at(lex.EOF) && !p.at(lex.BraceR) {
+		if p.eat_(lex.Spread) {
+			base = p.parseExpr()
+			if p.eat_(lex.Comma) {
+				p.error(p.peek(), "cannot have comma after the base object")
+			}
+			continue
+		}
+
 		name, ok := p.expect(lex.Name)
 		if !ok {
 			return nil
@@ -642,7 +651,14 @@ func (p *Parser) parseObjectExpr() *syn.ObjectExpr {
 
 	end, _ := p.expect(lex.BraceR)
 
-	return &syn.ObjectExpr{Position: start.Merge(end), OpenBrace: start, Fields: fields, Commas: commas, CloseBrace: end}
+	return &syn.ObjectExpr{
+		Position:   start.Merge(end),
+		OpenBrace:  start,
+		Fields:     fields,
+		Commas:     commas,
+		Base:       base,
+		CloseBrace: end,
+	}
 }
 
 func (p *Parser) parseLiteralExpr() *syn.LiteralExpr {

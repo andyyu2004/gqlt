@@ -135,5 +135,15 @@ let x = 2 !~ "foo"
 #       ^^^^^^^^^^ cannot apply '!~' to 'number' and 'string' (expected string and string)
 `),
 		},
+		{
+			"object base not an object", `
+let x = 2
+let y = { ...x }
+			`, expect.Expect(`
+let x = 2
+let y = { ...x }
+#       ^^^^^^^^ object base must be an object, got 'number'
+			`),
+		},
 	}...)
 }

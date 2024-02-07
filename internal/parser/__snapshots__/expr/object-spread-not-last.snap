@@ -1,0 +1,6 @@
+
+[TestParser/expr/object-spread-not-last - 1]
+{ a: 1, ...{ b: 2 }, c: 3 }
+#                    ^ cannot have comma after the base object
+
+---

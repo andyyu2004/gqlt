@@ -1,4 +1,4 @@
 assert try query { fail(yes: false) } == { data: 0, errors: null }
 
 let x = query { recursive { id next { id next { id } } } }
-let y = 1 + 2
+let y = 4 + 2
