@@ -92,7 +92,7 @@ func eq[T any](t testing.TB, x, y T) {
 
 func fetch[Q memosa.Query[K, V], K, V comparable](t *testing.T, ctx *memosa.Context, key K, expectedValue V, ch <-chan memosa.Event, expectation expect.Expectation) {
 	t.Helper()
-	eq(t, memosa.Fetch[Q](ctx, key), expectedValue)
+	eq(t, expectedValue, memosa.Fetch[Q](ctx, key))
 	expectation.AssertEqual(t, formatEvents(ch))
 }
 
@@ -141,6 +141,7 @@ DidValidateMemoizedValue{memosa_test.QueryC {}}`))
 
 	// similarly QueryD should not be invalidated
 	fetch[QueryD](t, ctx, KeyD{}, 42, ch, expect.Expect(`
+DidValidateMemoizedValue{memosa_test.QueryC {}}
 DidValidateMemoizedValue{memosa_test.QueryD {}}`))
 
 	memosa.Set[InputB](ctx, 13)
@@ -205,5 +206,6 @@ WillExecute{memosa_test.QueryA {1}}`))
 
 	// B still needs to reexecute
 	fetch[QueryB](t, ctx, KeyB{X: 1}, 46, ch, expect.Expect(`
+DidValidateMemoizedValue{memosa_test.QueryA {1}}
 DidValidateMemoizedValue{memosa_test.QueryB {1}}`))
 }

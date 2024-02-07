@@ -87,7 +87,12 @@ func (ctx *Context) verifyQuery(queryType reflect.Type, key any) bool {
 	lib.Assert(ok) // we wouldn't end up here if the key wasn't in the map
 
 	if ctx.verifyMemo(memo) {
-		return memo.deps.maxRev < ctx.rt.revision
+		if memo.deps.maxRev < ctx.rt.revision {
+			ctx.rt.event(DidValidateMemoizedValue{queryType, key})
+			return true
+		} else {
+			return false
+		}
 	}
 
 	prevMaxRev := memo.deps.maxRev
@@ -193,7 +198,6 @@ func fetch(ctx *Context, queryType reflect.Type, key any) any {
 
 	// otherwise walk the dependency graph and reexecute as necessary
 	if ctx.verifyQuery(queryType, key) {
-		ctx.rt.event(DidValidateMemoizedValue{queryType, key})
 	}
 
 	return memo.value
