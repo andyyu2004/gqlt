@@ -2,6 +2,7 @@ package memosa_test
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -99,7 +100,7 @@ func formatEvents(ch <-chan memosa.Event) string {
 	builder := strings.Builder{}
 	for len(ch) > 0 {
 		event := <-ch
-		builder.WriteString(fmt.Sprintf("\n%+T%v", event, event))
+		builder.WriteString(fmt.Sprintf("\n%s%v", reflect.TypeOf(event).Name(), event))
 	}
 	return builder.String()
 }
@@ -110,56 +111,99 @@ func TestSmoke(t *testing.T) {
 	memosa.Set[InputB](ctx, 12)
 
 	fetch[QueryA](t, ctx, KeyA{X: 1}, 3, ch, expect.Expect(`
-internal.WillExecute{memosa_test.QueryA {1}}`))
+WillExecute{memosa_test.QueryA {1}}`))
 	// same query should be memoized
 	fetch[QueryA](t, ctx, KeyA{X: 1}, 3, ch, expect.Expect(`
-internal.DidValidateMemoizedValue{memosa_test.QueryA {1}}`))
+DidValidateMemoizedValue{memosa_test.QueryA {1}}`))
 
 	fetch[QueryA](t, ctx, KeyA{X: 2}, 4, ch, expect.Expect(`
-internal.WillExecute{memosa_test.QueryA {2}}`))
+WillExecute{memosa_test.QueryA {2}}`))
 	fetch[QueryB](t, ctx, KeyB{X: 2}, 46, ch, expect.Expect(`
-internal.WillExecute{memosa_test.QueryB {2}}
-internal.DidValidateMemoizedValue{memosa_test.QueryA {2}}`))
+WillExecute{memosa_test.QueryB {2}}
+DidValidateMemoizedValue{memosa_test.QueryA {2}}`))
 
 	fetch[QueryC](t, ctx, KeyC{}, true, ch, expect.Expect(`
-internal.WillExecute{memosa_test.QueryC {}}`))
+WillExecute{memosa_test.QueryC {}}`))
 
 	fetch[QueryD](t, ctx, KeyD{}, 42, ch, expect.Expect(`
-internal.WillExecute{memosa_test.QueryD {}}
-internal.DidValidateMemoizedValue{memosa_test.QueryC {}}`))
+WillExecute{memosa_test.QueryD {}}
+DidValidateMemoizedValue{memosa_test.QueryC {}}`))
 
 	// updating input should invalidate memoized values that depend on it
 	memosa.Set[InputA](ctx, 102)
 
 	fetch[QueryA](t, ctx, KeyA{X: 1}, 103, ch, expect.Expect(`
-internal.WillExecute{memosa_test.QueryA {1}}`))
+WillExecute{memosa_test.QueryA {1}}`))
 
 	// however, QueryC shouldn't be invalidated as it does not depend on InputA
 	fetch[QueryC](t, ctx, KeyC{}, true, ch, expect.Expect(`
-internal.DidValidateMemoizedValue{memosa_test.QueryC {}}`))
+DidValidateMemoizedValue{memosa_test.QueryC {}}`))
 
 	// similarly QueryD should not be invalidated
 	fetch[QueryD](t, ctx, KeyD{}, 42, ch, expect.Expect(`
-internal.DidValidateMemoizedValue{memosa_test.QueryD {}}`))
+DidValidateMemoizedValue{memosa_test.QueryD {}}`))
 
 	memosa.Set[InputB](ctx, 13)
 
 	// needs reexecution since a relevant input has changed
 	fetch[QueryD](t, ctx, KeyD{}, -1, ch, expect.Expect(`
-internal.WillExecute{memosa_test.QueryC {}}
-internal.WillExecute{memosa_test.QueryD {}}
-internal.DidValidateMemoizedValue{memosa_test.QueryC {}}`))
+WillExecute{memosa_test.QueryC {}}
+WillExecute{memosa_test.QueryD {}}
+DidValidateMemoizedValue{memosa_test.QueryC {}}`))
 
 	memosa.Set[InputB](ctx, 15)
 
 	// however, we can short circuit before we execute D again because C's output has not changed
 	fetch[QueryD](t, ctx, KeyD{}, -1, ch, expect.Expect(`
-internal.WillExecute{memosa_test.QueryC {}}
-internal.DidValidateMemoizedValue{memosa_test.QueryD {}}`))
+WillExecute{memosa_test.QueryC {}}
+DidValidateMemoizedValue{memosa_test.QueryD {}}`))
 
 	memosa.Set[InputB](ctx, 16)
 	fetch[QueryD](t, ctx, KeyD{}, 42, ch, expect.Expect(`
-internal.WillExecute{memosa_test.QueryC {}}
-internal.WillExecute{memosa_test.QueryD {}}
-internal.DidValidateMemoizedValue{memosa_test.QueryC {}}`))
+WillExecute{memosa_test.QueryC {}}
+WillExecute{memosa_test.QueryD {}}
+DidValidateMemoizedValue{memosa_test.QueryC {}}`))
+}
+
+func TestQueryIsReexecutedEvenWhenInputsAreUpToDate(t *testing.T) {
+	// Even if a query `Q`'s inputs are all up to date, this is not sufficient
+	// to say that `Q` is up to date.
+	// It's possible that Q's dependencies have been reexecuted since the last input change, but not Q
+	ctx, ch := NewContext()
+	memosa.Set[InputA](ctx, 2)
+
+	// populate a memo for QueryB
+	fetch[QueryB](t, ctx, KeyB{X: 1}, 45, ch, expect.Expect(`
+WillExecute{memosa_test.QueryB {1}}
+WillExecute{memosa_test.QueryA {1}}`))
+
+	// update inputA to a different value
+	memosa.Set[InputA](ctx, 3)
+
+	// compute A directly
+	fetch[QueryA](t, ctx, KeyA{X: 1}, 4, ch, expect.Expect(`
+WillExecute{memosa_test.QueryA {1}}`))
+
+	// shuld be memoized
+	fetch[QueryA](t, ctx, KeyA{X: 1}, 4, ch, expect.Expect(`
+DidValidateMemoizedValue{memosa_test.QueryA {1}}`))
+
+	// QueryB must be reexecuted because QueryA has changed value since the last time QueryB was executed
+	fetch[QueryB](t, ctx, KeyB{X: 1}, 46, ch, expect.Expect(`
+WillExecute{memosa_test.QueryB {1}}
+DidValidateMemoizedValue{memosa_test.QueryA {1}}`))
+
+	// update InputA again
+	memosa.Set[InputA](ctx, 4)
+
+	// compute QueryA to keep it up to date
+	fetch[QueryA](t, ctx, KeyA{X: 1}, 5, ch, expect.Expect(`
+WillExecute{memosa_test.QueryA {1}}`))
+
+	// update some other input to bump the revision
+	memosa.Set[InputB](ctx, 12)
+
+	// B still needs to reexecute
+	fetch[QueryB](t, ctx, KeyB{X: 1}, 46, ch, expect.Expect(`
+DidValidateMemoizedValue{memosa_test.QueryB {1}}`))
 }
