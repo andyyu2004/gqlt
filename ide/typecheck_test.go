@@ -77,17 +77,17 @@ let [a, b] = [1, 2, 3]
 			`
 let {} = []
 let [a, b, c] = [1, 2, 3]
-let { a, b, c } = { a, b }
+let { a, b, c: d } = { a, b }
 let { a, a, b } = { a, b }
 `,
 			expect.Expect(`
 let {} = []
 #   ^^ cannot bind [] to an object pattern
 let [a, b, c] = [1, 2, 3]
-let { a, b, c } = { a, b }
-#   ^^^^^^^^^^^ field 'c' not found in object
+let { a, b, c: d } = { a, b }
+#           ^ field 'c' not found in object
 let { a, a, b } = { a, b }
-#   ^^^^^^^^^^^ field 'a' specified twice
+#        ^ field 'a' specified twice
 `),
 		},
 		{
