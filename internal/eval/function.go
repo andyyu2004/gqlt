@@ -107,11 +107,28 @@ func truthy(val any) bool {
 	}
 }
 
+// FIXME typecheck these?
 var builtinScope = &scope{
 	vars: map[string]any{
 		"print": function(func(args []any) (any, error) {
 			log.Println(args...)
 			return nil, nil
+		}),
+		"len": function(func(args []any) (any, error) {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("len takes exactly 1 argument")
+			}
+
+			switch arg := args[0].(type) {
+			case string:
+				return float64(len(arg)), nil
+			case []any:
+				return float64(len(arg)), nil
+			case map[string]any:
+				return float64(len(arg)), nil
+			default:
+				return nil, fmt.Errorf("len takes a string, array, or object")
+			}
 		}),
 	},
 }
