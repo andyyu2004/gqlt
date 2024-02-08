@@ -19,6 +19,7 @@ func (tcx *typechecker) bind(pat syn.Pat, ty Ty) {
 		tcx.bindObject(pat, ty)
 	case *syn.RestPat:
 	// This can actually be hit if we encounter an any type somewhere
+	// See 66abd8b2a896a9ed3ba6a50439e4639d789585e1
 	default:
 	}
 }
