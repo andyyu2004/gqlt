@@ -116,7 +116,7 @@ print(message)
 `,
 			expect.Expect(`
 let { errors: [{ message }] } = try query { foo }
-#                                           ^^^ field 'foo' of type '{ id: ID, string: String, int: Int, float: Float, boolean: Boolean }' must have a selection of subfields
+#                                           ^^^ field 'foo' of type '{ id: ID, any: Any, string: String, int: Int, float: Float, boolean: Boolean }' must have a selection of subfields
 print(errors)
 #     ^^^^^^ unbound name 'errors'
 print(message)

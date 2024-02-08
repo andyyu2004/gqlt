@@ -95,7 +95,7 @@ let { a, a, b } = { a, b }
 let x = query { foo }
 		#   ^`, expect.Expect(`
 let x = query { foo }
-#               ^^^ field 'foo' of type '{ id: ID, string: String, int: Int, float: Float, boolean: Boolean }' must have a selection of subfields
+#               ^^^ field 'foo' of type '{ id: ID, any: Any, string: String, int: Int, float: Float, boolean: Boolean }' must have a selection of subfields
 		#   ^`),
 		},
 
@@ -104,7 +104,7 @@ let x = query { foo }
 let x = query { foos }
 		#   ^`, expect.Expect(`
 let x = query { foos }
-#               ^^^^ field 'foos' of type '{ id: ID, string: String, int: Int, float: Float, boolean: Boolean }[]' must have a selection of subfields
+#               ^^^^ field 'foos' of type '{ id: ID, any: Any, string: String, int: Int, float: Float, boolean: Boolean }[]' must have a selection of subfields
 		#   ^`),
 		},
 
@@ -113,7 +113,7 @@ let x = query { foos }
 let x = query { nonexistent }
 `, expect.Expect(`
 let x = query { nonexistent }
-#               ^^^^^^^^^^^ field 'nonexistent' does not exist on type '{ any: Any, foo: Foo, foos: { id: ID, string: String, int: Int, float: Float, boolean: Boolean }[], int: Int, fail: Int, animals: AnimalQuery, recursive: Recursive, __schema: __Schema, __type: __Type }'
+#               ^^^^^^^^^^^ field 'nonexistent' does not exist on type '{ foo: Foo, foos: { id: ID, any: Any, string: String, int: Int, float: Float, boolean: Boolean }[], fail: Int, animals: AnimalQuery, recursive: Recursive, __schema: __Schema, __type: __Type }'
 `),
 		},
 		{

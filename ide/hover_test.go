@@ -281,7 +281,7 @@ let x = "hello" !~ "world"
 		},
 		{
 			"query scalar", `
-let x = query { int }
+let x = query { foo { int } }
 #   ^}`, expect.Expect(`number`),
 		},
 		{
@@ -330,8 +330,8 @@ let y = { a: false, ...x }
 		{
 			"object spread on any",
 			`
-let { ...xs } = query { any }
-#         ^
+let { ...xs } = query { foo { any } }
+#        ^
 			`,
 			expect.Expect(`no hover`),
 		},

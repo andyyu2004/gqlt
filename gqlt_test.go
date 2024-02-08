@@ -91,11 +91,8 @@ func (Any) UnmarshalGraphQL(input interface{}) error {
 	return nil
 }
 
-func (q *query) Any() Any {
-	return Any("any")
-}
-
 type Foo struct {
+	Any     Any
 	ID      graphql.ID
 	String  string
 	Int     int32
@@ -105,6 +102,7 @@ type Foo struct {
 
 func (q *query) Foo() Foo {
 	return Foo{
+		Any:     "any",
 		ID:      "1",
 		String:  "foo",
 		Int:     1,

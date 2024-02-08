@@ -2,10 +2,8 @@
 scalar Any
 
 type Query {
-  any: Any!
   foo: Foo!
   foos: [Foo!]!
-  int: Int!
   fail(yes: Boolean! = true): Int!
   animals: AnimalQuery!
   recursive: Recursive!
@@ -18,6 +16,7 @@ type Recursive {
 
 type Foo {
   id: ID!
+  any: Any!
   string: String!
   int: Int!
   float: Float!
