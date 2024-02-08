@@ -91,7 +91,7 @@ func buildSchema(config *Config, path string) (*syn.Schema, error) {
 	}
 
 	if schemaPaths == nil {
-		panic(0)
+		return nil, nil
 	}
 
 	sources := []*ast.Source{}
