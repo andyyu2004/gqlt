@@ -108,6 +108,12 @@ func (tcx *typechecker) inferSelectionSetType(ty Object, selectionSet syn.Select
 
 			outTy.Fields.Set(selection.Alias.Value, fieldTy)
 		case *syn.FragmentSpread:
+			fragment, ok := tcx.fragments[selection.Name.Value]
+			if !ok {
+				outTy.Fields.Set(selection.Name.Value, tcx.error(selection, fmt.Sprintf("fragment '%v' not defined", selection.Name.Value)))
+				continue
+			}
+			_ = fragment
 			return Any{}
 		case *syn.InlineFragment:
 			return Any{}

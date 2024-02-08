@@ -122,5 +122,15 @@ print(errors)
 print(message)
 `),
 		},
+
+		{
+			"undefined fragment", `
+query { foo { ...Foo } }
+`,
+			expect.Expect(`
+query { foo { ...Foo } }
+#                ^^^ fragment 'Foo' not defined
+`),
+		},
 	}...)
 }

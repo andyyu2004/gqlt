@@ -24,10 +24,11 @@ type Error struct {
 }
 
 type typechecker struct {
-	schema   *syn.Schema
-	info     Info
-	scope    map[string]scopeEntry
-	settings Settings
+	schema    *syn.Schema
+	info      Info
+	scope     map[string]scopeEntry
+	fragments map[string]*syn.FragmentDefinition
+	settings  Settings
 }
 
 type Settings interface {
@@ -45,9 +46,10 @@ type scopeEntry struct {
 // The schema may be nil, in which case the typechecker will typecheck all queries/mutations as any.
 func New(schema *syn.Schema, settings Settings) *typechecker {
 	return &typechecker{
-		schema:   schema,
-		settings: settings,
-		scope:    make(map[string]scopeEntry),
+		schema:    schema,
+		settings:  settings,
+		scope:     make(map[string]scopeEntry),
+		fragments: make(map[string]*syn.FragmentDefinition),
 		info: Info{
 			ExprTypes:    make(map[syn.Expr]Ty),
 			BindingTypes: make(map[*syn.NamePat]Ty),
@@ -73,24 +75,6 @@ func (tcx *typechecker) Check(ast syn.File) Info {
 	}
 
 	return tcx.info
-}
-
-func (tcx *typechecker) stmt(stmt syn.Stmt) {
-	switch stmt := stmt.(type) {
-	case *syn.ExprStmt:
-		tcx.expr(stmt.Expr)
-	case *syn.LetStmt:
-		tcx.let(stmt)
-	case *syn.AssertStmt:
-		ty := tcx.expr(stmt.Expr)
-		_ = ty
-		// allow any type to be asserted against for now
-	case *syn.SetStmt:
-		tcx.set(stmt)
-	case *syn.FragmentStmt, *syn.UseStmt:
-	default:
-		panic(fmt.Sprintf("missing case typechecker.stmt %T", stmt))
-	}
 }
 
 // Type error handling invariants:

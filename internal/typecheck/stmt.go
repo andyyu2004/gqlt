@@ -6,6 +6,34 @@ import (
 	"github.com/andyyu2004/gqlt/syn"
 )
 
+func (tcx *typechecker) stmt(stmt syn.Stmt) {
+	switch stmt := stmt.(type) {
+	case *syn.ExprStmt:
+		tcx.expr(stmt.Expr)
+	case *syn.LetStmt:
+		tcx.let(stmt)
+	case *syn.AssertStmt:
+		ty := tcx.expr(stmt.Expr)
+		_ = ty
+		// allow any type to be asserted against for now
+	case *syn.SetStmt:
+		tcx.set(stmt)
+	case *syn.FragmentStmt:
+		tcx.fragment(stmt)
+	case *syn.UseStmt:
+	default:
+		panic(fmt.Sprintf("missing case typechecker.stmt %T", stmt))
+	}
+}
+
+func (tcx *typechecker) fragment(stmt *syn.FragmentStmt) {
+	if _, ok := tcx.fragments[stmt.Fragment.Name.Value]; ok {
+		tcx.error(stmt, fmt.Sprintf("fragment %q already defined", stmt.Fragment.Name.Value))
+		return
+	}
+	tcx.fragments[stmt.Fragment.Name.Value] = stmt.Fragment
+}
+
 func (tcx *typechecker) let(stmt *syn.LetStmt) {
 	ty := tcx.expr(stmt.Expr)
 	tcx.bind(stmt.Pat, ty)
