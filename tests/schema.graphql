@@ -1,4 +1,8 @@
+# A scalar easy way to introduce an `any` type for testing
+scalar Any
+
 type Query {
+  any: Any!
   foo: Foo!
   foos: [Foo!]!
   int: Int!

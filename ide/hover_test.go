@@ -326,6 +326,15 @@ let x = { a: 1, b: "s" }
 let y = { a: false, ...x }
     ^`, expect.Expect(`{ a: bool, b: string }`),
 		},
+
+		{
+			"object spread on any",
+			`
+let { ...xs } = query { any }
+#         ^
+			`,
+			expect.Expect(`no hover`),
+		},
 	}
 
 	for _, test := range tests {

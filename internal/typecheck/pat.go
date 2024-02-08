@@ -18,7 +18,7 @@ func (tcx *typechecker) bind(pat syn.Pat, ty Ty) {
 	case *syn.ObjectPat:
 		tcx.bindObject(pat, ty)
 	case *syn.RestPat:
-		panic("rest pattern should have special handling in list, tuple and object cases")
+	// This can actually be hit if we encounter an any type somewhere
 	default:
 	}
 }

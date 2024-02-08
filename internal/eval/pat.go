@@ -47,7 +47,7 @@ func bindPat(binder binder, pat syn.Pat, val any) error {
 		return nil
 
 	case *syn.RestPat:
-		panic("rest pattern should have special handling in list and object cases")
+		panic("rest pattern should have special handling in list and object cases (eval)")
 
 	default:
 		panic(fmt.Sprintf("missing pattern bind case: %T", pat))

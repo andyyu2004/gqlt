@@ -81,6 +81,20 @@ func (q *query) Int() int32 {
 	return 1
 }
 
+type Any string
+
+func (Any) ImplementsGraphQLType(name string) bool {
+	return name == "Any"
+}
+
+func (Any) UnmarshalGraphQL(input interface{}) error {
+	return nil
+}
+
+func (q *query) Any() Any {
+	return Any("any")
+}
+
 type Foo struct {
 	ID      graphql.ID
 	String  string
