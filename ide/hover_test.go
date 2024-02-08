@@ -335,6 +335,30 @@ let { ...xs } = query { foo { any } }
 			`,
 			expect.Expect(`no hover`),
 		},
+
+		{
+			"fragment", `
+fragment Foo on Foo {
+	id
+	any
+}
+
+let x = query { foo { ...Foo } fail }
+#   ^`,
+			expect.Expect(`{ foo: { id: string, any: any }, fail: number }`),
+		},
+
+		{
+			"fragment flatten", `
+fragment Foo on Foo {
+	id
+	any
+}
+
+let x = query { foo { ...Foo } }
+#   ^`,
+			expect.Expect(`{ id: string, any: any }`),
+		},
 	}
 
 	for _, test := range tests {
