@@ -78,5 +78,49 @@ func TestDiagnostics(t *testing.T) {
 			expect.Expect(`let x == 5
 #     ^ expected '=', found '=='`),
 		},
+
+		{
+			"object pattern alias hides original name", `
+let { x: y } = { x: 5 }
+print(x)
+`,
+			expect.Expect(`
+let { x: y } = { x: 5 }
+print(x)
+#     ^ unbound name 'x'
+`),
+		},
+
+		{
+			"object pattern nested pattern names", `
+let { x: { y: z } } = { x: { y: 1 } }
+print(x)
+print(y)
+print(z)
+`,
+			expect.Expect(`
+let { x: { y: z } } = { x: { y: 1 } }
+print(x)
+#     ^ unbound name 'x'
+print(y)
+#     ^ unbound name 'y'
+print(z)
+`),
+		},
+
+		{
+			"object pattern nested pattern names", `
+let { errors: [{ message }] } = try query { foo }
+print(errors)
+print(message)
+`,
+			expect.Expect(`
+let { errors: [{ message }] } = try query { foo }
+#                                           ^^^ field 'foo' of type '{ id: ID, string: String, int: Int, float: Float, boolean: Boolean }' must have a selection of subfields
+print(errors)
+#     ^^^^^^ unbound name 'errors'
+print(message)
+`),
+		},
 	}...)
 }
