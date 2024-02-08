@@ -120,6 +120,8 @@ var builtinScope = &scope{
 			}
 
 			switch arg := args[0].(type) {
+			case nil:
+				return float64(0), nil
 			case string:
 				return float64(len(arg)), nil
 			case []any:
