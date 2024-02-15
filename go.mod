@@ -1,4 +1,4 @@
-module github.com/andyyu2004/gqlt
+module github.com/movio/gqlt
 
 go 1.21.4
 
