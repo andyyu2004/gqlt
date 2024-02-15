@@ -2,9 +2,9 @@ package parser
 
 import (
 	//nolint:revive
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/gqlparser/lexer"
-	. "github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/gqlparser/lexer"
+	. "github.com/movio/gqlt/syn"
 )
 
 func ParseSchemas(inputs ...*ast.Source) (*SchemaDocument, error) {

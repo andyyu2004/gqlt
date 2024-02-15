@@ -4,7 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/json"
 
-	"github.com/andyyu2004/gqlt/memosa/lib"
+	"github.com/movio/gqlt/memosa/lib"
 )
 
 const hashSize = 16

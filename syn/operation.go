@@ -3,9 +3,9 @@ package syn
 import (
 	"io"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/gqlparser/lexer"
-	"github.com/andyyu2004/gqlt/internal/lex"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/gqlparser/lexer"
+	"github.com/movio/gqlt/internal/lex"
 )
 
 type Operation string

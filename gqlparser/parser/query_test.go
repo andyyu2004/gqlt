@@ -5,10 +5,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
-	"github.com/andyyu2004/gqlt/gqlparser/parser/testrunner"
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/gqlparser/gqlerror"
+	"github.com/movio/gqlt/gqlparser/parser/testrunner"
+	"github.com/movio/gqlt/syn"
 )
 
 func TestQueryDocument(t *testing.T) {

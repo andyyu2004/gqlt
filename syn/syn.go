@@ -5,13 +5,13 @@ import (
 	"io"
 	"strings"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/gqlparser/lexer"
-	"github.com/andyyu2004/gqlt/internal/iterator"
-	"github.com/andyyu2004/gqlt/internal/lex"
-	"github.com/andyyu2004/gqlt/internal/slice"
-	"github.com/andyyu2004/gqlt/memosa/lib"
-	"github.com/andyyu2004/gqlt/memosa/stack"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/gqlparser/lexer"
+	"github.com/movio/gqlt/internal/iterator"
+	"github.com/movio/gqlt/internal/lex"
+	"github.com/movio/gqlt/internal/slice"
+	"github.com/movio/gqlt/memosa/lib"
+	"github.com/movio/gqlt/memosa/stack"
 )
 
 type Token = lex.Token

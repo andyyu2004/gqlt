@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/andyyu2004/expect-test"
-	"github.com/andyyu2004/gqlt/ide"
-	"github.com/andyyu2004/gqlt/ide/fixture"
+	"github.com/movio/gqlt/ide"
+	"github.com/movio/gqlt/ide/fixture"
 	"github.com/stretchr/testify/require"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )

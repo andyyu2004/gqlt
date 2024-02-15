@@ -1,8 +1,8 @@
 package ide
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/memosa/lib"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/memosa/lib"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 

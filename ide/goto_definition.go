@@ -1,9 +1,9 @@
 package ide
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/internal/typecheck"
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/internal/typecheck"
+	"github.com/movio/gqlt/syn"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 

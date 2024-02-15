@@ -1,8 +1,8 @@
 package ide
 
 import (
-	"github.com/andyyu2004/gqlt/memosa"
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/memosa"
+	"github.com/movio/gqlt/syn"
 )
 
 type sourcesInputQuery struct{}

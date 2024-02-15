@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/syn"
 )
 
 func (e *Executor) stmt(ctx context.Context, ecx *executionContext, stmt syn.Stmt) error {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	//nolint:revive // Validator rules each use dot imports for convenience.
-	. "github.com/andyyu2004/gqlt/gqlparser/validator"
-	"github.com/andyyu2004/gqlt/syn"
+	. "github.com/movio/gqlt/gqlparser/validator"
+	"github.com/movio/gqlt/syn"
 )
 
 func init() {

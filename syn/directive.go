@@ -1,6 +1,6 @@
 package syn
 
-import "github.com/andyyu2004/gqlt/gqlparser/ast"
+import "github.com/movio/gqlt/gqlparser/ast"
 
 type DirectiveLocation string
 

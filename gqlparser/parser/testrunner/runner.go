@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/andreyvit/diff"
-	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
+	"github.com/movio/gqlt/gqlparser/gqlerror"
 	"gopkg.in/yaml.v2"
 )
 

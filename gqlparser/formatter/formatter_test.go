@@ -9,10 +9,10 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"github.com/andyyu2004/gqlt/gqlparser"
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/gqlparser/formatter"
-	"github.com/andyyu2004/gqlt/gqlparser/parser"
+	"github.com/movio/gqlt/gqlparser"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/gqlparser/formatter"
+	"github.com/movio/gqlt/gqlparser/parser"
 	"github.com/stretchr/testify/assert"
 )
 

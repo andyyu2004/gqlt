@@ -3,7 +3,7 @@ package typecheck
 import (
 	"fmt"
 
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/syn"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 

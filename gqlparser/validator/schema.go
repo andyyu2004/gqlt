@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	//nolint:revive
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
-	"github.com/andyyu2004/gqlt/gqlparser/parser"
-	. "github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/gqlparser/gqlerror"
+	"github.com/movio/gqlt/gqlparser/parser"
+	. "github.com/movio/gqlt/syn"
 )
 
 func LoadSchema(inputs ...*ast.Source) (*Schema, error) {

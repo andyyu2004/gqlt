@@ -3,7 +3,7 @@ package typecheck
 import (
 	"fmt"
 
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/syn"
 )
 
 func (tcx *typechecker) stmt(stmt syn.Stmt) {

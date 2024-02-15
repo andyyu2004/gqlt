@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/andyyu2004/expect-test"
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/ide"
-	"github.com/andyyu2004/gqlt/ide/mapper"
-	"github.com/andyyu2004/gqlt/internal/annotate"
-	"github.com/andyyu2004/gqlt/internal/slice"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/ide"
+	"github.com/movio/gqlt/ide/mapper"
+	"github.com/movio/gqlt/internal/annotate"
+	"github.com/movio/gqlt/internal/slice"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 

@@ -4,11 +4,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/syn"
 
 	//nolint:revive // Validator rules each use dot imports for convenience.
-	. "github.com/andyyu2004/gqlt/gqlparser/validator"
+	. "github.com/movio/gqlt/gqlparser/validator"
 )
 
 func init() {

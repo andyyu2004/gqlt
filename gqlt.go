@@ -1,6 +1,6 @@
 package gqlt
 
-import "github.com/andyyu2004/gqlt/internal/eval"
+import "github.com/movio/gqlt/internal/eval"
 
 var (
 	New       = eval.New

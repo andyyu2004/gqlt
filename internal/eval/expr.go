@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/andyyu2004/gqlt/internal/lex"
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/internal/lex"
+	"github.com/movio/gqlt/syn"
 )
 
 // keep in sync with typecheck/expr.go

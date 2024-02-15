@@ -3,8 +3,8 @@ package main
 import (
 	"log/slog"
 
-	"github.com/andyyu2004/gqlt/ide"
-	"github.com/andyyu2004/gqlt/lsp"
+	"github.com/movio/gqlt/ide"
+	"github.com/movio/gqlt/lsp"
 )
 
 func main() {

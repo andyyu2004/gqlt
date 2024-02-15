@@ -3,9 +3,9 @@ package validator
 import (
 	"testing"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/gqlparser/parser"
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/gqlparser/parser"
+	"github.com/movio/gqlt/syn"
 	"github.com/stretchr/testify/require"
 )
 

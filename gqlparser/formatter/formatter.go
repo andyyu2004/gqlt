@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/syn"
 )
 
 type Formatter interface {
@@ -635,7 +635,7 @@ func (f *formatter) FormatVariableDefinition(def *syn.VariableDefinition) {
 		f.FormatValue(def.DefaultValue)
 	}
 
-	// TODO https://github.com/andyyu2004/gqlt/gqlparser/issues/102
+	// TODO https://github.com/movio/gqlt/gqlparser/issues/102
 	//   VariableDefinition : Variable : Type DefaultValue? Directives[Const]?
 }
 

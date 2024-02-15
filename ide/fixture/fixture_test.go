@@ -3,7 +3,7 @@ package fixture_test
 import (
 	"testing"
 
-	"github.com/andyyu2004/gqlt/ide/fixture"
+	"github.com/movio/gqlt/ide/fixture"
 	"github.com/stretchr/testify/require"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )

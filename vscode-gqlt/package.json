@@ -6,7 +6,7 @@
   "publisher": "andyyu2004",
   "icon": "assets/graphql.png",
   "repository": {
-    "url": "https://github.com/andyyu2004/gqlt",
+    "url": "https://github.com/movio/gqlt",
     "type": "git"
   },
   "engines": {

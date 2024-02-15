@@ -1,8 +1,8 @@
 package syn
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/internal/slice"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/internal/slice"
 )
 
 func NewCursor(node Node) *Cursor[Node] {

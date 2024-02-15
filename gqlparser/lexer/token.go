@@ -3,7 +3,7 @@ package lexer
 import (
 	"strconv"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/gqlparser/ast"
 )
 
 const (

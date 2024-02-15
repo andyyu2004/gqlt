@@ -3,10 +3,10 @@ package parser
 import (
 	"strconv"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
-	"github.com/andyyu2004/gqlt/gqlparser/lexer"
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/gqlparser/gqlerror"
+	"github.com/movio/gqlt/gqlparser/lexer"
+	"github.com/movio/gqlt/syn"
 )
 
 // Commas exist in the lexer for use by the gqlt parser.

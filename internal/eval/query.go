@@ -5,11 +5,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/andyyu2004/gqlt/gqlparser/formatter"
-	"github.com/andyyu2004/gqlt/gqlparser/validator"
-	"github.com/andyyu2004/gqlt/internal/slice"
-	"github.com/andyyu2004/gqlt/memosa/lib"
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/gqlparser/formatter"
+	"github.com/movio/gqlt/gqlparser/validator"
+	"github.com/movio/gqlt/internal/slice"
+	"github.com/movio/gqlt/memosa/lib"
+	"github.com/movio/gqlt/syn"
 )
 
 func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.QueryExpr) (any, error) {

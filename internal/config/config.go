@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/andyyu2004/gqlt/gqlparser"
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/gqlparser"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/syn"
 	"github.com/bmatcuk/doublestar/v4"
 	"gopkg.in/yaml.v2"
 )

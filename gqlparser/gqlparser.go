@@ -1,14 +1,14 @@
 package gqlparser
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
-	"github.com/andyyu2004/gqlt/gqlparser/parser"
-	"github.com/andyyu2004/gqlt/gqlparser/validator"
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/gqlparser/gqlerror"
+	"github.com/movio/gqlt/gqlparser/parser"
+	"github.com/movio/gqlt/gqlparser/validator"
+	"github.com/movio/gqlt/syn"
 
 	// Blank import is used to load up the validator rules.
-	_ "github.com/andyyu2004/gqlt/gqlparser/validator/rules"
+	_ "github.com/movio/gqlt/gqlparser/validator/rules"
 )
 
 func LoadSchema(str ...*ast.Source) (*syn.Schema, error) {

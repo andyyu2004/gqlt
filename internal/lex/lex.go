@@ -1,13 +1,13 @@
-// This package is a small wrapper around "github.com/andyyu2004/gqlt/gqlparser/lexer" with an extended token set
+// This package is a small wrapper around "github.com/movio/gqlt/gqlparser/lexer" with an extended token set
 // and a slightly altered interface.
 package lex
 
 import (
 	"strconv"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
-	"github.com/andyyu2004/gqlt/gqlparser/lexer"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/gqlparser/gqlerror"
+	"github.com/movio/gqlt/gqlparser/lexer"
 )
 
 type Lexer struct {

@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/internal/iterator"
-	"github.com/andyyu2004/gqlt/internal/lex"
-	"github.com/andyyu2004/gqlt/memosa/lib"
-	"github.com/andyyu2004/gqlt/memosa/stack"
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/internal/iterator"
+	"github.com/movio/gqlt/internal/lex"
+	"github.com/movio/gqlt/memosa/lib"
+	"github.com/movio/gqlt/memosa/stack"
+	"github.com/movio/gqlt/syn"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 

@@ -4,9 +4,9 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/andyyu2004/gqlt/memosa/internal/hash"
-	"github.com/andyyu2004/gqlt/memosa/lib"
-	"github.com/andyyu2004/gqlt/memosa/stack"
+	"github.com/movio/gqlt/memosa/internal/hash"
+	"github.com/movio/gqlt/memosa/lib"
+	"github.com/movio/gqlt/memosa/stack"
 
 	"github.com/hashicorp/golang-lru/v2/simplelru"
 )

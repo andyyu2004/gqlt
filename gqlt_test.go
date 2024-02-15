@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/andyyu2004/gqlt"
+	"github.com/movio/gqlt"
 
 	_ "embed"
 

@@ -3,9 +3,9 @@ package ide_test
 import (
 	"testing"
 
-	"github.com/andyyu2004/gqlt/ide"
-	"github.com/andyyu2004/gqlt/ide/fixture"
-	"github.com/andyyu2004/gqlt/internal/slice"
+	"github.com/movio/gqlt/ide"
+	"github.com/movio/gqlt/ide/fixture"
+	"github.com/movio/gqlt/internal/slice"
 	"github.com/stretchr/testify/require"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )

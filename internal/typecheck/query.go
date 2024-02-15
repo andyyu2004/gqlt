@@ -3,10 +3,10 @@ package typecheck
 import (
 	"fmt"
 
-	"github.com/andyyu2004/gqlt/internal/lex"
-	"github.com/andyyu2004/gqlt/internal/slice"
-	"github.com/andyyu2004/gqlt/memosa/lib"
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/internal/lex"
+	"github.com/movio/gqlt/internal/slice"
+	"github.com/movio/gqlt/memosa/lib"
+	"github.com/movio/gqlt/syn"
 
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )

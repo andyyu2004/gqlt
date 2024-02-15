@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/andyyu2004/gqlt"
-	"github.com/andyyu2004/gqlt/internal/annotate"
-	"github.com/andyyu2004/gqlt/internal/parser"
+	"github.com/movio/gqlt"
+	"github.com/movio/gqlt/internal/annotate"
+	"github.com/movio/gqlt/internal/parser"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/gqlparser/ast"
 	"github.com/gkampitakis/go-snaps/snaps"
 	"github.com/stretchr/testify/require"
 )

@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/gqlparser/ast"
 )
 
 type Comment struct {

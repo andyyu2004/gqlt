@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/andyyu2004/gqlt/gqlparser/gqlerror"
+	"github.com/movio/gqlt/gqlparser/gqlerror"
 	"github.com/stretchr/testify/require"
 )
 

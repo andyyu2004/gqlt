@@ -3,9 +3,9 @@ package lex_test
 import (
 	"testing"
 
-	"github.com/andyyu2004/gqlt/internal/lex"
+	"github.com/movio/gqlt/internal/lex"
 
-	"github.com/andyyu2004/gqlt/gqlparser/lexer"
+	"github.com/movio/gqlt/gqlparser/lexer"
 	"github.com/stretchr/testify/require"
 )
 

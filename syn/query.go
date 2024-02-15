@@ -1,6 +1,6 @@
 package syn
 
-import "github.com/andyyu2004/gqlt/gqlparser/lexer"
+import "github.com/movio/gqlt/gqlparser/lexer"
 
 type Transform interface {
 	// Create a new operation definition that is a transformation of the given operation.

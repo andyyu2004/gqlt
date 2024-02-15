@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/andyyu2004/expect-test"
-	"github.com/andyyu2004/gqlt/ide"
+	"github.com/movio/gqlt/ide"
 )
 
 func TestIDE(t *testing.T) {

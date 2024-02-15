@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/andyyu2004/expect-test"
-	"github.com/andyyu2004/gqlt/memosa"
+	"github.com/movio/gqlt/memosa"
 
 	"github.com/stretchr/testify/require"
 )

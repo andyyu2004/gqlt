@@ -1,6 +1,6 @@
 package internal
 
-import "github.com/andyyu2004/gqlt/memosa/lib"
+import "github.com/movio/gqlt/memosa/lib"
 
 type InputKey struct{}
 

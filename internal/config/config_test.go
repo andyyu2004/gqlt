@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/andyyu2004/gqlt/internal/config"
+	"github.com/movio/gqlt/internal/config"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 )

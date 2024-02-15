@@ -1,10 +1,10 @@
 package ide
 
 import (
-	"github.com/andyyu2004/gqlt/gqlparser/ast"
-	"github.com/andyyu2004/gqlt/internal/parser"
-	"github.com/andyyu2004/gqlt/memosa"
-	"github.com/andyyu2004/gqlt/syn"
+	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/internal/parser"
+	"github.com/movio/gqlt/memosa"
+	"github.com/movio/gqlt/syn"
 )
 
 type (
