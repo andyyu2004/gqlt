@@ -1,6 +1,8 @@
 module github.com/movio/gqlt
 
-go 1.21.4
+go 1.21.0
+
+toolchain go1.22.0
 
 require (
 	github.com/agnivade/levenshtein v1.1.1
