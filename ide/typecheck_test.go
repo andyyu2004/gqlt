@@ -113,7 +113,7 @@ let x = query { foos }
 let x = query { nonexistent }
 `, expect.Expect(`
 let x = query { nonexistent }
-#               ^^^^^^^^^^^ field 'nonexistent' does not exist on type '{ foo: Foo, foos: { id: ID, any: Any, string: String, int: Int, float: Float, boolean: Boolean }[], fail: Int, animals: AnimalQuery, recursive: Recursive, __schema: __Schema, __type: __Type }'
+#               ^^^^^^^^^^^ field 'nonexistent' does not exist on type '{ foo: Foo, foos: { id: ID, any: Any, string: String, int: Int, float: Float, boolean: Boolean }[], fail: Int, animals: AnimalQuery, recursive: Recursive, unions: Unions, __schema: __Schema, __type: __Type }'
 `),
 		},
 		{

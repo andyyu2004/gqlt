@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	"github.com/movio/gqlt"
+	"github.com/movio/gqlt/gqlparser"
+	"github.com/movio/gqlt/gqlparser/ast"
 
 	_ "embed"
 
@@ -36,6 +38,7 @@ func TestGqlt(t *testing.T) {
 		},
 	}
 
+	gqlparserSchema := gqlparser.MustLoadSchema(&ast.Source{Name: "schema.graphql", Input: schema})
 	schema := graphql.MustParseSchema(schema, q, graphql.UseFieldResolvers())
 	handler := &relay.Handler{Schema: schema}
 
@@ -50,7 +53,7 @@ func TestGqlt(t *testing.T) {
 			q.counter.Store(0)
 			return context.Background(), client
 		})
-		gqlt.New().Test(t, testpath, factory, gqlt.TypeCheck(true))
+		gqlt.New().Test(t, testpath, factory, gqlt.TypeCheck(true), gqlt.WithSchema(gqlparserSchema))
 	}
 }
 
@@ -58,12 +61,13 @@ func TestGqlt(t *testing.T) {
 // Put whatever in `scratch.gqlt` and debug this test
 func TestScratch(t *testing.T) {
 	q := &query{}
+	gqlparserSchema := gqlparser.MustLoadSchema(&ast.Source{Name: "schema.graphql", Input: schema})
 	schema := graphql.MustParseSchema(schema, q, graphql.UseFieldResolvers())
 	client := gqlt.GraphQLGophersClient{Schema: schema}
 	factory := gqlt.ClientFactoryFunc(func(testing.TB) (context.Context, gqlt.Client) {
 		return context.Background(), client
 	})
-	gqlt.New().Test(t, testpath, factory, gqlt.TypeCheck(true), gqlt.WithGlob("scratch.gqlt"))
+	gqlt.New().Test(t, testpath, factory, gqlt.TypeCheck(true), gqlt.WithGlob("**/scratch.gqlt"), gqlt.WithSchema(gqlparserSchema))
 }
 
 type AnimalFilter struct {
@@ -157,6 +161,34 @@ func (q *query) Cats() catQuery         { return catQuery{q} }
 func (q *query) AllKinds() []AnimalKind { return []AnimalKind{dog{}.Kind(), cat{}.Kind()} }
 func (q *query) KindToString(args struct{ Kind AnimalKind }) string {
 	return strings.ToLower(string(args.Kind))
+}
+
+func (q *query) Unions() unions { return unions{q} }
+
+type unions struct{ *query }
+
+type ab struct {
+	any
+}
+
+func (ab ab) ToA() (*a, bool) { a, ok := ab.any.(a); return &a, ok }
+func (ab ab) ToB() (*b, bool) { b, ok := ab.any.(b); return &b, ok }
+
+type a struct {
+	ID graphql.ID
+	A  int32
+}
+
+type b struct {
+	ID graphql.ID
+	B  bool
+}
+
+func (u unions) AB(args struct{ Pick bool }) ab {
+	if args.Pick {
+		return ab{b{"2", true}}
+	}
+	return ab{a{"1", 42}}
 }
 
 type Animal struct {

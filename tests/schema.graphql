@@ -7,6 +7,23 @@ type Query {
   fail(yes: Boolean! = true): Int!
   animals: AnimalQuery!
   recursive: Recursive!
+  unions: Unions!
+}
+
+type Unions {
+  ab(pick: Boolean = false): AB!
+}
+
+union AB = A | B
+
+type A {
+  id: ID!
+  a: Int!
+}
+
+type B {
+  id: ID!
+  b: Boolean!
 }
 
 type Recursive {

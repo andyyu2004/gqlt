@@ -1,4 +1,17 @@
-assert try query { fail(yes: false) } == { data: 0, errors: null }
-
-let x = query { recursive { id next { id next { id } } } }
-let y = 4 + 2
+assert query {
+	unions {
+		ab {
+			... on A {
+                id
+                a
+            }
+			... on B {
+                id
+                b
+            }
+		}
+	}
+} matches {
+    id: "1",
+    a: 42
+}

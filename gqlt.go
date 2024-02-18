@@ -3,11 +3,12 @@ package gqlt
 import "github.com/movio/gqlt/internal/eval"
 
 var (
-	New       = eval.New
-	Discover  = eval.Discover
-	Ext       = eval.Ext
-	WithGlob  = eval.WithGlob
-	TypeCheck = eval.TypeCheck
+	New        = eval.New
+	Discover   = eval.Discover
+	Ext        = eval.Ext
+	WithGlob   = eval.WithGlob
+	TypeCheck  = eval.TypeCheck
+	WithSchema = eval.WithSchema
 )
 
 type (

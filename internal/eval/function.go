@@ -110,6 +110,13 @@ func truthy(val any) bool {
 // FIXME typecheck these?
 var builtinScope = &scope{
 	vars: map[string]any{
+		"dbg": function(func(args []any) (any, error) {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("dbg takes exactly 1 argument")
+			}
+			log.Println(args...)
+			return args[0], nil
+		}),
 		"print": function(func(args []any) (any, error) {
 			log.Println(args...)
 			return nil, nil

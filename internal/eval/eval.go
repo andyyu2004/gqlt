@@ -8,12 +8,12 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/movio/gqlt/gqlparser/ast"
 	"github.com/movio/gqlt/internal/parser"
 	"github.com/movio/gqlt/internal/typecheck"
 	"github.com/movio/gqlt/memosa/lib"
 	"github.com/movio/gqlt/syn"
-	"github.com/bmatcuk/doublestar/v4"
 )
 
 type Error struct {
@@ -45,9 +45,17 @@ func TypeCheck(b bool) Opt {
 	}
 }
 
+func WithSchema(schema *syn.Schema) Opt {
+	return func(c *runConfig) {
+		c.schema = schema
+	}
+}
+
 type runConfig struct {
 	// Filter is a glob pattern (with support for **) that is matched against each test file path.
-	glob      string
+	glob string
+	// The schema to typecheck against (optional, but will do significantly reduced typechecking)
+	schema    *syn.Schema
 	typecheck bool
 }
 
@@ -237,9 +245,7 @@ func (e *Executor) RunFile(ctx context.Context, client Client, uri string, opts 
 		return err
 	}
 
-	// No need to pass as schema here for detailed typechecking (the typechecker is aimed at providing errors during editirng)
-	// We can just fail at runtime.
-	tcx := typecheck.New(nil, &Settings{})
+	tcx := typecheck.New(runConfig.schema, &Settings{})
 	info := tcx.Check(file)
 	if len(info.Errors) > 0 && runConfig.typecheck {
 		return info.Errors

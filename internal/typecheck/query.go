@@ -81,6 +81,7 @@ func (tcx *typechecker) inferSelectionSetType(ty Object, selectionSet syn.Select
 			}
 
 			switch f := fieldTy.(type) {
+			case Any:
 			case Object:
 				if len(selection.SelectionSet) == 0 {
 					fieldTy = tcx.error(selection, fmt.Sprintf("field '%s' of type '%v' must have a selection of subfields", selection.Name.Value, f))

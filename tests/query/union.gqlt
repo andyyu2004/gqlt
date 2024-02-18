@@ -1,0 +1,37 @@
+assert query {
+	unions {
+		ab {
+			... on A {
+                id
+                a
+            }
+			... on B {
+                id
+                b
+            }
+		}
+	}
+} matches {
+    id: "1",
+    a: 42
+}
+
+
+assert query {
+	unions {
+		ab(pick: true) {
+			... on A {
+                id
+                a
+            }
+			... on B {
+                id
+                b
+            }
+		}
+	}
+} matches {
+    id: "2",
+    b: true
+}
+
