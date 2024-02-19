@@ -15,6 +15,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/tliron/glsp v0.2.1
 	github.com/wk8/go-ordered-map/v2 v2.1.8
+	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a
 	gopkg.in/yaml.v2 v2.4.0
 )
 

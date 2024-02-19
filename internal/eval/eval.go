@@ -117,20 +117,35 @@ type scope struct {
 	vars   map[string]any
 	// defined fragments that can be referenced by queries
 	// map from fragment name to raw fragment string
-	fragments map[string]string
+	fragments map[string]*syn.FragmentStmt
 }
 
 func (s *scope) bind(name string, val any) {
 	s.vars[name] = val
 }
 
-func (s *scope) LookupFragment(name string) (string, bool) {
+func (s *scope) LookupFragment(name string) (*syn.FragmentStmt, bool) {
 	frag, ok := s.fragments[name]
 	if !ok && s.parent != nil {
 		return s.parent.LookupFragment(name)
 	}
 
 	return frag, ok
+}
+
+// All fragment definitions in scope
+func (s *scope) fragmentDefinitions() map[string]*syn.FragmentDefinition {
+	fragments := map[string]*syn.FragmentDefinition{}
+	if s.parent != nil {
+		fragments = s.parent.fragmentDefinitions()
+	}
+
+	// overwrite parent fragments with local ones
+	for name, frag := range s.fragments {
+		fragments[name] = frag.Fragment
+	}
+
+	return fragments
 }
 
 func (s *scope) Lookup(name string) (any, bool) {
@@ -261,7 +276,7 @@ func (e *Executor) RunFile(ctx context.Context, client Client, uri string, opts 
 		scope: &scope{
 			parent:    builtinScope,
 			vars:      map[string]any{},
-			fragments: map[string]string{},
+			fragments: map[string]*syn.FragmentStmt{},
 		},
 	}
 

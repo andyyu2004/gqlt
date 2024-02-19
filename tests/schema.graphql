@@ -78,6 +78,7 @@ type Dog implements Animal {
   id: ID!
   name: String!
   kind: AnimalKind!
+  bark: String!
 }
 
 type CatQuery {
@@ -90,4 +91,5 @@ type Cat implements Animal {
   id: ID!
   name: String!
   kind: AnimalKind!
+  meow: String!
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/movio/gqlt/internal/slice"
 	"github.com/movio/gqlt/memosa/lib"
 	"github.com/movio/gqlt/syn"
+	"golang.org/x/exp/maps"
 )
 
 func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.QueryExpr) (any, error) {
@@ -27,7 +28,12 @@ func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.Q
 		usedFragments[fragmentSpread.Name.Value] = struct{}{}
 	})
 
-	validator.Walk(&syn.Schema{}, &syn.QueryDocument{Operations: []*syn.OperationDefinition{expr.Operation}}, observers)
+	fragments := maps.Values(ecx.scope.fragmentDefinitions())
+
+	validator.Walk(&syn.Schema{}, &syn.QueryDocument{
+		Operations: []*syn.OperationDefinition{expr.Operation},
+		Fragments:  fragments,
+	}, observers)
 
 	buf := formatOperation(operation)
 
@@ -36,8 +42,9 @@ func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.Q
 		// if fragment doesn't exist, we just ignore it. Will be caught by better validation later
 		if ok {
 			buf.WriteString("\n\n")
-			buf.WriteString(fragment)
+			buf.WriteString(fragment.RawFragment)
 		}
+
 	}
 
 	// Pass our local variables directly also as graphql variables

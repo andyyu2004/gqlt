@@ -88,6 +88,6 @@ func (e *Executor) fragment(ctx context.Context, ecx *executionContext, stmt *sy
 		return errorf(stmt, "fragment %s already defined", stmt.Fragment.Name.Value)
 	}
 
-	ecx.scope.fragments[stmt.Fragment.Name.Value] = stmt.RawFragment
+	ecx.scope.fragments[stmt.Fragment.Name.Value] = stmt
 	return nil
 }

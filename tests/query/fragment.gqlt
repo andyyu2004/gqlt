@@ -1,0 +1,25 @@
+fragment Dog on Dog {
+    bark
+}
+
+fragment Cat on Cat {
+    meow
+}
+
+fragment Animal on Animal {
+    id
+    ... on Dog {
+        ...Dog
+    }
+    ... on Cat {
+        ...Cat
+    }
+}
+
+query {
+    animals {
+        search {
+            ...Animal
+        }
+    }
+}

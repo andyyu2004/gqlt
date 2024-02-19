@@ -262,6 +262,7 @@ type dog struct {
 func (d dog) ID() graphql.ID   { return d.id }
 func (d dog) Kind() AnimalKind { return "DOG" }
 func (d dog) Name() string     { return d.name }
+func (d dog) Bark() string     { return "woof" }
 
 type AnimalKind string
 
@@ -293,3 +294,4 @@ func (q catQuery) Find(args struct{ Name string }) *cat {
 func (c cat) ID() graphql.ID   { return c.id }
 func (c cat) Kind() AnimalKind { return "CAT" }
 func (c cat) Name() string     { return c.name }
+func (c cat) Meow() string     { return "meow" }
