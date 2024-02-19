@@ -27,11 +27,11 @@ func (tcx *typechecker) stmt(stmt syn.Stmt) {
 }
 
 func (tcx *typechecker) fragment(stmt *syn.FragmentStmt) {
-	if _, ok := tcx.fragments[stmt.Fragment.Name.Value]; ok {
-		tcx.error(stmt, fmt.Sprintf("fragment %q already defined", stmt.Fragment.Name.Value))
+	if _, ok := tcx.fragments[stmt.Definition.Name.Value]; ok {
+		tcx.error(stmt, fmt.Sprintf("fragment %q already defined", stmt.Definition.Name.Value))
 		return
 	}
-	tcx.fragments[stmt.Fragment.Name.Value] = stmt.Fragment
+	tcx.fragments[stmt.Definition.Name.Value] = stmt.Definition
 }
 
 func (tcx *typechecker) let(stmt *syn.LetStmt) {

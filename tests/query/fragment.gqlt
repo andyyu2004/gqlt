@@ -16,10 +16,23 @@ fragment Animal on Animal {
     }
 }
 
+# test that nested fragments work
 query {
     animals {
         search {
             ...Animal
+        }
+    }
+}
+
+# Ensure that extra fragments are not included.
+# Avoid `Fragment "Dog" is never used.` for example
+query {
+    animals {
+        cats {
+            first {
+                ...Cat
+            }
         }
     }
 }

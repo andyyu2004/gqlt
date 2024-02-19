@@ -84,10 +84,10 @@ func (e *Executor) let(ctx context.Context, ecx *executionContext, let *syn.LetS
 }
 
 func (e *Executor) fragment(ctx context.Context, ecx *executionContext, stmt *syn.FragmentStmt) error {
-	if _, ok := ecx.scope.fragments[stmt.Fragment.Name.Value]; ok {
-		return errorf(stmt, "fragment %s already defined", stmt.Fragment.Name.Value)
+	if _, ok := ecx.scope.fragments[stmt.Definition.Name.Value]; ok {
+		return errorf(stmt, "fragment %s already defined", stmt.Definition.Name.Value)
 	}
 
-	ecx.scope.fragments[stmt.Fragment.Name.Value] = stmt
+	ecx.scope.fragments[stmt.Definition.Name.Value] = stmt
 	return nil
 }

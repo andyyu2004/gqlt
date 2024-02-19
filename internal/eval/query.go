@@ -10,7 +10,6 @@ import (
 	"github.com/movio/gqlt/internal/slice"
 	"github.com/movio/gqlt/memosa/lib"
 	"github.com/movio/gqlt/syn"
-	"golang.org/x/exp/maps"
 )
 
 func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.QueryExpr) (any, error) {
@@ -22,29 +21,46 @@ func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.Q
 		operation = transform.TransformOperation(operation)
 	}
 
+	worklist := []string{}
 	usedFragments := map[string]struct{}{}
 	observers := &validator.Events{}
 	observers.OnFragmentSpread(func(_ *validator.Walker, fragmentSpread *syn.FragmentSpread) {
+		if _, ok := usedFragments[fragmentSpread.Name.Value]; ok {
+			// already processed this fragment
+			return
+		}
+
+		worklist = append(worklist, fragmentSpread.Name.Value)
 		usedFragments[fragmentSpread.Name.Value] = struct{}{}
 	})
 
-	fragments := maps.Values(ecx.scope.fragmentDefinitions())
-
+	// find the set of fragments used in the query (non-transitively)
 	validator.Walk(&syn.Schema{}, &syn.QueryDocument{
 		Operations: []*syn.OperationDefinition{expr.Operation},
-		Fragments:  fragments,
 	}, observers)
+
+	// Then for each fragment, find the set of fragments used in the fragment until we have nothing more to traverse.
+	for len(worklist) > 0 {
+		definitions := make([]*syn.FragmentDefinition, 0, len(worklist))
+		for _, fragmentName := range worklist {
+			if fragment, ok := ecx.scope.LookupFragment(fragmentName); ok {
+				definitions = append(definitions, fragment.Definition)
+			}
+		}
+
+		worklist = worklist[:0]
+
+		validator.Walk(&syn.Schema{}, &syn.QueryDocument{Fragments: definitions}, observers)
+	}
 
 	buf := formatOperation(operation)
 
 	for fragmentName := range usedFragments {
-		fragment, ok := ecx.scope.LookupFragment(fragmentName)
-		// if fragment doesn't exist, we just ignore it. Will be caught by better validation later
-		if ok {
+		if fragment, ok := ecx.scope.LookupFragment(fragmentName); ok {
 			buf.WriteString("\n\n")
 			buf.WriteString(fragment.RawFragment)
 		}
-
+		// If fragment doesn't exist, we just ignore it. Will be caught by better validation later during execution
 	}
 
 	// Pass our local variables directly also as graphql variables

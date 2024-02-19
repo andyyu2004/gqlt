@@ -38,13 +38,13 @@ type FragmentStmt struct {
 	// unparsed graphql string
 	// useful for pretty printing without formatting
 	RawFragment string
-	Fragment    *FragmentDefinition
+	Definition  *FragmentDefinition
 }
 
 var _ Stmt = FragmentStmt{}
 
 func (stmt FragmentStmt) Children() Children {
-	return Children{stmt.Fragment}
+	return Children{stmt.Definition}
 }
 
 func (FragmentStmt) isStmt() {}

@@ -171,7 +171,7 @@ func (p *Parser) parseFragment() *syn.FragmentStmt {
 	return &syn.FragmentStmt{
 		Position:    startPos.Merge(endTok),
 		RawFragment: rawFragment,
-		Fragment:    fragment,
+		Definition:  fragment,
 	}
 }
 

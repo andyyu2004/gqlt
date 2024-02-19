@@ -133,21 +133,6 @@ func (s *scope) LookupFragment(name string) (*syn.FragmentStmt, bool) {
 	return frag, ok
 }
 
-// All fragment definitions in scope
-func (s *scope) fragmentDefinitions() map[string]*syn.FragmentDefinition {
-	fragments := map[string]*syn.FragmentDefinition{}
-	if s.parent != nil {
-		fragments = s.parent.fragmentDefinitions()
-	}
-
-	// overwrite parent fragments with local ones
-	for name, frag := range s.fragments {
-		fragments[name] = frag.Fragment
-	}
-
-	return fragments
-}
-
 func (s *scope) Lookup(name string) (any, bool) {
 	val, ok := s.vars[name]
 	if !ok && s.parent != nil {
