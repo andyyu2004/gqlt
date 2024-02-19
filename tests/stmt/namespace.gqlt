@@ -1,4 +1,4 @@
-# namespace can be specified as a slash separated string 
+# namespace can be specified as a slash separated string
 set namespace "animals/dogs"
 
 let { id, name } = query {
@@ -19,7 +19,29 @@ let { name } = query {
   id
   name
 }
- 
+
 assert name == "Buddy"
 
+set namespace ""
 
+assert query {
+  animals {
+    dogs {
+      first {
+        name
+      }
+    }
+  }
+} == "Buddy"
+
+set namespace "/"
+
+assert query {
+  animals {
+    dogs {
+      first {
+        name
+      }
+    }
+  }
+} == "Buddy"

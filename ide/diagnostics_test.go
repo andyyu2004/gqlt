@@ -54,6 +54,7 @@ type diagnosticTestCase struct {
 
 func testDiagnostics(t *testing.T, cases ...diagnosticTestCase) {
 	check := func(name, content string, expectation expect.Expectation) {
+		t.Helper()
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			ide.TestWith(t, content, func(uri string, s ide.Snapshot) {

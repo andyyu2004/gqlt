@@ -10,8 +10,8 @@ import (
 	"github.com/movio/gqlt/internal/annotate"
 	"github.com/movio/gqlt/internal/parser"
 
-	"github.com/movio/gqlt/gqlparser/ast"
 	"github.com/gkampitakis/go-snaps/snaps"
+	"github.com/movio/gqlt/gqlparser/ast"
 	"github.com/stretchr/testify/require"
 )
 

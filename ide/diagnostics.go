@@ -53,7 +53,7 @@ func (d *diagnostics) typecheck() {
 
 	for _, err := range info.Errors {
 		d.diagnostics = append(d.diagnostics, protocol.Diagnostic{
-			Range:    posToProto(d.Mapper(d.path), err.Pos),
+			Range:    posToProto(d.Mapper(d.path), err.Position),
 			Severity: lib.Ref(protocol.DiagnosticSeverityError),
 			Message:  err.Msg,
 		})
@@ -61,7 +61,7 @@ func (d *diagnostics) typecheck() {
 
 	for _, err := range info.Warnings {
 		d.diagnostics = append(d.diagnostics, protocol.Diagnostic{
-			Range:    posToProto(d.Mapper(d.path), err.Pos),
+			Range:    posToProto(d.Mapper(d.path), err.Position),
 			Severity: lib.Ref(protocol.DiagnosticSeverityWarning),
 			Message:  err.Msg,
 		})

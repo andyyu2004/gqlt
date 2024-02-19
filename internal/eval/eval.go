@@ -108,7 +108,12 @@ func (s *Settings) Set(key string, val any) error {
 	case "namespace":
 		switch val := val.(type) {
 		case string:
-			s.namespace = strings.Split(val, "/")
+			switch val {
+			case "", "/":
+				s.namespace = nil
+			default:
+				s.namespace = strings.Split(val, "/")
+			}
 			return nil
 		case []any:
 			parts := make([]string, len(val))

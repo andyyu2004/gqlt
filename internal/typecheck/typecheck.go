@@ -13,14 +13,22 @@ type Errors []Error
 func (errs Errors) Error() string {
 	s := new(strings.Builder)
 	for _, err := range errs {
-		fmt.Fprintf(s, "%v: %s\n", err.Pos, err.Msg)
+		fmt.Fprintf(s, "%v: %s\n", err.Position, err.Msg)
 	}
 	return s.String()
 }
 
 type Error struct {
-	Pos ast.Position
-	Msg string
+	Position ast.Position
+	Msg      string
+}
+
+func (e Error) Message() string {
+	return e.Msg
+}
+
+func (e Error) Pos() ast.Position {
+	return e.Position
 }
 
 type typechecker struct {

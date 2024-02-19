@@ -14,6 +14,7 @@ import (
 	"github.com/movio/gqlt/gqlparser"
 	"github.com/movio/gqlt/gqlparser/ast"
 	"github.com/movio/gqlt/internal/annotate"
+	"github.com/movio/gqlt/internal/typecheck"
 	"github.com/stretchr/testify/require"
 
 	_ "embed"
@@ -79,8 +80,16 @@ func TestGqlt(t *testing.T) {
 
 				bytes, err := os.ReadFile(path)
 				require.NoError(t, err)
-				annotation := evalErr.(annotate.Annotation)
-				annotated := annotate.Annotate(string(bytes), []annotate.Annotation{annotation})
+				var annotations []annotate.Annotation
+				switch err := evalErr.(type) {
+				case annotate.Annotation:
+					annotations = append(annotations, err)
+				case typecheck.Errors:
+					for _, e := range err {
+						annotations = append(annotations, e)
+					}
+				}
+				annotated := annotate.Annotate(string(bytes), annotations)
 				snaps.WithConfig(snaps.Filename(strings.TrimSuffix(path, ".gqlt"))).MatchSnapshot(t, annotated)
 			}),
 		)
