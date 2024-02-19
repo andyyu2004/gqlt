@@ -83,7 +83,7 @@ func (tcx *typechecker) bindObject(pat *syn.ObjectPat, ty Ty) {
 					// if it's in the original type, but not in the one we're removing fields from
 					tcx.error(entry.Key.Pos(), fmt.Sprintf("field '%s' specified twice", entry.Key.Value))
 				} else {
-					tcx.error(entry.Key.Pos(), fmt.Sprintf("field '%s' not found in object", entry.Key.Value))
+					tcx.error(entry.Key.Pos(), fmt.Sprintf("field '%s' doesn't exist in object type '%s'", entry.Key.Value, ty))
 				}
 				continue
 			}

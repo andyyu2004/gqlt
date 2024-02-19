@@ -85,7 +85,7 @@ let {} = []
 #   ^^ cannot bind [] to an object pattern
 let [a, b, c] = [1, 2, 3]
 let { a, b, c: d } = { a, b }
-#           ^ field 'c' not found in object
+#           ^ field 'c' doesn't exist in object type '{ a: number, b: number }'
 let { a, a, b } = { a, b }
 #        ^ field 'a' specified twice
 `),
