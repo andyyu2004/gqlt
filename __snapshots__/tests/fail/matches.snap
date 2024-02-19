@@ -3,10 +3,26 @@
 assert 1 matches 2
 #^^^^^^^^^^^^^^^^^^ assertion failed: 1 matches 2
 
+assert {
+    a: 1,
+    b: 2
+} matches {
+    a: 1,
+    b: 3
+}
+
 ---
 
 [TestGqlt/fail/matches#01 - 1]
 assert 1 matches 2
 #^^^^^^^^^^^^^^^^^^ assertion failed: 1 matches 2
+
+assert {
+    a: 1,
+    b: 2
+} matches {
+    a: 1,
+    b: 3
+}
 
 ---

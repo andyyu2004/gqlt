@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"os"
-	"path/filepath"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 
@@ -52,6 +52,9 @@ func TestGqlt(t *testing.T) {
 		gqlt.HTTPClient{Handler: handler},
 	}
 
+	var lock sync.Mutex
+	alreadyReportedError := map[string]struct{}{}
+
 	for _, client := range clients {
 		factory := gqlt.ClientFactoryFunc(func(testing.TB) (context.Context, gqlt.Client) {
 			// reset the counter for each test
@@ -65,11 +68,20 @@ func TestGqlt(t *testing.T) {
 			gqlt.TypeCheck(true),
 			gqlt.WithSchema(gqlparserSchema),
 			gqlt.WithErrorHandler(func(t *testing.T, path string, evalErr error) {
+				lock.Lock()
+				// since we run once per client
+				if _, ok := alreadyReportedError[path]; ok {
+					defer lock.Unlock()
+					return
+				}
+				alreadyReportedError[path] = struct{}{}
+				lock.Unlock()
+
 				bytes, err := os.ReadFile(path)
 				require.NoError(t, err)
 				annotation := evalErr.(annotate.Annotation)
 				annotated := annotate.Annotate(string(bytes), []annotate.Annotation{annotation})
-				snaps.WithConfig(snaps.Filename(filepath.Join(path, ".error"))).MatchSnapshot(t, annotated)
+				snaps.WithConfig(snaps.Filename(strings.TrimSuffix(path, ".gqlt"))).MatchSnapshot(t, annotated)
 			}),
 		)
 	}

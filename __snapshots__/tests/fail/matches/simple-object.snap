@@ -1,0 +1,6 @@
+
+[TestGqlt/fail/matches/simple-object - 1]
+assert { a: 1, b: 2 } matches { a: 1, b: 3 }
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ assertion failed: { a: 1 b: 2 } matches { a: 1 b: 3 }
+
+---

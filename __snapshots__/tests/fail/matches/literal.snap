@@ -1,0 +1,6 @@
+
+[TestGqlt/fail/matches/literal - 1]
+assert 1 matches 2
+#^^^^^^^^^^^^^^^^^^ assertion failed: 1 matches 2
+
+---
