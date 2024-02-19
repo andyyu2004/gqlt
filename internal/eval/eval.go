@@ -10,6 +10,7 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/internal/annotate"
 	"github.com/movio/gqlt/internal/parser"
 	"github.com/movio/gqlt/internal/typecheck"
 	"github.com/movio/gqlt/memosa/lib"
@@ -17,16 +18,26 @@ import (
 )
 
 type Error struct {
-	Pos ast.HasPosition
-	Msg string
+	Position ast.HasPosition
+	Msg      string
+}
+
+var _ annotate.Annotation = Error{}
+
+func (e Error) Pos() ast.Position {
+	return e.Position.Pos()
+}
+
+func (e Error) Message() string {
+	return e.Msg
 }
 
 func (e Error) Error() string {
-	return fmt.Sprintf("%s: %s", e.Pos.Pos(), e.Msg)
+	return fmt.Sprintf("%s: %s", e.Position.Pos(), e.Msg)
 }
 
 func errorf(pos ast.HasPosition, format string, args ...interface{}) error {
-	return Error{Pos: pos, Msg: fmt.Sprintf(format, args...)}
+	return Error{Position: pos, Msg: fmt.Sprintf(format, args...)}
 }
 
 type Opt func(*runConfig)
@@ -39,15 +50,28 @@ func WithGlob(glob string) Opt {
 	}
 }
 
+// Enable or disable typechecking of the test files.
+// See `WithSchema` to set the schema to typecheck against.
 func TypeCheck(b bool) Opt {
 	return func(c *runConfig) {
 		c.typecheck = b
 	}
 }
 
+// Set the schema to typecheck against.
+// Typechecking will still be performec if this is not set, but it will be significantly reduced.
+// Only meaningful if typechecking is enabled.
 func WithSchema(schema *syn.Schema) Opt {
 	return func(c *runConfig) {
 		c.schema = schema
+	}
+}
+
+// Set a custom error handler for the test runner.
+// This is called when an error occurs during the test.
+func WithErrorHandler(handler func(t *testing.T, path string, err error)) Opt {
+	return func(c *runConfig) {
+		c.errorHandler = handler
 	}
 }
 
@@ -55,8 +79,9 @@ type runConfig struct {
 	// Filter is a glob pattern (with support for **) that is matched against each test file path.
 	glob string
 	// The schema to typecheck against (optional, but will do significantly reduced typechecking)
-	schema    *syn.Schema
-	typecheck bool
+	schema       *syn.Schema
+	errorHandler func(*testing.T, string, error)
+	typecheck    bool
 }
 
 // A thread-safe graphql client
@@ -192,6 +217,9 @@ func Discover(dir string) ([]string, error) {
 func (e *Executor) Test(t *testing.T, root string, factory ClientFactory, opts ...Opt) {
 	runConfig := runConfig{
 		glob: "**",
+		errorHandler: func(t *testing.T, file string, err error) {
+			t.Fatal(err)
+		},
 	}
 
 	for _, opt := range opts {
@@ -201,6 +229,10 @@ func (e *Executor) Test(t *testing.T, root string, factory ClientFactory, opts .
 	paths, err := Discover(root)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if len(paths) == 0 {
+		t.Fatal("no test files found")
 	}
 
 	for _, path := range paths {
@@ -222,20 +254,20 @@ func (e *Executor) Test(t *testing.T, root string, factory ClientFactory, opts .
 			ctx, client := factory.CreateClient(t)
 
 			if err := e.RunFile(ctx, client, path, opts...); err != nil {
-				t.Fatal(err)
+				runConfig.errorHandler(t, path, err)
 			}
 		})
 	}
 }
 
-func (e *Executor) RunFile(ctx context.Context, client Client, uri string, opts ...Opt) error {
+func (e *Executor) RunFile(ctx context.Context, client Client, path string, opts ...Opt) error {
 	// FIXME, doesn't make much sense to take the `glob` config here as it's not needed
 	runConfig := runConfig{}
 	for _, opt := range opts {
 		opt(&runConfig)
 	}
 
-	parser, err := parser.NewFromPath(uri)
+	parser, err := parser.NewFromPath(path)
 	if err != nil {
 		return err
 	}
@@ -256,7 +288,7 @@ func (e *Executor) RunFile(ctx context.Context, client Client, uri string, opts 
 	}
 
 	ecx := &executionContext{
-		path:   uri,
+		path:   path,
 		client: client,
 		scope: &scope{
 			parent:    builtinScope,

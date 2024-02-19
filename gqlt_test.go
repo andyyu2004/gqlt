@@ -3,13 +3,18 @@ package gqlt_test
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync/atomic"
 	"testing"
 
+	"github.com/gkampitakis/go-snaps/snaps"
 	"github.com/movio/gqlt"
 	"github.com/movio/gqlt/gqlparser"
 	"github.com/movio/gqlt/gqlparser/ast"
+	"github.com/movio/gqlt/internal/annotate"
+	"github.com/stretchr/testify/require"
 
 	_ "embed"
 
@@ -53,7 +58,20 @@ func TestGqlt(t *testing.T) {
 			q.counter.Store(0)
 			return context.Background(), client
 		})
-		gqlt.New().Test(t, testpath, factory, gqlt.TypeCheck(true), gqlt.WithSchema(gqlparserSchema))
+		gqlt.New().Test(
+			t,
+			testpath,
+			factory,
+			gqlt.TypeCheck(true),
+			gqlt.WithSchema(gqlparserSchema),
+			gqlt.WithErrorHandler(func(t *testing.T, path string, evalErr error) {
+				bytes, err := os.ReadFile(path)
+				require.NoError(t, err)
+				annotation := evalErr.(annotate.Annotation)
+				annotated := annotate.Annotate(string(bytes), []annotate.Annotation{annotation})
+				snaps.WithConfig(snaps.Filename(filepath.Join(path, ".error"))).MatchSnapshot(t, annotated)
+			}),
+		)
 	}
 }
 
