@@ -1,0 +1,11 @@
+
+[TestGqlt/fail/assert-eq/object - 1]
+assert { a: 1, b: 2} == { a: 1, b: 3 }
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ assertion failed:   map[string]any{
+    "a": float64(1),
+-   "b": float64(2),
++   "b": float64(3),
+  }
+
+
+---

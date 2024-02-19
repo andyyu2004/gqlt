@@ -3,9 +3,9 @@ package eval
 import (
 	"fmt"
 	"log"
-	"reflect"
 	"regexp"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/movio/gqlt/gqlparser/ast"
 )
 
@@ -19,7 +19,7 @@ func regexMatch(pos ast.HasPosition, lhs, rhs string) (bool, error) {
 }
 
 func eq(lhs, rhs any) bool {
-	return reflect.DeepEqual(lhs, rhs)
+	return cmp.Equal(lhs, rhs)
 }
 
 func add(pos ast.HasPosition, lhs, rhs any) (any, error) {

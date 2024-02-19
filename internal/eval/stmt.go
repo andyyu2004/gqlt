@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/movio/gqlt/internal/lex"
 	"github.com/movio/gqlt/syn"
 )
 
@@ -93,15 +95,49 @@ func (e *Executor) assert(ctx context.Context, ecx *executionContext, stmt *syn.
 		}
 
 		if err := bindPat(dummyBinder{}, expr.Pat, val); err != nil {
-			return errorf(stmt, "assertion failed: %v", err)
+			var msg string
+			if e, ok := err.(Error); ok {
+				// need to avoid reporting positions twice
+				msg = e.Message()
+			} else {
+				msg = err.Error()
+			}
+
+			return errorf(stmt, "assertion failed: %v", msg)
 		}
 
-	default:
-		if !truthy(val) {
-			var fmt strings.Builder
-			stmt.Expr.Format(&fmt)
-			return errorf(stmt, "assertion failed: %v", fmt.String())
+		return nil
+
+	case *syn.BinaryExpr:
+		if expr.Op.Kind == lex.Equals2 {
+			lhs, err := e.eval(ctx, ecx, expr.Left)
+			if err != nil {
+				return err
+			}
+
+			rhs, err := e.eval(ctx, ecx, expr.Right)
+			if err != nil {
+				return err
+			}
+
+			diff := cmp.Diff(lhs, rhs)
+			if diff != "" {
+				return errorf(stmt, "assertion failed: %v", diff)
+			}
+
+			return nil
 		}
+	}
+
+	val, err := e.eval(ctx, ecx, stmt.Expr)
+	if err != nil {
+		return err
+	}
+
+	if !truthy(val) {
+		var fmt strings.Builder
+		stmt.Expr.Format(&fmt)
+		return errorf(stmt, "assertion failed: %v", fmt.String())
 	}
 
 	return nil

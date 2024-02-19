@@ -15,7 +15,6 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/tliron/glsp v0.2.1
 	github.com/wk8/go-ordered-map/v2 v2.1.8
-
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -26,6 +25,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gkampitakis/ciinfo v0.3.0 // indirect
 	github.com/gkampitakis/go-diff v1.3.2 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
