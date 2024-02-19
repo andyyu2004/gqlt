@@ -50,7 +50,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			case float64:
 				return -lhs, nil
 			default:
-				return nil, fmt.Errorf("cannot negate %T", lhs)
+				return nil, errorf(expr.Expr, "cannot negate %T", lhs)
 			}
 		case lex.Bang, lex.Not:
 			return !truthy(val), nil
@@ -86,12 +86,12 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 		case lex.BangTilde, lex.EqualsTilde:
 			lhs, ok := lhs.(string)
 			if !ok {
-				return nil, fmt.Errorf("expected string to match regex against")
+				return nil, errorf(expr.Left, "expected string to match regex against")
 			}
 
 			rhs, ok := rhs.(string)
 			if !ok {
-				return nil, fmt.Errorf("regex must be string")
+				return nil, errorf(expr.Right, "regex must a string")
 			}
 
 			b, err := regexMatch(expr, lhs, rhs)
@@ -110,7 +110,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 	case *syn.NameExpr:
 		val, ok := ecx.scope.Lookup(expr.Name.Value)
 		if !ok {
-			return nil, fmt.Errorf("reference to undefined variable: %s", expr.Name.Value)
+			return nil, errorf(expr, "reference to undefined variable: %s", expr.Name.Value)
 		}
 
 		return val, nil
@@ -137,7 +137,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			var ok bool
 			fields, ok = val.(map[string]any)
 			if !ok {
-				return nil, fmt.Errorf("object base must be an object, got %T", val)
+				return nil, errorf(base, "object base must be an object, got %T", val)
 			}
 		}
 
@@ -173,7 +173,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			}
 			return nil, nil
 		default:
-			return nil, fmt.Errorf("cannot access field %s on %T", expr.Field.Value, val)
+			return nil, errorf(expr.Field, "cannot access field %s on %T", expr.Field.Value, val)
 		}
 
 	case *syn.IndexExpr:
@@ -207,7 +207,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			}
 		}
 
-		return nil, fmt.Errorf("cannot index %T with %T", val, idx)
+		return nil, errorf(expr.Index, "cannot index %T with %T", val, idx)
 
 	case *syn.CallExpr:
 		fn, err := e.eval(ctx, ecx, expr.Fn)
@@ -217,7 +217,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 
 		f, ok := fn.(function)
 		if !ok {
-			return nil, fmt.Errorf("expected function, found %T", fn)
+			return nil, errorf(expr.Fn, "expected function, found %T", fn)
 		}
 
 		args := make([]any, len(expr.Args))

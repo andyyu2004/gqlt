@@ -1,1 +1,9 @@
 assert 1 matches 2
+
+assert {
+    a: 1,
+    b: 2
+} matches {
+    a: 1,
+    b: 3
+}

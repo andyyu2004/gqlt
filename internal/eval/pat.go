@@ -28,21 +28,21 @@ func bindPat(binder binder, pat syn.Pat, val any) error {
 	case *syn.ListPat:
 		vals, ok := val.([]any)
 		if !ok {
-			return fmt.Errorf("cannot bind %T value `%v` to list pattern", val, val)
+			return errorf(pat, "cannot bind %T value `%v` to list pattern", val, val)
 		}
 		return bindListPat(binder, pat, vals)
 
 	case *syn.ObjectPat:
 		vals, ok := val.(map[string]any)
 		if !ok {
-			return fmt.Errorf("cannot bind %T value `%v` to object pattern", val, val)
+			return errorf(pat, "cannot bind %T value `%v` to object pattern", val, val)
 		}
 
 		return bindObjectPat(binder, pat, vals)
 
 	case *syn.LiteralPat:
 		if pat.Value != val {
-			return fmt.Errorf("literal pattern does not match value: %v != %v", pat.Value, val)
+			return errorf(pat, "literal pattern does not match value: %v != %v", pat.Value, val)
 		}
 		return nil
 
@@ -91,7 +91,7 @@ func bindObjectPat(binder binder, objPat *syn.ObjectPat, values map[string]any) 
 
 		val, ok := values[name.Value]
 		if !ok {
-			return fmt.Errorf("object missing field specified in pattern `%s`", name.Value)
+			return errorf(entry.Key, "object missing field specified in pattern `%s`", name.Value)
 		}
 
 		if err := bindPat(binder, pat, val); err != nil {
