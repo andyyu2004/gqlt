@@ -40,16 +40,7 @@ func (e *Executor) stmt(ctx context.Context, ecx *executionContext, stmt syn.Stm
 		}
 
 	case *syn.AssertStmt:
-		val, err := e.eval(ctx, ecx, stmt.Expr)
-		if err != nil {
-			return err
-		}
-
-		if !truthy(val) {
-			var fmt strings.Builder
-			stmt.Expr.Format(&fmt)
-			return errorf(stmt, "assertion failed: %v", fmt.String())
-		}
+		return e.assert(ctx, ecx, stmt)
 
 	default:
 		panic(fmt.Sprintf("missing stmt eval case: %T", stmt))
@@ -83,11 +74,40 @@ func (e *Executor) let(ctx context.Context, ecx *executionContext, let *syn.LetS
 	return nil
 }
 
-func (e *Executor) fragment(ctx context.Context, ecx *executionContext, stmt *syn.FragmentStmt) error {
+func (e *Executor) fragment(_ context.Context, ecx *executionContext, stmt *syn.FragmentStmt) error {
 	if _, ok := ecx.scope.fragments[stmt.Definition.Name.Value]; ok {
 		return errorf(stmt, "fragment %s already defined", stmt.Definition.Name.Value)
 	}
 
 	ecx.scope.fragments[stmt.Definition.Name.Value] = stmt
+	return nil
+}
+
+func (e *Executor) assert(ctx context.Context, ecx *executionContext, stmt *syn.AssertStmt) error {
+	val, err := e.eval(ctx, ecx, stmt.Expr)
+	if err != nil {
+		return err
+	}
+
+	// Try to provide nice assertion failure messages for certain common cases
+	switch expr := stmt.Expr.(type) {
+	case *syn.MatchesExpr:
+		val, err := e.eval(ctx, ecx, expr.Expr)
+		if err != nil {
+			return err
+		}
+
+		if err := bindPat(dummyBinder{}, expr.Pat, val); err != nil {
+			return errorf(stmt, "assertion failed: %v", err)
+		}
+
+	default:
+		if !truthy(val) {
+			var fmt strings.Builder
+			stmt.Expr.Format(&fmt)
+			return errorf(stmt, "assertion failed: %v", fmt.String())
+		}
+	}
+
 	return nil
 }
