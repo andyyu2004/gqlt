@@ -84,11 +84,6 @@ func (e *Executor) fragment(_ context.Context, ecx *executionContext, stmt *syn.
 }
 
 func (e *Executor) assert(ctx context.Context, ecx *executionContext, stmt *syn.AssertStmt) error {
-	val, err := e.eval(ctx, ecx, stmt.Expr)
-	if err != nil {
-		return err
-	}
-
 	// Try to provide nice assertion failure messages for certain common cases
 	switch expr := stmt.Expr.(type) {
 	case *syn.MatchesExpr:
