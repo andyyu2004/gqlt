@@ -1,0 +1,12 @@
+let a = {
+    x: 1,
+    y: 2,
+}
+
+assert a matches { y: 2 }
+
+assert a == { x: 1, y: 2 }
+
+let xs = [1, 2, 3]
+assert xs matches [1, 2, 3]
+assert xs == [1, 2, 3]

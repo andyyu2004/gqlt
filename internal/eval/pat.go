@@ -2,6 +2,7 @@ package eval
 
 import (
 	"fmt"
+	"maps"
 
 	"github.com/movio/gqlt/syn"
 )
@@ -77,6 +78,9 @@ func bindListPat(binder binder, listPat *syn.ListPat, values []any) error {
 }
 
 func bindObjectPat(binder binder, objPat *syn.ObjectPat, values map[string]any) error {
+	// Important to clone, we can't modify in place because the value may be a variable and used multiple times
+	values = maps.Clone(values)
+
 	for entry := objPat.Fields.Oldest(); entry != nil; entry = entry.Next() {
 		name := entry.Key
 		pat := entry.Value
@@ -99,7 +103,7 @@ func bindObjectPat(binder binder, objPat *syn.ObjectPat, values map[string]any) 
 		}
 
 		// delete the value once it's been bound for the rest pattern
-		// it's fine to mutate the map in place as the values won't be used again
+		// it's fine to mutate the map in place as we cloned it above
 		delete(values, name.Value)
 	}
 
