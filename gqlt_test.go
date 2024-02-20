@@ -69,6 +69,12 @@ func TestGqlt(t *testing.T) {
 			gqlt.TypeCheck(true),
 			gqlt.WithSchema(gqlparserSchema),
 			gqlt.WithErrorHandler(func(t *testing.T, path string, evalErr error) {
+				// Only the tests in the fail directory are expected to fail
+				if !strings.Contains(path, "/fail/") {
+					require.NoError(t, evalErr)
+					return
+				}
+
 				lock.Lock()
 				// since we run once per client
 				if _, ok := alreadyReportedError[path]; ok {
