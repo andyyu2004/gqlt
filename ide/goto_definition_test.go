@@ -70,6 +70,16 @@ let b = { ...obj }
 #            ^^^
 			`,
 		},
+
+		{
+			"variable pattern",
+			`
+let foo = 42
+#   ...
+assert 42 matches $foo
+#                  ^^^
+			`,
+		},
 	}
 
 	for _, test := range tests {

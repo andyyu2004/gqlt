@@ -44,6 +44,12 @@ func hover(typeInfo typecheck.Info, point ast.Point) (syn.Node, typecheck.Ty) {
 	node := tokenCursor.Parent()
 	for node != nil {
 		switch node := node.Value().(type) {
+		case *syn.VarPat:
+			if pat, ok := typeInfo.VarPatResolutions[node]; ok {
+				if ty, ok := typeInfo.BindingTypes[pat]; ok {
+					return pat, ty
+				}
+			}
 		case *syn.NamePat:
 			if ty, ok := typeInfo.BindingTypes[node]; ok {
 				return node, ty

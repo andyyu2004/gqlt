@@ -94,7 +94,7 @@ func (e *Executor) assert(ctx context.Context, ecx *executionContext, stmt *syn.
 			return err
 		}
 
-		if err := bindPat(dummyBinder{}, expr.Pat, val); err != nil {
+		if err := bindPat(noopBinder{ecx.scope}, expr.Pat, val); err != nil {
 			var msg string
 			if e, ok := err.(Error); ok {
 				// need to avoid reporting positions twice

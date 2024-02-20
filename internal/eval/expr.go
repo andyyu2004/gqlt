@@ -166,7 +166,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			return nil, err
 		}
 
-		return bindPat(dummyBinder{}, expr.Pat, val) == nil, nil
+		return bindPat(noopBinder{ecx.scope}, expr.Pat, val) == nil, nil
 
 	case *syn.FieldExpr:
 		val, err := e.eval(ctx, ecx, expr.Expr)

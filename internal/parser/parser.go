@@ -272,6 +272,13 @@ func (p *Parser) parsePat(opts patOpts) syn.Pat {
 		return p.parseObjectPat()
 	case lex.BracketL:
 		return p.parseListPat()
+	case lex.Dollar:
+		dollar := p.bump(lex.Dollar)
+		name, ok := p.expect(lex.Name)
+		if !ok {
+			return nil
+		}
+		return &syn.VarPat{Dollar: dollar, Name: name}
 	case lex.ParenL:
 		p.bump(lex.ParenL)
 		pat := p.parsePat(patOpts{})

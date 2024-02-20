@@ -81,7 +81,7 @@ func (tcx *typechecker) tryExpr(expr *syn.TryExpr) Ty {
 
 func (tcx *typechecker) nameExpr(expr *syn.NameExpr) Ty {
 	if entry, ok := tcx.scope[expr.Name.Value]; ok {
-		tcx.info.Resolutions[expr] = entry.Pat
+		tcx.info.NameResolutions[expr] = entry.Pat
 		return entry.Ty
 	}
 	return tcx.error(expr.Pos(), fmt.Sprintf("unbound name '%s'", expr.Name.Value))

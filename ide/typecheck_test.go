@@ -145,5 +145,31 @@ let y = { ...x }
 #       ^^^^^^^^ object base must be an object, got 'number'
 			`),
 		},
+
+		{
+			"simple variable pattern", `
+let x = 2
+let y = "string"
+assert x matches $y
+			`, expect.Expect(`
+let x = 2
+let y = "string"
+assert x matches $y
+#                ^^ variable pattern has type string, but is being compared to a value of type number
+			`),
+		},
+
+		{
+			"variable pattern", `
+let x = 2
+let y = "string"
+assert x matches $y
+			`, expect.Expect(`
+let x = 2
+let y = "string"
+assert x matches $y
+#                ^^ variable pattern has type string, but is being compared to a value of type number
+			`),
+		},
 	}...)
 }

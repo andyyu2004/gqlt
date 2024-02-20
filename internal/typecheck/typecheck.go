@@ -59,9 +59,10 @@ func New(schema *syn.Schema, settings Settings) *typechecker {
 		scope:     make(map[string]scopeEntry),
 		fragments: make(map[string]*syn.FragmentDefinition),
 		info: Info{
-			ExprTypes:    make(map[syn.Expr]Ty),
-			BindingTypes: make(map[*syn.NamePat]Ty),
-			Resolutions:  make(map[*syn.NameExpr]*syn.NamePat),
+			ExprTypes:         make(map[syn.Expr]Ty),
+			BindingTypes:      make(map[*syn.NamePat]Ty),
+			NameResolutions:   make(map[*syn.NameExpr]*syn.NamePat),
+			VarPatResolutions: make(map[*syn.VarPat]*syn.NamePat),
 		},
 	}
 }
@@ -70,10 +71,12 @@ type Info struct {
 	Ast          syn.File
 	ExprTypes    map[syn.Expr]Ty
 	BindingTypes map[*syn.NamePat]Ty
-	// Resolutions maps name expressions to the binding that it references
-	Resolutions map[*syn.NameExpr]*syn.NamePat
-	Warnings    Errors
-	Errors      Errors
+	// NameResolutions maps name expressions to the binding that it references
+	NameResolutions map[*syn.NameExpr]*syn.NamePat
+	// VarPatResolutions maps var patterns to the binding that it references
+	VarPatResolutions map[*syn.VarPat]*syn.NamePat
+	Warnings          Errors
+	Errors            Errors
 }
 
 func (tcx *typechecker) Check(ast syn.File) Info {
