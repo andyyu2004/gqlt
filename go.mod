@@ -9,7 +9,8 @@ require (
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
 	github.com/andyyu2004/expect-test v0.6.7
 	github.com/bmatcuk/doublestar/v4 v4.6.1
-	github.com/gkampitakis/go-snaps v0.4.12
+	github.com/gkampitakis/go-snaps v0.5.2
+	github.com/google/go-cmp v0.6.0
 	github.com/graph-gophers/graphql-go v1.5.0
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/stretchr/testify v1.8.4
@@ -25,14 +26,13 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gkampitakis/ciinfo v0.3.0 // indirect
 	github.com/gkampitakis/go-diff v1.3.2 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/maruel/natural v1.1.0 // indirect
+	github.com/maruel/natural v1.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
@@ -40,7 +40,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/sasha-s/go-deadlock v0.3.1 // indirect
 	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/sourcegraph/jsonrpc2 v0.2.0 // indirect

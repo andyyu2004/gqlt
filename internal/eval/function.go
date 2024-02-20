@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/movio/gqlt/gqlparser/ast"
@@ -110,6 +111,22 @@ func truthy(val any) bool {
 // FIXME typecheck these?
 var builtinScope = &scope{
 	vars: map[string]any{
+		"now": function(func(args []any) (any, error) {
+			if len(args) > 1 {
+				return nil, fmt.Errorf("now() or now(format: string) expected")
+			}
+
+			format := time.RFC3339
+			if len(args) == 1 {
+				switch arg := args[0].(type) {
+				case string:
+					format = arg
+				default:
+					return nil, fmt.Errorf("format argument must be a string")
+				}
+			}
+			return time.Now().Format(format), nil
+		}),
 		"dbg": function(func(args []any) (any, error) {
 			if len(args) != 1 {
 				return nil, fmt.Errorf("dbg takes exactly 1 argument")

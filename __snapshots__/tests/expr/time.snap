@@ -1,0 +1,8 @@
+
+[TestGqlt/expr/time - 1]
+let time1 = now()
+let time2 = now()
+
+assert time1 < time2
+
+---
