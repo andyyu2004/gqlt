@@ -152,6 +152,7 @@ func (t Type) String() string {
 	case AngleL:
 		return "<"
 	case AngleR:
+		return ">"
 	case Pipe:
 		return "|"
 	case Plus:
