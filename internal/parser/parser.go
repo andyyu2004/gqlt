@@ -272,6 +272,14 @@ func (p *Parser) parsePat(opts patOpts) syn.Pat {
 		return p.parseObjectPat()
 	case lex.BracketL:
 		return p.parseListPat()
+	case lex.ParenL:
+		p.bump(lex.ParenL)
+		pat := p.parsePat(patOpts{})
+		if lib.IsNil(pat) {
+			return nil
+		}
+		p.expect(lex.ParenR)
+		return pat
 	case lex.Int, lex.Float, lex.String, lex.BlockString, lex.True, lex.False, lex.Null:
 		return p.parseLiteralPat()
 	default:
