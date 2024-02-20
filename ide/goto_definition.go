@@ -41,8 +41,12 @@ func definition(typeInfo typecheck.Info, point ast.Point) syn.Node {
 	node := tokenCursor.Parent()
 	for node != nil {
 		switch node := node.Value().(type) {
+		case *syn.VarPat:
+			if pat, ok := typeInfo.VarPatResolutions[node]; ok {
+				return pat
+			}
 		case *syn.NameExpr:
-			if pat, ok := typeInfo.Resolutions[node]; ok {
+			if pat, ok := typeInfo.NameResolutions[node]; ok {
 				return pat
 			}
 		}

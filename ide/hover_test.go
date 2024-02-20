@@ -359,6 +359,14 @@ let x = query { foo { ...Foo } }
 #   ^`,
 			expect.Expect(`{ id: string, any: any }`),
 		},
+
+		{
+			"var pattern", `
+let foo = 2
+assert 2 matches $foo
+#                 ^^^`,
+			expect.Expect(`number`),
+		},
 	}
 
 	for _, test := range tests {

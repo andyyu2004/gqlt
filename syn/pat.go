@@ -32,6 +32,7 @@ func (WildcardPat) Format(w io.Writer) {
 }
 
 // A name pattern matches any value and binds it to the name
+// Not to be confused with the variable pattern
 type NamePat struct {
 	Name lex.Token
 }
@@ -52,6 +53,31 @@ func (NamePat) isNode() {}
 func (pat NamePat) Format(w io.Writer) {
 	_, _ = io.WriteString(w, pat.Name.Value)
 }
+
+// A variable pattern matches the value of the referenced variable
+// Not to be confused with the name pattern
+type VarPat struct {
+	Dollar lex.Token
+	Name   lex.Token
+}
+
+var _ Pat = VarPat{}
+
+func (pat VarPat) Pos() ast.Position {
+	return pat.Dollar.Pos().Merge(pat.Name.Pos())
+}
+
+func (pat VarPat) Children() Children {
+	return Children{pat.Dollar, pat.Name}
+}
+
+func (pat VarPat) Format(w io.Writer) {
+	_, _ = io.WriteString(w, "$")
+	_, _ = io.WriteString(w, pat.Name.Value)
+}
+
+func (VarPat) isPat()  {}
+func (VarPat) isNode() {}
 
 // A literal pattern matches a value that is equal to the literal
 type LiteralPat struct {

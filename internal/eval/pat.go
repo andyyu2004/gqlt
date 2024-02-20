@@ -8,6 +8,7 @@ import (
 )
 
 type binder interface {
+	Lookup(name string) (any, bool)
 	bind(name string, val any)
 }
 
@@ -39,6 +40,18 @@ func bindPat(binder binder, pat syn.Pat, val any) error {
 		if pat.Value != val {
 			return errorf(pat, "literal pattern does not match value: %v != %v", pat.Value, val)
 		}
+		return nil
+
+	case *syn.VarPat:
+		target, ok := binder.Lookup(pat.Name.Value)
+		if !ok {
+			return errorf(pat, "variable pattern references undefined variable: '$%s'", pat.Name.Value)
+		}
+
+		if val != target {
+			return errorf(pat, "variable pattern does not match value: %v != %v", target, val)
+		}
+
 		return nil
 
 	case *syn.RestPat:
