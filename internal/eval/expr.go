@@ -83,6 +83,14 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			return mul(lhs, rhs)
 		case lex.Slash:
 			return div(lhs, rhs)
+		case lex.AngleL:
+			return lt(lhs, rhs)
+		case lex.AngleLEqual:
+			return lte(lhs, rhs)
+		case lex.AngleR:
+			return gt(lhs, rhs)
+		case lex.AngleREqual:
+			return gte(lhs, rhs)
 		case lex.BangTilde, lex.EqualsTilde:
 			lhs, ok := lhs.(string)
 			if !ok {

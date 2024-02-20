@@ -89,6 +89,7 @@ func TestGqlt(t *testing.T) {
 						annotations = append(annotations, e)
 					}
 				}
+
 				annotated := annotate.Annotate(string(bytes), annotations)
 				snaps.WithConfig(snaps.Filename(strings.TrimSuffix(path, ".gqlt"))).MatchSnapshot(t, annotated)
 			}),

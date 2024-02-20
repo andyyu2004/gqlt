@@ -149,6 +149,18 @@ func convertToken(tok [n]lexer.Token) (Token, int) {
 			kind = BangTilde
 			len = 2
 		}
+	case lexer.AngleL:
+		switch tok[1].Kind {
+		case lexer.Equals:
+			kind = AngleLEqual
+			len = 2
+		}
+	case lexer.AngleR:
+		switch tok[1].Kind {
+		case lexer.Equals:
+			kind = AngleREqual
+			len = 2
+		}
 	}
 	return Token{Kind: kind, Value: tok[0].Value, Position: tok[0].Position}, len
 }
@@ -186,6 +198,8 @@ const (
 	BracketR
 	BraceL
 	BraceR
+	AngleL
+	AngleR
 	Pipe
 	Plus
 	Minus
@@ -218,6 +232,8 @@ const (
 	Set
 	Equals2
 	BangEqual
+	AngleLEqual
+	AngleREqual
 	Not
 	Try
 	EqualsTilde
@@ -260,10 +276,14 @@ func (t TokenKind) Name() string {
 		return "Equals2"
 	case BangEqual:
 		return "BangEqual"
-	case Not:
-		return "Not"
+	case AngleLEqual:
+		return "AngleLEqual"
+	case AngleREqual:
+		return "AngleREqual"
 	case Try:
 		return "try"
+	case Not:
+		return "not"
 	default:
 		return lexer.Type(t).Name()
 	}
@@ -307,6 +327,10 @@ func (t TokenKind) String() string {
 		return "=~"
 	case BangTilde:
 		return "!~"
+	case AngleLEqual:
+		return "<="
+	case AngleREqual:
+		return ">="
 	case Not:
 		return "not"
 	case Try:

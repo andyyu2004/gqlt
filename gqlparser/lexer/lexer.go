@@ -134,6 +134,10 @@ func (s *Lexer) ReadToken() (Token, error) {
 		return s.makeValueToken(Slash, "")
 	case ',':
 		return s.makeValueToken(Comma, "")
+	case '<':
+		return s.makeValueToken(AngleL, "")
+	case '>':
+		return s.makeValueToken(AngleR, "")
 
 	case '#':
 		return s.readComment()

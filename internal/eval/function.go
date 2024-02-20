@@ -108,6 +108,41 @@ func truthy(val any) bool {
 	}
 }
 
+func lt(lhs, rhs any) (bool, error) {
+	switch lhs := lhs.(type) {
+	case float64:
+		switch rhs := rhs.(type) {
+		case float64:
+			return lhs < rhs, nil
+		}
+	case string:
+		switch rhs := rhs.(type) {
+		case string:
+			return lhs < rhs, nil
+		}
+	}
+
+	return false, fmt.Errorf("cannot compare %T and %T", lhs, rhs)
+}
+
+func lte(lhs, rhs any) (bool, error) {
+	if eq(lhs, rhs) {
+		return true, nil
+	}
+
+	return lt(lhs, rhs)
+}
+
+func gt(lhs, rhs any) (bool, error) {
+	lte, err := lte(lhs, rhs)
+	return !lte, err
+}
+
+func gte(lhs, rhs any) (bool, error) {
+	lt, err := lt(lhs, rhs)
+	return !lt, err
+}
+
 // FIXME typecheck these?
 var builtinScope = &scope{
 	vars: map[string]any{

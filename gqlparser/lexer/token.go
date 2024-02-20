@@ -25,6 +25,8 @@ const (
 	BracketR
 	BraceL
 	BraceR
+	AngleL
+	AngleR
 	Pipe
 	Plus
 	Minus
@@ -77,6 +79,10 @@ func (t Type) Name() string {
 		return "BraceL"
 	case BraceR:
 		return "BraceR"
+	case AngleL:
+		return "AngleL"
+	case AngleR:
+		return "AngleR"
 	case Pipe:
 		return "Pipe"
 	case Plus:
@@ -143,6 +149,9 @@ func (t Type) String() string {
 		return "{"
 	case BraceR:
 		return "}"
+	case AngleL:
+		return "<"
+	case AngleR:
 	case Pipe:
 		return "|"
 	case Plus:

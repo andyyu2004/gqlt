@@ -253,9 +253,20 @@ func (tcx *typechecker) binaryExpr(expr *syn.BinaryExpr) Ty {
 	switch expr.Op.Kind {
 	case lex.Equals2, lex.BangEqual:
 		if !compat(lhs, rhs) {
-			tcx.error(expr.Pos(), fmt.Sprintf("comparing '%v' to '%v' will always be false", lhs, rhs))
+			tcx.error(expr.Pos(), fmt.Sprintf("cannot equate '%v' to '%v'", lhs, rhs))
 		}
 		return Bool{}
+	case lex.AngleLEqual, lex.AngleREqual, lex.AngleL, lex.AngleR:
+		switch lhs.(type) {
+		case Number, String:
+			if !compat(lhs, rhs) {
+				return tcx.error(expr.Pos(), fmt.Sprintf("cannot order '%v' against '%v'", lhs, rhs))
+			}
+		default:
+			return tcx.error(expr.Pos(), fmt.Sprintf("cannot order '%v' against '%v'", lhs, rhs))
+		}
+		return Bool{}
+
 	case lex.BangTilde, lex.EqualsTilde:
 		if _, ok := lhs.(String); ok {
 			if _, ok := rhs.(String); ok {
