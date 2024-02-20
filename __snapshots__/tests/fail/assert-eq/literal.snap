@@ -1,7 +1,8 @@
 
 [TestGqlt/fail/assert-eq/literal - 1]
 assert 1 == 2
-#^^^^^^^^^^^^^ assertion failed:   float64(
+#^^^^^^^^^^^^^ equality assertion failed:
+  float64(
 -   1,
 +   2,
   )

@@ -103,7 +103,7 @@ func (e *Executor) assert(ctx context.Context, ecx *executionContext, stmt *syn.
 				msg = err.Error()
 			}
 
-			return errorf(stmt, "assertion failed: %v", msg)
+			return errorf(stmt, "match assertion failed: %v", msg)
 		}
 
 		return nil
@@ -122,7 +122,7 @@ func (e *Executor) assert(ctx context.Context, ecx *executionContext, stmt *syn.
 
 			diff := cmp.Diff(lhs, rhs)
 			if diff != "" {
-				return errorf(stmt, "assertion failed: %v", diff)
+				return errorf(stmt, "equality assertion failed:\n%v", diff)
 			}
 
 			return nil

@@ -1,6 +1,6 @@
 
 [TestGqlt/fail/matches/simple-object - 1]
 assert { a: 1, b: 2 } matches { a: 1, b: 3 }
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ assertion failed: literal pattern does not match value: 3 != 2
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ match assertion failed: literal pattern does not match value: 3 != 2
 
 ---
