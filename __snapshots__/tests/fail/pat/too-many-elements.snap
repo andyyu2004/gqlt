@@ -1,0 +1,6 @@
+
+[TestGqlt/fail/pat/too-many-elements - 1]
+let [x] = [1, 2, 3]
+#    ^ too many elements to bind to list pattern (consider using a ...rest pattern to match the rest)
+
+---

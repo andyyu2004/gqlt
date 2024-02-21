@@ -1,0 +1,7 @@
+
+[TestGqlt/fail/pat/not-enough-elements - 1]
+let [x, y] = [1]
+#       ^ not enough elements to bind to list pattern
+
+
+---

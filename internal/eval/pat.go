@@ -66,7 +66,11 @@ func bindListPat(binder binder, listPat *syn.ListPat, values []any) error {
 		}
 
 		if i > len(values)-1 {
-			return bindPat(binder, pat, nil)
+			return errorf(pat, "not enough elements to bind to list pattern")
+		}
+
+		if i == len(listPat.Pats)-1 && len(listPat.Pats) < len(values) {
+			return errorf(pat, "too many elements to bind to list pattern (consider using a ...rest pattern to match the rest)")
 		}
 
 		if err := bindPat(binder, pat, values[i]); err != nil {
