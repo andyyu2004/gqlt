@@ -1,0 +1,11 @@
+# quoted identifier works for objects and patterns
+let headers = {
+    "X-Header": "value"
+}
+
+assert headers["X-Header"] == "value"
+
+assert headers matches {
+    "X-Header": "value"
+}
+

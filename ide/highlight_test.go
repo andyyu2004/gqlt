@@ -139,6 +139,18 @@ mutation { bar }`,
 1:27..1:29: number
 `),
 		},
+
+		{
+			"quoted object fields",
+			`let { "foo": bar } = { "foo": 42 }`,
+			expect.Expect(`1:1..1:4: keyword
+1:8..1:13: string
+1:14..1:17: property
+1:20..1:21: operator
+1:25..1:30: string
+1:31..1:33: number
+`),
+		},
 	}
 
 	for _, test := range tests {

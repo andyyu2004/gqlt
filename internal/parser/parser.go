@@ -340,9 +340,13 @@ func (p *Parser) parseObjectPat() *syn.ObjectPat {
 			}
 			pat = &syn.RestPat{Position: name.Pos(), Pat: &syn.NamePat{Name: name}}
 		} else {
-			name, ok = p.expect(lex.Name)
-			if !ok {
-				return nil
+			if p.at(lex.String) {
+				name = p.bump(lex.String)
+			} else {
+				name, ok = p.expect(lex.Name)
+				if !ok {
+					return nil
+				}
 			}
 
 			pat = &syn.NamePat{Name: name}
@@ -637,9 +641,15 @@ func (p *Parser) parseObjectExpr() *syn.ObjectExpr {
 			continue
 		}
 
-		name, ok := p.expect(lex.Name)
-		if !ok {
-			return nil
+		var name lex.Token
+		if p.at(lex.String) {
+			name = p.bump(lex.String)
+		} else {
+			var ok bool
+			name, ok = p.expect(lex.Name)
+			if !ok {
+				return nil
+			}
 		}
 
 		var expr syn.Expr = &syn.NameExpr{Name: name}
