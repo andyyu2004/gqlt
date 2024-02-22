@@ -145,5 +145,14 @@ let y = { ...x }
 #       ^^^^^^^^ object base must be an object, got 'number'
 			`),
 		},
+
+		{
+			"match condition not boolean", `
+assert 2 matches 2 if 2
+			`, expect.Expect(`
+assert 2 matches 2 if 2
+#                     ^ expected match condition to be a boolean expression, got 'number'
+			`),
+		},
 	}...)
 }
