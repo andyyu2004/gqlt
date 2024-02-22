@@ -165,16 +165,28 @@ func (FieldExpr) isExpr() {}
 func (FieldExpr) isNode() {}
 
 type MatchesExpr struct {
-	ast.Position
 	Expr      Expr
 	MatchesKw lex.Token
 	Pat       Pat
+	IfKw      lex.Token
+	Cond      Expr // may be nil
 }
 
 var _ Expr = MatchesExpr{}
 
+func (expr MatchesExpr) Pos() ast.Position {
+	if expr.Cond != nil {
+		return expr.Expr.Pos().Merge(expr.Cond)
+	}
+	return expr.Expr.Pos().Merge(expr.Pat)
+}
+
 func (expr MatchesExpr) Children() Children {
-	return Children{expr.Expr, expr.MatchesKw, expr.Pat}
+	children := Children{expr.Expr, expr.MatchesKw, expr.Pat}
+	if expr.Cond != nil {
+		children = append(children, expr.IfKw, expr.Cond)
+	}
+	return children
 }
 
 func (MatchesExpr) isExpr() {}
