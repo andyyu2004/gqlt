@@ -528,7 +528,16 @@ func (p *Parser) parseMatchesExpr(expr syn.Expr) *syn.MatchesExpr {
 		return nil
 	}
 
-	return &syn.MatchesExpr{Position: expr.Pos().Merge(pat), Expr: expr, MatchesKw: matches, Pat: pat}
+	var cond syn.Expr
+	ifKw, ok := p.eat(lex.If)
+	if ok {
+		cond = p.parseExpr()
+		if lib.IsNil(cond) {
+			return nil
+		}
+	}
+
+	return &syn.MatchesExpr{Expr: expr, MatchesKw: matches, Pat: pat, IfKw: ifKw, Cond: cond}
 }
 
 func (p *Parser) parseIndexExpr(expr syn.Expr) *syn.IndexExpr {
