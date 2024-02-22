@@ -142,6 +142,18 @@ type executionContext struct {
 	settings Settings
 }
 
+func (ecx *executionContext) PushScope() {
+	ecx.scope = &scope{
+		parent:    ecx.scope,
+		vars:      map[string]any{},
+		fragments: map[string]*syn.FragmentStmt{},
+	}
+}
+
+func (ecx *executionContext) PopScope() {
+	ecx.scope = ecx.scope.parent
+}
+
 type scope struct {
 	parent *scope
 	vars   map[string]any

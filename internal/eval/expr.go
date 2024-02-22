@@ -166,7 +166,25 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			return nil, err
 		}
 
-		return bindPat(dummyBinder{}, expr.Pat, val) == nil, nil
+		ecx.PushScope()
+		defer ecx.PopScope()
+		matches := bindPat(ecx.scope, expr.Pat, val) == nil
+		if !matches {
+			return false, nil
+		}
+
+		if expr.Cond != nil {
+			cond, err := e.eval(ctx, ecx, expr.Cond)
+			if err != nil {
+				return nil, err
+			}
+
+			if !truthy(cond) {
+				return false, nil
+			}
+		}
+
+		return true, nil
 
 	case *syn.FieldExpr:
 		val, err := e.eval(ctx, ecx, expr.Expr)

@@ -1,1 +1,17 @@
-assert 1 matches 1 if false
+assert 1 matches 1 if true
+
+# can access names bound in the pattern
+let x = 1
+
+# should shadow the outer x for the scope of the `if`
+let obj = { x: 2 }
+assert obj matches { x } if x == 2
+# outer x should be visible again afterwards
+assert x == 1
+
+# Have to write weird code to avoid the evaluator's special case for `assert x matches y`
+assert false == (1 matches 1 if false)
+assert false == (1 matches 2 if true)
+
+
+
