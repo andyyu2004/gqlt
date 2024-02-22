@@ -1,0 +1,38 @@
+let { status, statusCode, headers, body } = fetch("https://jsonplaceholder.typicode.com/users/1")
+
+assert status == "200 OK"
+assert statusCode == 200
+
+assert parseJSON(body) matches {
+    address: {
+        city: "Gwenborough",
+        street: "Kulas Light",
+        suite: "Apt. 556",
+        zipcode: "92998-3874",
+    },
+    company: {
+        bs: "harness real-time e-markets",
+        catchPhrase: "Multi-layered client-server neural-net",
+        name: "Romaguera-Crona",
+    },
+}
+
+let { status, body } = fetch("https://jsonplaceholder.typicode.com/posts", {
+    method: "POST",
+    body: {
+        title: "foo",
+        body: "bar",
+        userId: 1,
+    },
+    headers: {
+        "Content-Type": "application/json; charset=utf-8",
+    }
+})
+
+assert status == "201 Created"
+assert parseJSON(body) matches {
+    id: 101,
+    title: "foo",
+    body: "bar",
+    userId: 1,
+}

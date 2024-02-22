@@ -1,8 +1,12 @@
 package eval
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"regexp"
 	"time"
 
@@ -143,6 +147,75 @@ func gte(lhs, rhs any) (bool, error) {
 	return !lt, err
 }
 
+func fetch(url string, args map[string]any) (any, error) {
+	method := "GET"
+	if m, ok := args["method"]; ok {
+		if s, ok := m.(string); ok {
+			method = s
+		} else {
+			return nil, fmt.Errorf("method must be a string")
+		}
+	}
+
+	var body io.Reader
+	if b, ok := args["body"]; ok {
+		byts, err := json.Marshal(b)
+		if err != nil {
+			return nil, err
+		}
+
+		body = bytes.NewReader(byts)
+	}
+
+	req, err := http.NewRequest(method, url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	if headers, ok := args["headers"]; ok {
+		h, ok := headers.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("headers must be an object")
+		}
+
+		for k, v := range h {
+			switch v := v.(type) {
+			case string:
+				req.Header.Set(k, v)
+			default:
+				return nil, fmt.Errorf("header values must be strings")
+			}
+		}
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	headers := map[string][]any{}
+	for k, v := range resp.Header {
+		values := make([]any, len(v))
+		for i, s := range v {
+			values[i] = s
+		}
+		headers[k] = values
+	}
+
+	defer resp.Body.Close()
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"statusCode": float64(resp.StatusCode),
+		"status":     resp.Status,
+		"headers":    headers,
+		"body":       string(data),
+	}, nil
+}
+
 // FIXME typecheck these?
 var builtinScope = &scope{
 	vars: map[string]any{
@@ -161,6 +234,47 @@ var builtinScope = &scope{
 				}
 			}
 			return time.Now().Format(format), nil
+		}),
+		"fetch": function(func(args []any) (any, error) {
+			const help = `fetch(url: string, args: {
+				method?: string,
+				body:? string,
+				headers: { string: string },
+			})`
+			if len(args) < 1 || len(args) > 2 {
+				return nil, fmt.Errorf(help)
+			}
+
+			url, ok := args[0].(string)
+			if !ok {
+				return nil, fmt.Errorf("%s: 'url' must be a string", help)
+			}
+
+			if len(args) == 1 {
+				return fetch(url, map[string]any{})
+			} else {
+				p, ok := args[1].(map[string]any)
+				if !ok {
+					return nil, fmt.Errorf("%s: 'args' must be an object", help)
+				}
+				return fetch(url, p)
+			}
+		}),
+		"parseJSON": function(func(args []any) (any, error) {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("parseJson takes exactly 1 argument")
+			}
+
+			switch arg := args[0].(type) {
+			case string:
+				var val any
+				if err := json.Unmarshal([]byte(arg), &val); err != nil {
+					return nil, err
+				}
+				return val, nil
+			default:
+				return nil, fmt.Errorf("parseJSON takes a string")
+			}
 		}),
 		"dbg": function(func(args []any) (any, error) {
 			if len(args) != 1 {
