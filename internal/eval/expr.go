@@ -91,26 +91,11 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			return gt(lhs, rhs)
 		case lex.AngleREqual:
 			return gte(lhs, rhs)
-		case lex.BangTilde, lex.EqualsTilde:
-			lhs, ok := lhs.(string)
-			if !ok {
-				return nil, errorf(expr.Left, "expected string to match regex against")
-			}
-
-			rhs, ok := rhs.(string)
-			if !ok {
-				return nil, errorf(expr.Right, "regex must a string")
-			}
-
-			b, err := regexMatch(expr, lhs, rhs)
-			if err != nil {
-				return nil, err
-			}
-
-			if expr.Op.Kind == lex.BangTilde {
-				return !b, nil
-			}
-			return b, nil
+		case lex.EqualsTilde:
+			return regexMatch(expr, lhs, rhs)
+		case lex.BangTilde:
+			match, ok := regexMatch(expr, lhs, rhs)
+			return !match, ok
 		default:
 			panic(fmt.Sprintf("missing binary expr eval case: %s", expr.Op))
 		}

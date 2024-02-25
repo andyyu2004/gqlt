@@ -1,0 +1,6 @@
+
+[TestGqlt/fail/matches/regex - 1]
+assert "abc" =~ "^bc"
+#^^^^^^^^^^^^^^^^^^^^^ regex match assertion failed: "abc" !~ "^bc"
+
+---

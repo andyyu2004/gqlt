@@ -14,15 +14,6 @@ import (
 	"github.com/movio/gqlt/gqlparser/ast"
 )
 
-func regexMatch(pos ast.HasPosition, lhs, rhs string) (bool, error) {
-	regex, err := regexp.Compile(rhs)
-	if err != nil {
-		return false, errorf(pos, "invalid regex: %v", err)
-	}
-
-	return regex.MatchString(lhs), nil
-}
-
 func eq(lhs, rhs any) bool {
 	return cmp.Equal(lhs, rhs)
 }
@@ -140,6 +131,26 @@ func lte(lhs, rhs any) (bool, error) {
 func gt(lhs, rhs any) (bool, error) {
 	lte, err := lte(lhs, rhs)
 	return !lte, err
+}
+
+func regexMatch(pos ast.HasPosition, lhsVal, rhsVal any) (bool, error) {
+	lhs, ok := lhsVal.(string)
+	if !ok {
+		return false, errorf(pos, "expected string to match regex against")
+	}
+
+	rhs, ok := rhsVal.(string)
+	if !ok {
+		return false, errorf(pos, "regex must a string")
+	}
+
+	// Cache regex compilation if slow
+	regex, err := regexp.Compile(rhs)
+	if err != nil {
+		return false, errorf(pos, "invalid regex: %v", err)
+	}
+
+	return regex.MatchString(lhs), nil
 }
 
 func gte(lhs, rhs any) (bool, error) {

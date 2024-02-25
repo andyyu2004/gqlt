@@ -120,24 +120,36 @@ func (e *Executor) assertExpr(ctx context.Context, ecx *executionContext, pos as
 		return nil
 
 	case *syn.BinaryExpr:
-		if expr.Op.Kind == lex.Equals2 {
-			lhs, err := e.eval(ctx, ecx, expr.Left)
-			if err != nil {
-				return err
-			}
+		lhs, err := e.eval(ctx, ecx, expr.Left)
+		if err != nil {
+			return err
+		}
 
-			rhs, err := e.eval(ctx, ecx, expr.Right)
-			if err != nil {
-				return err
-			}
+		rhs, err := e.eval(ctx, ecx, expr.Right)
+		if err != nil {
+			return err
+		}
 
+		switch expr.Op.Kind {
+		case lex.Equals2:
 			diff := cmp.Diff(lhs, rhs)
 			if diff != "" {
 				return errorf(pos, "equality assertion failed:\n%v", diff)
 			}
 
 			return nil
+		case lex.EqualsTilde:
+			ok, err := regexMatch(pos, lhs, rhs)
+			if err != nil {
+				return err
+			}
+
+			if !ok {
+				return errorf(pos, "regex match assertion failed: %#v !~ %#v", lhs, rhs)
+			}
+
 		}
+
 	}
 
 	val, err := e.eval(ctx, ecx, expr)
