@@ -70,6 +70,34 @@ let b = { ...obj }
 #            ^^^
 			`,
 		},
+
+		{
+			"match condition",
+			`
+let x = 1
+assert x matches foo if foo == 1
+#                ...    ^^^
+			`,
+		},
+
+		{
+			"match condition shadowed",
+			`
+let foo = 1
+assert foo matches foo if foo == 1
+#                  ...    ^^^
+			`,
+		},
+
+		{
+			"match condition outer scope",
+			`
+let x = 1
+#   .
+assert foo matches _ if x == 1
+#                       ^
+			`,
+		},
 	}
 
 	for _, test := range tests {

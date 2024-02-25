@@ -151,6 +151,27 @@ mutation { bar }`,
 1:31..1:33: number
 `),
 		},
+		{
+			"matches",
+			"assert 1 matches 2",
+			expect.Expect(`1:1..1:7: keyword
+1:8..1:9: number
+1:10..1:17: keyword
+1:18..1:19: number
+`),
+		},
+
+		{
+			"matches if",
+			"assert 1 matches 2 if true",
+			expect.Expect(`1:1..1:7: keyword
+1:8..1:9: number
+1:10..1:17: keyword
+1:18..1:19: number
+1:20..1:22: keyword
+1:23..1:27: keyword
+`),
+		},
 	}
 
 	for _, test := range tests {

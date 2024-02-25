@@ -1,2 +1,9 @@
+# Tests that ensure that the typechecker does NOT complain about the following
+
 let x = [0, "test"]
+
+let x = "a string"
+assert { x: 42 } matches { x } if x == 42
+# test that the typechecker implements variable scoping properly
+assert x == "a string"
 

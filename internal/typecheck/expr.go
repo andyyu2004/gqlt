@@ -3,7 +3,6 @@ package typecheck
 import (
 	"fmt"
 
-	"github.com/movio/gqlt/gqlparser/ast"
 	"github.com/movio/gqlt/internal/lex"
 	"github.com/movio/gqlt/internal/slice"
 	"github.com/movio/gqlt/memosa/lib"
@@ -23,7 +22,7 @@ func (tcx *typechecker) expr(expr syn.Expr) Ty {
 		case *syn.IndexExpr:
 			return tcx.indexExpr(expr)
 		case *syn.LiteralExpr:
-			return tcx.literalExpr(expr, expr.Value)
+			return tcx.literalExpr(expr)
 		case *syn.ListExpr:
 			return tcx.listExpr(expr)
 		case *syn.MatchesExpr:
@@ -80,15 +79,15 @@ func (tcx *typechecker) tryExpr(expr *syn.TryExpr) Ty {
 }
 
 func (tcx *typechecker) nameExpr(expr *syn.NameExpr) Ty {
-	if entry, ok := tcx.scope[expr.Name.Value]; ok {
+	if entry, ok := tcx.scope.Lookup(expr.Name.Value); ok {
 		tcx.info.Resolutions[expr] = entry.Pat
 		return entry.Ty
 	}
 	return tcx.error(expr.Pos(), fmt.Sprintf("unbound name '%s'", expr.Name.Value))
 }
 
-func (tcx *typechecker) literalExpr(pos ast.HasPosition, val any) Ty {
-	switch val := val.(type) {
+func (tcx *typechecker) literalExpr(expr *syn.LiteralExpr) Ty {
+	switch val := expr.Value.(type) {
 	case bool:
 		return Bool{}
 	case float64:
@@ -220,8 +219,18 @@ func (tcx *typechecker) indexExpr(expr *syn.IndexExpr) Ty {
 }
 
 func (tcx *typechecker) matchesExpr(expr *syn.MatchesExpr) Ty {
+	tcx.PushScope()
+	defer tcx.PopScope()
 	ty := tcx.expr(expr.Expr)
 	tcx.bind(expr.Pat, ty)
+
+	if expr.Cond != nil {
+		condTy := tcx.expr(expr.Cond)
+		if !compat(condTy, Bool{}) {
+			return tcx.error(expr.Cond.Pos(), fmt.Sprintf("expected match condition to be a boolean expression, got '%v'", condTy))
+		}
+	}
+
 	return Bool{}
 }
 

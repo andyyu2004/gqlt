@@ -50,6 +50,7 @@ func (s *Snapshot) Highlight(uri string) Highlights {
 				lex.Null,
 				lex.Assert,
 				lex.Matches,
+				lex.If,
 				lex.Fragment,
 				lex.On,
 				lex.Query,

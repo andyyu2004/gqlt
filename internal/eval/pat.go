@@ -11,12 +11,6 @@ type binder interface {
 	bind(name string, val any)
 }
 
-type dummyBinder struct{}
-
-var _ binder = dummyBinder{}
-
-func (dummyBinder) bind(string, any) {}
-
 func bindPat(binder binder, pat syn.Pat, val any) error {
 	switch pat := pat.(type) {
 	case *syn.WildcardPat:

@@ -26,6 +26,7 @@ var semanticTokensLegend = protocol.SemanticTokensLegend{
 		string(protocol.SemanticTokenTypeType),
 		string(protocol.SemanticTokenTypeParameter),
 	},
+	TokenModifiers: []string{},
 }
 
 func New(ide *ide.IDE) *server.Server {

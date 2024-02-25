@@ -34,9 +34,38 @@ func (e Error) Pos() ast.Position {
 type typechecker struct {
 	schema    *syn.Schema
 	info      Info
-	scope     map[string]scopeEntry
+	scope     *scope
 	fragments map[string]*syn.FragmentDefinition
 	settings  Settings
+}
+
+func (tcx *typechecker) PushScope() {
+	tcx.scope = &scope{parent: tcx.scope, bindings: make(map[string]scopeEntry)}
+}
+
+func (tcx *typechecker) PopScope() {
+	tcx.scope = tcx.scope.parent
+}
+
+type scope struct {
+	parent   *scope
+	bindings map[string]scopeEntry
+}
+
+func (s *scope) Lookup(name string) (scopeEntry, bool) {
+	if entry, ok := s.bindings[name]; ok {
+		return entry, true
+	}
+
+	if s.parent != nil {
+		return s.parent.Lookup(name)
+	}
+	return scopeEntry{}, false
+}
+
+func (s *scope) Bind(name string, ty Ty, pat *syn.NamePat) {
+	// we overwrite the name in scope if it already exists (i.e. shadowing is allowed)
+	s.bindings[name] = scopeEntry{Ty: ty, Pat: pat}
 }
 
 type Settings interface {
@@ -56,7 +85,7 @@ func New(schema *syn.Schema, settings Settings) *typechecker {
 	return &typechecker{
 		schema:    schema,
 		settings:  settings,
-		scope:     make(map[string]scopeEntry),
+		scope:     &scope{bindings: make(map[string]scopeEntry)},
 		fragments: make(map[string]*syn.FragmentDefinition),
 		info: Info{
 			ExprTypes:    make(map[syn.Expr]Ty),
