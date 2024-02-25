@@ -78,12 +78,15 @@ func (stmt SetStmt) Format(w io.Writer) {
 }
 
 type AssertStmt struct {
-	ast.Position
 	AssertKw lex.Token
 	Expr     Expr
 }
 
 var _ Stmt = AssertStmt{}
+
+func (stmt AssertStmt) Pos() ast.Position {
+	return stmt.AssertKw.Merge(stmt.Expr.Pos())
+}
 
 func (stmt AssertStmt) Children() Children {
 	return Children{stmt.AssertKw, stmt.Expr}

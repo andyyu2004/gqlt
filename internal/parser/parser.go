@@ -210,7 +210,7 @@ func (p *Parser) parseAssertStmt() *syn.AssertStmt {
 		return nil
 	}
 
-	return &syn.AssertStmt{Position: assert.Merge(expr), AssertKw: assert, Expr: expr}
+	return &syn.AssertStmt{AssertKw: assert, Expr: expr}
 }
 
 func (p *Parser) parseLetStmt() *syn.LetStmt {

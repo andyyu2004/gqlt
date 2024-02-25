@@ -1,0 +1,7 @@
+
+[TestGqlt/fail/matches/conditional - 1]
+let [x, y] = [1, 1];
+assert x matches y if false
+#                     ^^^^^ assertion failed: false
+
+---

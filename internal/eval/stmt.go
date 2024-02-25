@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/movio/gqlt/gqlparser/ast"
 	"github.com/movio/gqlt/internal/lex"
 	"github.com/movio/gqlt/syn"
 )
@@ -86,8 +87,12 @@ func (e *Executor) fragment(_ context.Context, ecx *executionContext, stmt *syn.
 }
 
 func (e *Executor) assert(ctx context.Context, ecx *executionContext, stmt *syn.AssertStmt) error {
+	return e.assertExpr(ctx, ecx, stmt, stmt.Expr)
+}
+
+func (e *Executor) assertExpr(ctx context.Context, ecx *executionContext, pos ast.HasPosition, expr syn.Expr) error {
 	// Try to provide nice assertion failure messages for certain common cases
-	switch expr := stmt.Expr.(type) {
+	switch expr := expr.(type) {
 	case *syn.MatchesExpr:
 		val, err := e.eval(ctx, ecx, expr.Expr)
 		if err != nil {
@@ -105,18 +110,11 @@ func (e *Executor) assert(ctx context.Context, ecx *executionContext, stmt *syn.
 				msg = err.Error()
 			}
 
-			return errorf(stmt, "match assertion failed: %v", msg)
+			return errorf(pos, "match assertion failed: %v", msg)
 		}
 
 		if expr.Cond != nil {
-			cond, err := e.eval(ctx, ecx, expr.Cond)
-			if err != nil {
-				return err
-			}
-
-			if !truthy(cond) {
-				return errorf(stmt, "match condition failed")
-			}
+			return e.assertExpr(ctx, ecx, expr.Cond, expr.Cond)
 		}
 
 		return nil
@@ -135,22 +133,22 @@ func (e *Executor) assert(ctx context.Context, ecx *executionContext, stmt *syn.
 
 			diff := cmp.Diff(lhs, rhs)
 			if diff != "" {
-				return errorf(stmt, "equality assertion failed:\n%v", diff)
+				return errorf(pos, "equality assertion failed:\n%v", diff)
 			}
 
 			return nil
 		}
 	}
 
-	val, err := e.eval(ctx, ecx, stmt.Expr)
+	val, err := e.eval(ctx, ecx, expr)
 	if err != nil {
 		return err
 	}
 
 	if !truthy(val) {
 		var fmt strings.Builder
-		stmt.Expr.Format(&fmt)
-		return errorf(stmt, "assertion failed: %v", fmt.String())
+		expr.Format(&fmt)
+		return errorf(pos, "assertion failed: %v", fmt.String())
 	}
 
 	return nil
