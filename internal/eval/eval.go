@@ -230,11 +230,10 @@ func Discover(dir string) ([]string, error) {
 	return doublestar.FilepathGlob(fmt.Sprintf("%s/**/*%s", dir, Ext))
 }
 
-// `Test` all `gqlt` tests in the given directory (recursively).
-func (e *Executor) Test(t *testing.T, root string, factory ClientFactory, opts ...Opt) {
+func (e *Executor) TestWith(t *testing.T, root string, f func(func(context.Context, Client)), opts ...Opt) {
 	runConfig := runConfig{
 		glob: "**",
-		errorHandler: func(t *testing.T, file string, err error) {
+		errorHandler: func(t *testing.T, _ string, err error) {
 			t.Fatal(err)
 		},
 	}
@@ -268,13 +267,20 @@ func (e *Executor) Test(t *testing.T, root string, factory ClientFactory, opts .
 				t.SkipNow()
 			}
 
-			ctx, client := factory.CreateClient(t)
-
-			if err := e.RunFile(ctx, client, path, opts...); err != nil {
-				runConfig.errorHandler(t, path, err)
-			}
+			f(func(ctx context.Context, client Client) {
+				if err := e.RunFile(ctx, client, path, opts...); err != nil {
+					runConfig.errorHandler(t, path, err)
+				}
+			})
 		})
 	}
+}
+
+// `Test` all `gqlt` tests in the given directory with the given ClientFactory (recursively).
+func (e *Executor) Test(t *testing.T, root string, factory ClientFactory, opts ...Opt) {
+	e.TestWith(t, root, func(f func(context.Context, Client)) {
+		f(factory.CreateClient(t))
+	}, opts...)
 }
 
 func (e *Executor) RunFile(ctx context.Context, client Client, path string, opts ...Opt) error {
