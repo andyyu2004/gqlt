@@ -1,8 +1,8 @@
 package ide
 
 import (
+	"github.com/movio/gqlt/internal/config"
 	"github.com/movio/gqlt/memosa"
-	"github.com/movio/gqlt/syn"
 )
 
 type sourcesInputQuery struct{}
@@ -17,10 +17,10 @@ type Input struct {
 	Sources map[string]string
 }
 
-type schemaInputQuery struct{}
+type schemasInputQuery struct{}
 
-var _ memosa.Input[*syn.Schema] = schemaInputQuery{}
+var _ memosa.Input[*config.Schemas] = schemasInputQuery{}
 
-func (schemaInputQuery) Execute(ctx *memosa.Context, key memosa.InputKey) *syn.Schema {
+func (schemasInputQuery) Execute(ctx *memosa.Context, key memosa.InputKey) *config.Schemas {
 	panic("memosa will not call input queries")
 }

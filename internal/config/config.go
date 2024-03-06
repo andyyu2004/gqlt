@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/movio/gqlt/gqlparser"
 	"github.com/movio/gqlt/gqlparser/ast"
 	"github.com/movio/gqlt/syn"
-	"github.com/bmatcuk/doublestar/v4"
 	"gopkg.in/yaml.v2"
 )
 
@@ -29,22 +30,35 @@ type ProjectConfig struct {
 
 type Config struct {
 	ProjectConfig `yaml:",inline" json:",inline"`
-	// Unsupported for now, we would need a way to select which project to use
-	// Maybe `set schema <project>`?
-	// Projects      map[string]ProjectConfig `yaml:"projects,omitempty" json:"projects,omitempty"`
+	Projects      map[string]ProjectConfig `yaml:"projects,omitempty" json:"projects,omitempty"`
 }
 
-func LoadSchema(workspaces ...string) (*syn.Schema, error) {
+type schemaEntry struct {
+	glob   string
+	schema *syn.Schema
+}
+
+type Schemas struct {
+	schemas []schemaEntry
+}
+
+func (s *Schemas) ForPath(path string) *syn.Schema {
+	for _, entry := range s.schemas {
+		if matches, err := doublestar.Match(entry.glob, path); err == nil && matches {
+			return entry.schema
+		}
+	}
+
+	return nil
+}
+
+func LoadSchemas(workspaces ...string) (*Schemas, error) {
 	config, root, err := discover(workspaces)
 	if err != nil {
 		return nil, err
 	}
 
-	if config == nil {
-		return nil, nil
-	}
-
-	return buildSchema(config, root)
+	return buildSchemas(config, root)
 }
 
 func discover(workspaces []string) (*Config, string, error) {
@@ -84,8 +98,43 @@ func discover(workspaces []string) (*Config, string, error) {
 	return nil, "", nil
 }
 
-func buildSchema(config *Config, path string) (*syn.Schema, error) {
-	schemaPaths, err := doublestar.FilepathGlob(filepath.Join(path, config.Schema), doublestar.WithFilesOnly())
+func buildSchemas(config *Config, root string) (*Schemas, error) {
+	// Can't use the glob directly as it probably ends with *.graphql
+	if config == nil {
+		// no .graphqlrc file found, use a reasonable default where we scan for all .graphql files
+		schema, err := buildSchema(ProjectConfig{Schema: "**/*.graphql"}, root)
+		if err != nil {
+			return nil, err
+		}
+
+		return &Schemas{schemas: []schemaEntry{{"**/*.gqlt", schema}}}, nil
+	}
+
+	if config.Projects == nil {
+		schema, err := buildSchema(config.ProjectConfig, root)
+		if err != nil {
+			return nil, err
+		}
+
+		return &Schemas{schemas: []schemaEntry{{"**/*.gqlt", schema}}}, nil
+	}
+
+	schemas := make([]schemaEntry, 0, len(config.Projects))
+	for _, projectConfig := range config.Projects {
+		schema, err := buildSchema(projectConfig, root)
+		if err != nil {
+			return nil, err
+		}
+
+		// change the graphql glob to a gqlt glob
+		schemas = append(schemas, schemaEntry{strings.ReplaceAll(filepath.Join(root, projectConfig.Schema), ".graphql", ".gqlt"), schema})
+	}
+
+	return &Schemas{schemas: schemas}, nil
+}
+
+func buildSchema(config ProjectConfig, root string) (*syn.Schema, error) {
+	schemaPaths, err := doublestar.FilepathGlob(filepath.Join(root, config.Schema), doublestar.WithFilesOnly())
 	if err != nil {
 		return nil, err
 	}

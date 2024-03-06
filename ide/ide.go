@@ -3,6 +3,7 @@ package ide
 import (
 	"fmt"
 	"maps"
+	"net/url"
 	"sync"
 	"testing"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/movio/gqlt/internal/eval"
 	"github.com/movio/gqlt/internal/typecheck"
 	"github.com/movio/gqlt/memosa"
+	"github.com/movio/gqlt/memosa/lib"
 	"github.com/movio/gqlt/syn"
 	"github.com/stretchr/testify/require"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -103,12 +105,12 @@ func (ide *IDE) Sources() map[string]string {
 	return maps.Clone(memosa.Get[sourcesInputQuery](ide.ctx).Sources)
 }
 
-func (ide *IDE) SetSchema(schema *syn.Schema) {
-	memosa.Set[schemaInputQuery](ide.ctx, schema)
+func (ide *IDE) SetSchemas(schema *config.Schemas) {
+	memosa.Set[schemasInputQuery](ide.ctx, schema)
 }
 
-func (ide *IDE) Schema() *syn.Schema {
-	return memosa.Get[schemaInputQuery](ide.ctx)
+func (ide *IDE) Schemas() *config.Schemas {
+	return memosa.Get[schemasInputQuery](ide.ctx)
 }
 
 func (ide *IDE) Source(uri string) string {
@@ -128,6 +130,19 @@ func (s *Snapshot) Typecheck(uri string) typecheck.Info {
 }
 
 type (
+	schemaQuery struct{}
+	schemaKey   struct{ URI string }
+)
+
+var _ memosa.Query[schemaKey, *syn.Schema] = schemaQuery{}
+
+func (schemaQuery) Execute(ctx *memosa.Context, key schemaKey) *syn.Schema {
+	path := lib.Must(url.Parse(key.URI)).Path
+	schemas := memosa.Get[schemasInputQuery](ctx)
+	return schemas.ForPath(path)
+}
+
+type (
 	typecheckQuery struct{}
 	typecheckKey   struct{ URI string }
 )
@@ -135,8 +150,8 @@ type (
 var _ memosa.Query[typecheckKey, typecheck.Info] = typecheckQuery{}
 
 func (typecheckQuery) Execute(ctx *memosa.Context, key typecheckKey) typecheck.Info {
-	schema := memosa.Get[schemaInputQuery](ctx)
-	tcx := typecheck.New(schema, &eval.Settings{})
+	schemas := memosa.Fetch[schemaQuery](ctx, schemaKey(key))
+	tcx := typecheck.New(schemas, &eval.Settings{})
 	ast := memosa.Fetch[parseQuery](ctx, parseKey(key)).Ast
 	return tcx.Check(ast)
 }
@@ -205,11 +220,13 @@ func TestWith(t testing.TB, content string, f func(string, Snapshot)) {
 	ide := New()
 
 	// working directory is `gqlt/ide`
-	schema, err := config.LoadSchema("../")
+	schemas, err := config.LoadSchemas("../")
 	require.NoError(t, err)
+
+	schema := schemas.ForPath(path)
 	require.NotNil(t, schema, "should load gqlt/.graphqlrc.yaml")
-	ide.SetSchema(schema)
-	require.Equal(t, schema, ide.Schema())
+	ide.SetSchemas(schemas)
+	require.Equal(t, schema, ide.Schemas().ForPath(path))
 
 	ide.Apply(Changes{SetFileContent{Path: path, Content: content}})
 	require.NoError(t, ide.WithSnapshot(logger{t}, func(s Snapshot) {

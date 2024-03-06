@@ -21,17 +21,18 @@ func TestParseConfig(t *testing.T) {
 	check(`schema: schema.graphql`, yaml.Unmarshal, expected)
 	check(`{ "schema": "schema.graphql" }`, json.Unmarshal, expected)
 
-	// expected = config.Config{
-	// 	Projects: map[string]config.ProjectConfig{
-	// 		"project1": {Schema: "schema1.graphql"},
-	// 		"project2": {Schema: "schema2.graphql"},
-	// 	},
-	// }
-	//
-	// check(`projects:
-	//  project1:
-	//    schema: schema1.graphql
-	//  project2:
-	//    schema: schema2.graphql`, yaml.Unmarshal, expected)
-	// check(`{ "projects": { "project1": { "schema": "schema1.graphql" }, "project2": { "schema": "schema2.graphql" } } }`, json.Unmarshal, expected)
+	expected = config.Config{
+		Projects: map[string]config.ProjectConfig{
+			"project1": {Schema: "schema1.graphql"},
+			"project2": {Schema: "schema2.graphql"},
+		},
+	}
+
+	check(`
+projects:
+  project1:
+    schema: schema1.graphql
+  project2:
+    schema: schema2.graphql`, yaml.Unmarshal, expected)
+	check(`{ "projects": { "project1": { "schema": "schema1.graphql" }, "project2": { "schema": "schema2.graphql" } } }`, json.Unmarshal, expected)
 }

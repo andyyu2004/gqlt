@@ -58,14 +58,14 @@ func (s *ls) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (a
 	})
 
 	// TODO need to add a lsp file watcher to manage changes to the schema files and config file
-	schema, err := config.LoadSchema(workspaces...)
+	schemas, err := config.LoadSchemas(workspaces...)
 	if err != nil {
 		// don't return, just continue without loading a schema
 		_ = protocol.Trace(ctx, protocol.MessageTypeError, fmt.Sprintf("failed to load config: %v", err))
 	}
 
-	// the input must always be set, nil or not
-	s.ide.SetSchema(schema)
+	// the input must always be explicitly set, nil or otherwise
+	s.ide.SetSchemas(schemas)
 
 	return protocol.InitializeResult{
 		Capabilities: protocol.ServerCapabilities{
