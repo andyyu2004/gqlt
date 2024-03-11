@@ -3,6 +3,7 @@ package eval
 import (
 	"context"
 	"fmt"
+	"maps"
 
 	"github.com/movio/gqlt/internal/lex"
 	"github.com/movio/gqlt/syn"
@@ -106,7 +107,17 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 			return nil, errorf(expr, "reference to undefined variable: %s", expr.Name.Value)
 		}
 
-		return val, nil
+		// copy in order to avoid mutation of the stored values
+		switch val := val.(type) {
+		case map[string]any:
+			return maps.Clone(val), nil
+		case []any:
+			dst := make([]any, len(val))
+			copy(dst, val)
+			return dst, nil
+		default:
+			return val, nil
+		}
 
 	case *syn.ListExpr:
 		vals := make([]any, len(expr.Exprs))
