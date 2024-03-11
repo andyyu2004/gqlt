@@ -1,0 +1,6 @@
+# https://github.com/movio/gqlt/issues/6
+
+let a = { name: "a", age: 20 }
+
+assert { age: 21, ...a } == { name: "a", age: 21 }
+assert a == { name: "a", age: 20 }
