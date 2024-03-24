@@ -68,7 +68,7 @@ func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.Q
 	req := Request{Query: buf.String(), Variables: ecx.scope.gqlVars()}
 	errs, err := ecx.client.Request(ctx, req, &data)
 	if err != nil {
-		return nil, err
+		return nil, errorf(expr.Position, "graphql request failed: %v", err)
 	}
 
 	if len(errs) > 0 {
