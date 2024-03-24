@@ -72,7 +72,7 @@ func (e *Executor) query(ctx context.Context, ecx *executionContext, expr *syn.Q
 	}
 
 	if len(errs) > 0 {
-		return flatten(data), errs
+		return flatten(data), errorf(expr.Position, "graphql request failed: %v", errs)
 	}
 
 	return flatten(data), nil

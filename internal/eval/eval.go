@@ -234,7 +234,7 @@ func (e *Executor) TestWith(t *testing.T, root string, f func(func(context.Conte
 	runConfig := runConfig{
 		glob: "**",
 		errorHandler: func(t *testing.T, _ string, err error) {
-			t.Fatal(err)
+			t.Fatalf("error: %v", err.Error())
 		},
 	}
 
