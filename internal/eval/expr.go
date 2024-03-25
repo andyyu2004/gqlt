@@ -9,6 +9,21 @@ import (
 	"github.com/movio/gqlt/syn"
 )
 
+func unwrapCatchable(err error) catchable {
+	for {
+		if c, ok := err.(catchable); ok {
+			return c
+		}
+
+		e, ok := err.(interface{ Unwrap() error })
+		if !ok {
+			return nil
+		}
+
+		err = e.Unwrap()
+	}
+}
+
 // keep in sync with typecheck/expr.go
 func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Expr) (any, error) {
 	switch expr := expr.(type) {
@@ -18,7 +33,7 @@ func (e *Executor) eval(ctx context.Context, ecx *executionContext, expr syn.Exp
 		const errorsKey = "errors"
 		data, err := e.eval(ctx, ecx, expr.Expr)
 		if err != nil {
-			if err, ok := err.(catchable); ok {
+			if err := unwrapCatchable(err); err != nil {
 				return map[string]any{
 					dataKey:   data,
 					errorsKey: err.catch(),

@@ -40,6 +40,25 @@ func errorf(pos ast.HasPosition, format string, args ...interface{}) error {
 	return Error{Position: pos, Msg: fmt.Sprintf(format, args...)}
 }
 
+// Wrap an error with position information
+// This implementation implements the `Unwrap` method so the `try catch` mechanism works.
+func errWrap(pos ast.HasPosition, err error) error {
+	return posError{pos: pos.Pos(), err: err}
+}
+
+type posError struct {
+	pos ast.Position
+	err error
+}
+
+func (e posError) Error() string {
+	return fmt.Sprintf("%v: %s", e.pos, e.err.Error())
+}
+
+func (e posError) Unwrap() error {
+	return e.err
+}
+
 type Opt func(*runConfig)
 
 // Apply a glob filter to the test files
