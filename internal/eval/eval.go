@@ -249,7 +249,7 @@ func Discover(dir string) ([]string, error) {
 	return doublestar.FilepathGlob(fmt.Sprintf("%s/**/*%s", dir, Ext))
 }
 
-func (e *Executor) TestWith(t *testing.T, root string, f func(func(context.Context, Client)), opts ...Opt) {
+func (e *Executor) TestWith(t *testing.T, root string, f func(*testing.T, func(context.Context, Client)), opts ...Opt) {
 	runConfig := runConfig{
 		glob: "**",
 		errorHandler: func(t *testing.T, _ string, err error) {
@@ -286,7 +286,7 @@ func (e *Executor) TestWith(t *testing.T, root string, f func(func(context.Conte
 				t.SkipNow()
 			}
 
-			f(func(ctx context.Context, client Client) {
+			f(t, func(ctx context.Context, client Client) {
 				if err := e.RunFile(ctx, client, path, opts...); err != nil {
 					runConfig.errorHandler(t, path, err)
 				}
@@ -297,7 +297,7 @@ func (e *Executor) TestWith(t *testing.T, root string, f func(func(context.Conte
 
 // `Test` all `gqlt` tests in the given directory with the given ClientFactory (recursively).
 func (e *Executor) Test(t *testing.T, root string, factory ClientFactory, opts ...Opt) {
-	e.TestWith(t, root, func(f func(context.Context, Client)) {
+	e.TestWith(t, root, func(t *testing.T, f func(context.Context, Client)) {
 		f(factory.CreateClient(t))
 	}, opts...)
 }
