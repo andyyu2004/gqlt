@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"time"
 
@@ -230,6 +231,25 @@ func fetch(url string, args map[string]any) (any, error) {
 // FIXME typecheck these?
 var builtinScope = &scope{
 	vars: map[string]any{
+		"format": function(func(args []any) (any, error) {
+			if len(args) < 1 {
+				return nil, fmt.Errorf("format takes at least 1 argument")
+			}
+
+			format, ok := args[0].(string)
+			if !ok {
+				return nil, fmt.Errorf("format argument must be a string")
+			}
+
+			return fmt.Sprintf(format, args[1:]...), nil
+		}),
+		"getcwd": function(func(args []any) (any, error) {
+			if len(args) != 0 {
+				return nil, fmt.Errorf("getcwd() takes no arguments")
+			}
+
+			return os.Getwd()
+		}),
 		"now": function(func(args []any) (any, error) {
 			if len(args) > 1 {
 				return nil, fmt.Errorf("now() or now(format: string) expected")
