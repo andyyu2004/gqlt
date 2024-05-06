@@ -1,0 +1,3 @@
+let x = 42
+assert 42 matches $x
+assert [42 matches $x] == [true]

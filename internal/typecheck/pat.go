@@ -17,10 +17,31 @@ func (tcx *typechecker) bind(pat syn.Pat, ty Ty) {
 		tcx.bindList(pat, ty)
 	case *syn.ObjectPat:
 		tcx.bindObject(pat, ty)
+	case *syn.VarPat:
+		tcx.varPat(pat, ty)
 	case *syn.RestPat:
 	// This can actually be hit if we encounter an any type somewhere
 	// See 66abd8b2a896a9ed3ba6a50439e4639d789585e1
 	default:
+		panic(fmt.Sprintf("unhandled pattern type: %T", pat))
+	}
+}
+
+func (tcx *typechecker) varPat(pat *syn.VarPat, ty Ty) {
+	if _, ok := ty.(errTy); ok {
+		return
+	}
+
+	entry, ok := tcx.scope.Lookup(pat.Name.Value)
+	if !ok {
+		tcx.error(pat.Pos(), fmt.Sprintf("variable pattern references undefined variable $%s", pat.Name.Value))
+		return
+	}
+
+	tcx.info.VarPatResolutions[pat] = entry.Pat
+
+	if !compat(entry.Ty, ty) {
+		tcx.error(pat.Pos(), fmt.Sprintf("variable pattern has type %v, but is being compared to a value of type %v", entry.Ty, ty))
 	}
 }
 

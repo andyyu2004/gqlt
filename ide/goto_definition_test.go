@@ -96,6 +96,15 @@ let x = 1
 #   .
 assert foo matches _ if x == 1
 #                       ^
+`,
+		},
+		{
+			"variable pattern",
+			`
+let foo = 42
+#   ...
+assert 42 matches $foo
+#                  ^^^
 			`,
 		},
 	}

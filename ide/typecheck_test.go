@@ -154,5 +154,31 @@ assert 2 matches 2 if 2
 #                     ^ expected match condition to be a boolean expression, got 'number'
 			`),
 		},
+
+		{
+			"simple variable pattern", `
+let x = 2
+let y = "string"
+assert x matches $y
+			`, expect.Expect(`
+let x = 2
+let y = "string"
+assert x matches $y
+#                ^^ variable pattern has type string, but is being compared to a value of type number
+			`),
+		},
+
+		{
+			"variable pattern", `
+let x = 2
+let y = "string"
+assert { x } matches { x: $y }
+			`, expect.Expect(`
+let x = 2
+let y = "string"
+assert { x } matches { x: $y }
+#                         ^^ variable pattern has type string, but is being compared to a value of type number
+			`),
+		},
 	}...)
 }
