@@ -48,7 +48,7 @@ func bindPat(binder binder, pat syn.Pat, val any) error {
 			return errorf(pat, "variable pattern references undefined variable: '$%s'", pat.Name.Value)
 		}
 
-		if val != target {
+		if !eq(val, target) {
 			return errorf(pat, "variable pattern does not match value: %v != %v", target, val)
 		}
 

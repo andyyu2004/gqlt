@@ -1,3 +1,6 @@
 let x = 42
 assert 42 matches $x
 assert [42 matches $x] == [true]
+
+let obj = { a: 42 }
+assert { a: 42 } matches $obj
