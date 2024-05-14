@@ -102,7 +102,7 @@ type Info struct {
 	BindingTypes map[*syn.NamePat]Ty
 	// NameResolutions maps name expressions to the binding that it references
 	NameResolutions map[*syn.NameExpr]*syn.NamePat
-	// VarPatResolutions maps var patterns to the binding that it references
+	// VarPatResolutions maps $var patterns to the binding that it references
 	VarPatResolutions map[*syn.VarPat]*syn.NamePat
 	Warnings          Errors
 	Errors            Errors
@@ -114,7 +114,35 @@ func (tcx *typechecker) Check(ast syn.File) Info {
 		tcx.stmt(stmt)
 	}
 
+	tcx.populateWarnings()
+
 	return tcx.info
+}
+
+func (tcx *typechecker) populateWarnings() {
+	for pat := range tcx.unusedBindings() {
+		tcx.warn(pat.Pos(), fmt.Sprintf("unused variable %s", pat.Name.Value))
+	}
+}
+
+func (tcx *typechecker) unusedBindings() map[*syn.NamePat]struct{} {
+	// start with all bindings in scope
+	unusedBindings := make(map[*syn.NamePat]struct{})
+	for pat := range tcx.info.BindingTypes {
+		unusedBindings[pat] = struct{}{}
+	}
+
+	// remove all bindings that are referenced by name expressions
+	for _, binding := range tcx.info.NameResolutions {
+		delete(unusedBindings, binding)
+	}
+
+	// remove all bindings that are referenced by $var patterns
+	for _, binding := range tcx.info.VarPatResolutions {
+		delete(unusedBindings, binding)
+	}
+
+	return unusedBindings
 }
 
 // Type error handling invariants:
@@ -127,6 +155,6 @@ func (tcx *typechecker) error(pos ast.HasPosition, msg string) errTy {
 	return errTy{}
 }
 
-// func (tcx *typechecker) warn(pos ast.Position, msg string) {
-// 	tcx.info.Warnings = append(tcx.info.Warnings, Error{pos.Pos(), msg})
-// }
+func (tcx *typechecker) warn(pos ast.Position, msg string) {
+	tcx.info.Warnings = append(tcx.info.Warnings, Error{pos.Pos(), msg})
+}

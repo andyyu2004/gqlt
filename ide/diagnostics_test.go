@@ -52,16 +52,24 @@ type diagnosticTestCase struct {
 	expectation expect.Expectation
 }
 
-func testDiagnostics(t *testing.T, cases ...diagnosticTestCase) {
+func testDiagnostics(t *testing.T, cases []diagnosticTestCase, minSeverity protocol.DiagnosticSeverity) {
 	check := func(name, content string, expectation expect.Expectation) {
 		t.Helper()
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			ide.TestWith(t, content, func(uri string, s ide.Snapshot) {
 				mapper := s.Mapper(uri)
-				diagnostics := slice.Map(s.Diagnostics()[uri], toAnnotation(mapper))
+				diagnostics := slice.Filter(s.Diagnostics()[uri], func(d protocol.Diagnostic) bool {
+					if d.Severity == nil {
+						return true
+					}
 
-				expectation.AssertEqual(t, annotate.Annotate(content, diagnostics))
+					// Low number is high severity for some reason
+					return *d.Severity <= minSeverity
+				})
+
+				annotations := slice.Map(diagnostics, toAnnotation(mapper))
+				expectation.AssertEqual(t, annotate.Annotate(content, annotations))
 			})
 		})
 	}
@@ -87,6 +95,7 @@ print(x)
 `,
 			expect.Expect(`
 let { x: y } = { x: 5 }
+#        ^ unused variable y
 print(x)
 #     ^ unbound name 'x'
 `),
@@ -133,5 +142,18 @@ query { foo { ...Foo } }
 #                ^^^ fragment 'Foo' not defined
 `),
 		},
-	}...)
+
+		{
+			"unused variable in matches", `
+let x = 5
+assert 5 matches x # oops, forgot to use $x
+`,
+			expect.Expect(`
+let x = 5
+#   ^ unused variable x
+assert 5 matches x # oops, forgot to use $x
+#                ^ unused variable x
+`),
+		},
+	}, protocol.DiagnosticSeverityHint)
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/andyyu2004/expect-test"
+	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
 // Test type errors
@@ -180,5 +181,5 @@ assert { x } matches { x: $y }
 #                         ^^ variable pattern has type string, but is being compared to a value of type number
 			`),
 		},
-	}...)
+	}, protocol.DiagnosticSeverityError)
 }

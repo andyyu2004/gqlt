@@ -7,6 +7,8 @@ import (
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
+type PatternFlags uint8
+
 func (tcx *typechecker) bind(pat syn.Pat, ty Ty) {
 	switch pat := pat.(type) {
 	case *syn.WildcardPat:
