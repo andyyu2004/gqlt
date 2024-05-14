@@ -7,5 +7,7 @@ assert mutation { inc } == 3
 # optional extension
 use "../common/increment"
 
+assert mutation { inc } == 5
+
 
 
