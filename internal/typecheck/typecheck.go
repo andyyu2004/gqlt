@@ -121,7 +121,7 @@ func (tcx *typechecker) Check(ast syn.File) Info {
 
 func (tcx *typechecker) populateWarnings() {
 	for pat := range tcx.unusedBindings() {
-		tcx.warn(pat.Pos(), fmt.Sprintf("unused variable %s", pat.Name.Value))
+		tcx.warn(pat.Pos(), fmt.Sprintf("unused variable '%s'", pat.Name.Value))
 	}
 }
 

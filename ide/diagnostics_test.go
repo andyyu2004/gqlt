@@ -95,7 +95,7 @@ print(x)
 `,
 			expect.Expect(`
 let { x: y } = { x: 5 }
-#        ^ unused variable y
+#        ^ unused variable 'y'
 print(x)
 #     ^ unbound name 'x'
 `),
@@ -150,9 +150,9 @@ assert 5 matches x # oops, forgot to use $x
 `,
 			expect.Expect(`
 let x = 5
-#   ^ unused variable x
+#   ^ unused variable 'x'
 assert 5 matches x # oops, forgot to use $x
-#                ^ unused variable x
+#                ^ unused variable 'x'
 `),
 		},
 	}, protocol.DiagnosticSeverityHint)
