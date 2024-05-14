@@ -146,7 +146,7 @@ query { foo { ...Foo } }
 		{
 			"unused variable in matches", `
 let x = 5
-assert 5 matches x # oops, forgot to use $x
+assert 5 matches x
 `,
 			expect.Expect(`
 let x = 5

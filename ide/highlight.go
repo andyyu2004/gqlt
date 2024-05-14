@@ -37,6 +37,7 @@ func (s *Snapshot) Highlight(uri string) Highlights {
 		ScopeObject Scope = iota
 		ScopeArgs
 		ScopeSet
+		ScopeValue
 	)
 	scopes := stack.Stack[Scope]{}
 	return iterator.FilterMap(syn.Traverse(root.Ast), func(event syn.Event) (Highlight, bool) {

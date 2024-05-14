@@ -8,6 +8,7 @@ import (
 
 	"github.com/movio/gqlt/gqlparser/ast"
 	"github.com/movio/gqlt/gqlparser/lexer"
+	"github.com/movio/gqlt/internal/lex"
 )
 
 type ValueKind int
@@ -43,11 +44,58 @@ func (v *Value) Children() Children {
 	if v == nil {
 		return nil
 	}
-	children := Children{}
-	for _, f := range v.Fields {
-		children = append(children, f)
+
+	switch v.Kind {
+	case ListValue, ObjectValue:
+		children := Children{}
+		for _, child := range v.Fields {
+			children = append(children, child)
+		}
+		return children
+	default:
+		if v.Fields != nil {
+			panic(fmt.Errorf("unexpected fields for value kind %d", v.Kind))
+		}
+
+		var kind lex.TokenKind
+		switch v.Kind {
+		case Variable:
+			kind = lex.Name
+		case IntValue:
+			kind = lex.Int
+		case FloatValue:
+			kind = lex.Float
+		case StringValue:
+			kind = lex.String
+		case BlockValue:
+			kind = lex.BlockString
+		case NullValue:
+			kind = lex.Null
+		case EnumValue:
+			// be nice to give the enum value a special type maybe for highlighting
+			kind = lex.Name
+		case BooleanValue:
+			switch v.Raw {
+			case "true":
+				kind = lex.True
+			case "false":
+				kind = lex.False
+			default:
+				panic(fmt.Errorf("unexpected boolean value %q", v.Raw))
+			}
+		default:
+			panic(fmt.Errorf("unexpected value kind %d", v.Kind))
+		}
+
+		return Children{
+			lex.Token{
+				Kind:     kind,
+				Value:    v.Raw,
+				Position: v.Position,
+			},
+		}
+
 	}
-	return children
 }
 
 func (v *Value) Format(io.Writer) {}

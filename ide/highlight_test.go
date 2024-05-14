@@ -76,6 +76,7 @@ mutation { bar }`,
 			expect.Expect(`1:1..1:6: keyword
 1:9..1:12: property
 1:13..1:16: parameter
+1:19..1:24: string
 `),
 		},
 		{
@@ -118,6 +119,7 @@ mutation { bar }`,
 1:14..1:17: type
 1:22..1:25: property
 1:26..1:29: parameter
+1:31..1:32: parameter
 `),
 		},
 		{
@@ -126,6 +128,7 @@ mutation { bar }`,
 			expect.Expect(`1:1..1:6: keyword
 1:9..1:12: property
 1:13..1:16: parameter
+1:18..1:19: parameter
 `),
 		},
 		{
@@ -172,6 +175,93 @@ mutation { bar }`,
 1:23..1:27: keyword
 `),
 		},
+
+		{
+			"bool arg",
+			`mutation { foo(b: true) { id } }`, expect.Expect(`1:1..1:9: keyword
+1:12..1:15: property
+1:16..1:17: parameter
+1:19..1:23: keyword
+1:27..1:29: property
+`),
+		},
+
+		{
+			"int arg",
+			`mutation { foo(b: 5) { id } }`, expect.Expect(`1:1..1:9: keyword
+1:12..1:15: property
+1:16..1:17: parameter
+1:19..1:20: number
+1:24..1:26: property
+`),
+		},
+
+		{
+			"string arg",
+			`mutation { foo(b: 5) { id } }`, expect.Expect(`1:1..1:9: keyword
+1:12..1:15: property
+1:16..1:17: parameter
+1:19..1:20: number
+1:24..1:26: property
+`),
+		},
+
+		{
+			"var arg",
+			`mutation { foo(x: $x) { id } }`, expect.Expect(`1:1..1:9: keyword
+1:12..1:15: property
+1:16..1:17: parameter
+1:19..1:20: parameter
+1:25..1:27: property
+`),
+		},
+
+		{
+			"null arg",
+			`mutation { foo(x: null) { id } }`, expect.Expect(`1:1..1:9: keyword
+1:12..1:15: property
+1:16..1:17: parameter
+1:19..1:23: keyword
+1:27..1:29: property
+`),
+		},
+
+		{
+			"obj args",
+			`mutation { foo(input: { x: 5 }) { id } }`, expect.Expect(`1:1..1:9: keyword
+1:12..1:15: property
+1:16..1:21: parameter
+1:25..1:26: parameter
+1:28..1:29: number
+1:35..1:37: property
+`),
+		},
+
+		{
+			"obj args 2",
+			`mutation { foo(input: { x: 1 y: 2 }) { id } }`, expect.Expect(`1:1..1:9: keyword
+1:12..1:15: property
+1:16..1:21: parameter
+1:25..1:26: parameter
+1:28..1:29: number
+1:30..1:31: parameter
+1:33..1:34: number
+1:40..1:42: property
+`),
+		},
+
+		{
+			"obj args 3",
+			`mutation { foo(input: { name: "a", ty: BOOL }) { id } }`, expect.Expect(`1:1..1:9: keyword
+1:12..1:15: property
+1:16..1:21: parameter
+1:25..1:29: parameter
+1:32..1:35: string
+1:36..1:38: parameter
+1:40..1:44: parameter
+1:50..1:52: property
+`),
+		},
 	}
 
 	for _, test := range tests {
@@ -184,4 +274,11 @@ mutation { bar }`,
 			})
 		})
 	}
+}
+
+func TestHighlightScratch(t *testing.T) {
+	s := `mutation { foo(input: { name: "a", ty: BOOL }) { id } }`
+	ide.TestWith(t, s, func(uri string, s ide.Snapshot) {
+		t.Log(s.Highlight(uri).String())
+	})
 }
