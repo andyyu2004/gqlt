@@ -2,6 +2,7 @@ package annotate
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/movio/gqlt/gqlparser/ast"
@@ -13,6 +14,10 @@ type Annotation interface {
 }
 
 func Annotate[S ~[]T, T Annotation](src string, annotations S) string {
+	slices.SortFunc(annotations, func(a, b T) int {
+		return a.Pos().Start - b.Pos().Start
+	})
+
 	lines := strings.Split(src, "\n")
 	// Process annotations in reverse order to avoid shifting line numbers
 	for i := len(annotations) - 1; i >= 0; i-- {
