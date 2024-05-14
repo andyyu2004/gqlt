@@ -151,8 +151,17 @@ assert 5 matches x # oops, forgot to use $x
 			expect.Expect(`
 let x = 5
 #   ^ unused variable 'x'
-assert 5 matches x # oops, forgot to use $x
+assert 5 matches x
 #                ^ unused variable 'x'
+`),
+		},
+
+		{
+			"underscore variables are ignored by unused var", `
+let _x = 5
+`,
+			expect.Expect(`
+let _x = 5
 `),
 		},
 	}, protocol.DiagnosticSeverityHint)
