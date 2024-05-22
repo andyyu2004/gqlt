@@ -17,8 +17,9 @@ var args struct {
 }
 
 type runCmd struct {
-	URL  string `arg:"" help:"URL of the GraphQL server to query"`
-	File string `arg:"" help:"Path to the file to run (use - for stdin)"`
+	URL     string            `arg:"" help:"URL of the GraphQL server to query"`
+	File    string            `arg:"" help:"Path to the file to run (use - for stdin)"`
+	Headers map[string]string `short:"H" help:"HTTP headers to send with the request"`
 }
 
 func (r *runCmd) Run() error {
@@ -30,7 +31,12 @@ func (r *runCmd) Run() error {
 	executor := gqlt.New()
 	ctx := context.Background()
 
-	return executor.RunFile(ctx, gqlt.HTTPClient{Client: http.DefaultClient, URL: r.URL}, file)
+	headers := make(http.Header)
+	for k, v := range r.Headers {
+		headers.Add(k, v)
+	}
+
+	return executor.RunFile(ctx, gqlt.HTTPClient{Client: http.DefaultClient, URL: r.URL, Headers: headers}, file)
 }
 
 type serveCmd struct{}
