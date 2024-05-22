@@ -50,7 +50,7 @@ func TestGqlt(t *testing.T) {
 
 	clients := []gqlt.Client{
 		gqlt.GraphQLGophersClient{Schema: schema},
-		gqlt.HTTPClient{Handler: handler},
+		gqlt.HTTPHandler{Handler: handler},
 	}
 
 	var lock sync.Mutex
