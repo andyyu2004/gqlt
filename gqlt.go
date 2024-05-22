@@ -17,5 +17,10 @@ type (
 	ClientFactoryFunc    = eval.ClientFactoryFunc
 	Client               = eval.Client
 	GraphQLGophersClient = eval.GraphQLGophersClient
+	HTTPHandler          = eval.HTTPHandler
 	HTTPClient           = eval.HTTPClient
+	HTTPRoundTripper     = eval.HTTPRoundTripper
+	GraphQLErrors        = eval.GraphQLErrors
+	Request              = eval.Request
+	Response             = eval.Response
 )
