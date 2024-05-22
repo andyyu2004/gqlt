@@ -135,7 +135,7 @@ func (c HTTPRoundTripper) Request(ctx context.Context, req Request, out any) (Gr
 	}
 
 	if httpRes.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", httpReq.Response.StatusCode)
+		return nil, fmt.Errorf("unexpected status code: %d", httpRes.StatusCode)
 	}
 	defer httpRes.Body.Close()
 
