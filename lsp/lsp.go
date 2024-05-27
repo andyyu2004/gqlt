@@ -35,6 +35,7 @@ func New(ide *ide.IDE) *server.Server {
 		Initialize:                     ls.initialize,
 		Initialized:                    ls.initialized,
 		TextDocumentDefinition:         ls.definition,
+		TextDocumentReferences:         ls.references,
 		TextDocumentDidChange:          ls.onChange,
 		TextDocumentDidOpen:            ls.onOpen,
 		TextDocumentSemanticTokensFull: ls.semanticTokens,
@@ -79,6 +80,7 @@ func (s *ls) initialize(ctx *glsp.Context, params *protocol.InitializeParams) (a
 			},
 			HoverProvider:      protocol.HoverOptions{},
 			DefinitionProvider: true,
+			ReferencesProvider: true,
 			Workspace: &protocol.ServerCapabilitiesWorkspace{
 				WorkspaceFolders: &protocol.WorkspaceFoldersServerCapabilities{
 					Supported: lib.Ref(true),
@@ -230,5 +232,11 @@ func (l *ls) setTrace(ctx *glsp.Context, params *protocol.SetTraceParams) error 
 func (l *ls) definition(ctx *glsp.Context, params *protocol.DefinitionParams) (any, error) {
 	return ide.WithSnapshot(l.ide, logger{ctx}, func(s ide.Snapshot) []protocol.Location {
 		return s.Definition(params.TextDocument.URI, params.Position)
+	})
+}
+
+func (l *ls) references(ctx *glsp.Context, params *protocol.ReferenceParams) ([]protocol.Location, error) {
+	return ide.WithSnapshot(l.ide, logger{ctx}, func(s ide.Snapshot) []protocol.Location {
+		return s.References(params.TextDocument.URI, params.Position)
 	})
 }

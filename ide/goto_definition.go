@@ -28,9 +28,10 @@ func (s *Snapshot) Definition(uri string, position protocol.Position) []protocol
 	return nil
 }
 
-func definition(typeInfo typecheck.Info, point ast.Point) syn.Node {
+func definition(typeInfo typecheck.Info, point ast.Point) *syn.NamePat {
 	// - Find the token that contains the given point
-	// - Traverse the parent nodes to find a `*syn.NameExpr`, and lookup what it resolves to
+	// - Traverse the parent nodes to find a `*syn.NameExpr`, `*syn.VarPat` (the only syntax that can define a name)
+	// and lookup what it resolves to
 
 	cursor := syn.NewCursor(typeInfo.Ast)
 	tokenCursor := cursor.TokenAt(point)
@@ -41,6 +42,9 @@ func definition(typeInfo typecheck.Info, point ast.Point) syn.Node {
 	node := tokenCursor.Parent()
 	for node != nil {
 		switch node := node.Value().(type) {
+		case *syn.NamePat:
+			// if on a definition itself, return it
+			return node
 		case *syn.VarPat:
 			if pat, ok := typeInfo.VarPatResolutions[node]; ok {
 				return pat
