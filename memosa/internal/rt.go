@@ -197,8 +197,7 @@ func fetch(ctx *Context, queryType reflect.Type, key any) any {
 	}
 
 	// otherwise walk the dependency graph and reexecute as necessary
-	if ctx.verifyQuery(queryType, key) {
-	}
+	ctx.verifyQuery(queryType, key)
 
 	return memo.value
 }

@@ -21,13 +21,13 @@ var (
 )
 
 func Get[I Input[T], T any](ctx *Context) T {
-	return Fetch[I, InputKey, T](ctx, InputKey{})
+	return Fetch[I](ctx, InputKey{})
 }
 
 func Fetch[Q Query[K, V], K, V any](ctx *Context, key K) V {
-	return internal.Fetch[Q, K, V](ctx, key)
+	return internal.Fetch[Q](ctx, key)
 }
 
 func Set[I Input[T], T any](ctx *Context, value T) {
-	internal.Set[I, T](ctx, value)
+	internal.Set[I](ctx, value)
 }

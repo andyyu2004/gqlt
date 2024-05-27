@@ -41,7 +41,7 @@ func NewContext(opts ...Option) *Context {
 }
 
 func Set[I Input[T], T any](ctx *Context, value T) {
-	set[I, T](ctx.rt, value)
+	set[I](ctx.rt, value)
 }
 
 func Fetch[Q Query[K, V], K, V any](ctx *Context, key K) V {
