@@ -15,41 +15,25 @@ import (
 func (e *Executor) stmt(ctx context.Context, ecx *executionContext, stmt syn.Stmt) error {
 	switch stmt := stmt.(type) {
 	case *syn.UseStmt:
-		if err := e.use(ctx, ecx, stmt); err != nil {
-			return err
-		}
-
+		return e.use(ctx, ecx, stmt)
 	case *syn.LetStmt:
-		if err := e.let(ctx, ecx, stmt); err != nil {
-			return err
-		}
+		return e.let(ctx, ecx, stmt)
 	case *syn.FragmentStmt:
-		if err := e.fragment(ctx, ecx, stmt); err != nil {
-			return err
-		}
+		return e.fragment(ctx, ecx, stmt)
 	case *syn.ExprStmt:
-		if _, err := e.eval(ctx, ecx, stmt.Expr); err != nil {
-			return err
-		}
-
+		_, err := e.eval(ctx, ecx, stmt.Expr)
+		return err
 	case *syn.SetStmt:
 		val, err := e.eval(ctx, ecx, stmt.Expr)
 		if err != nil {
 			return err
 		}
-
-		if err := ecx.settings.Set(stmt.Variable.Value, val); err != nil {
-			return err
-		}
-
+		return ecx.settings.Set(stmt.Variable.Value, val)
 	case *syn.AssertStmt:
 		return e.assert(ctx, ecx, stmt)
-
 	default:
 		panic(fmt.Sprintf("missing stmt eval case: %T", stmt))
 	}
-
-	return nil
 }
 
 func (e *Executor) use(ctx context.Context, ecx *executionContext, use *syn.UseStmt) error {
