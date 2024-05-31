@@ -18,20 +18,41 @@ func TestReferences(t *testing.T) {
 		{
 			"it works",
 			`
-let foo = 1
-#   ...
-print(foo)
-#     ...
-			`,
+		let foo = 1
+		#   ...
+		print(foo)
+		#     ...
+					`,
 		},
 
 		{
 			"variable patterns",
 			`
-let foo = 1
-#   ...
-assert 1 matches $foo
-#                ....
+		let foo = 1
+		#   ...
+		assert 1 matches $foo
+		#                ....
+					`,
+		},
+
+		{
+			"fragment references",
+			`
+fragment Foo on Foo {
+        #...
+	id
+}
+
+query {
+	foo {
+        ...Foo
+          #...
+	}
+	foos {
+        ...Foo
+          #...
+	}
+}
 			`,
 		},
 	}

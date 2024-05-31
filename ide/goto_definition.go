@@ -18,17 +18,10 @@ func (s *Snapshot) Definition(uri string, position protocol.Position) []protocol
 
 	typeInfo := s.Typecheck(uri)
 	if node := definition(typeInfo, *point); node != nil {
-		pos := node.Pos()
-		switch node := node.(type) {
-		case *syn.FragmentDefinition:
-			// Returning the position of the name is enough rather than the entire definition
-			pos = node.Name.Pos()
-		}
-
 		return []protocol.Location{
 			{
 				URI:   uri, // definitions are always in the same file currently
-				Range: posToProto(mapper, pos),
+				Range: posToProto(mapper, node),
 			},
 		}
 	}
@@ -50,7 +43,10 @@ func definition(typeInfo typecheck.Info, point ast.Point) syn.Node {
 	for node != nil {
 		switch node := node.Value().(type) {
 		case *syn.NamePat:
-			// if on a definition itself, return it
+			// if on a name definition itself, return it
+			return node
+		case *syn.FragmentDefinition:
+			// if on a fragment definition, return it
 			return node
 		case *syn.VarPat:
 			if pat, ok := typeInfo.VarPatResolutions[node]; ok {

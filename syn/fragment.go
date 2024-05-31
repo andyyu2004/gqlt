@@ -97,7 +97,7 @@ func (d FragmentDefinition) Format(w io.Writer) {
 }
 
 func (f FragmentDefinition) Pos() ast.Position {
-	return f.Position
+	return f.Name.Pos().Merge(f.SelectionSet.Pos())
 }
 
 func (FragmentDefinition) isNode() {}

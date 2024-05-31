@@ -180,6 +180,16 @@ func protoToPoint(mapper *mapper.Mapper, position protocol.Position) *ast.Point 
 
 func posToProto(mapper *mapper.Mapper, position ast.HasPosition) protocol.Range {
 	pos := position.Pos()
+
+	// Refine which position is returned for specific node types
+	switch node := position.(type) {
+	case *syn.FragmentDefinition:
+		// Returning the position of the name is enough rather than the entire definition
+		pos = node.Name.Pos()
+	case *syn.FragmentSpread:
+		pos = node.Name.Pos()
+	}
+
 	startLine, startCol, err := mapper.LineAndColumn(pos.Start)
 	if err != nil {
 		panic(fmt.Sprintf("posToProto: %v: %v", pos, err))

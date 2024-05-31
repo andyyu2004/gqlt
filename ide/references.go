@@ -21,7 +21,7 @@ func (s *Snapshot) References(uri string, position protocol.Position) []protocol
 	return slice.Map(references(typeInfo, *point), func(node syn.Node) protocol.Location {
 		return protocol.Location{
 			URI:   uri,
-			Range: posToProto(mapper, node.Pos()),
+			Range: posToProto(mapper, node),
 		}
 	})
 }
@@ -52,7 +52,11 @@ func references(typeInfo typecheck.Info, point ast.Point) []syn.Node {
 			}
 		}
 	case *syn.FragmentDefinition:
-		panic("todo")
+		for node, ref := range typeInfo.FragmentResolutions {
+			if ref == def {
+				nodes = append(nodes, node)
+			}
+		}
 	default:
 	}
 
