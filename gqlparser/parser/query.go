@@ -42,18 +42,19 @@ func (p *parser) parseQueryDocument() *QueryDocument {
 }
 
 func (p *parser) ParseOperationDefinition() *OperationDefinition {
+	start := p.peekPos()
 	if p.peek().Kind == lexer.BraceL {
+		ss := p.parseRequiredSelectionSet()
 		return &OperationDefinition{
-			Position:       p.peekPos(),
+			Position:       start.Merge(ss.Pos()),
 			Comment:        p.comment,
 			Operation:      Query,
 			OperationToken: nil,
-			SelectionSet:   p.parseRequiredSelectionSet(),
+			SelectionSet:   ss,
 		}
 	}
 
 	var od OperationDefinition
-	od.Position = p.peekPos()
 	od.Comment = p.comment
 	od.Operation, od.OperationToken = p.parseOperationType()
 
@@ -64,6 +65,7 @@ func (p *parser) ParseOperationDefinition() *OperationDefinition {
 	od.VariableDefinitions = p.parseVariableDefinitions()
 	od.Directives = p.parseDirectives(false)
 	od.SelectionSet = p.parseRequiredSelectionSet()
+	od.Position = start.Merge(od.SelectionSet.Pos())
 
 	return &od
 }
@@ -151,7 +153,8 @@ func (p *parser) parseSelection() Selection {
 
 func (p *parser) parseField() *Field {
 	var field Field
-	field.Position = p.peekPos()
+	start := p.peekPos()
+	field.Position = start
 	field.Comment = p.comment
 	field.Alias = p.parseName()
 
@@ -165,6 +168,7 @@ func (p *parser) parseField() *Field {
 	field.Directives = p.parseDirectives(false)
 	if p.peek().Kind == lexer.BraceL {
 		field.SelectionSet = p.parseOptionalSelectionSet()
+		field.Position = start.Merge(field.SelectionSet.Pos())
 	}
 
 	return &field

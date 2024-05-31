@@ -741,7 +741,8 @@ func (p *Parser) parseQueryExpr() *syn.QueryExpr {
 	endTok := p.lexer.Peek()
 	query := strings.TrimRight(endTok.Src.Input[startPos.Start:endTok.Start], "\n")
 
-	return &syn.QueryExpr{Position: startPos.Merge(endTok), Query: query, Operation: operation}
+	pos := startPos.Pos().Merge(endTok)
+	return &syn.QueryExpr{Position: pos, Query: query, Operation: operation}
 }
 
 func assert(cond bool) {

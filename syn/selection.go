@@ -19,6 +19,10 @@ func (ss SelectionSet) Format(w io.Writer) {
 }
 
 func (ss SelectionSet) Pos() ast.Position {
+	if len(ss) == 0 {
+		return ast.Position{}
+	}
+
 	fst := ss[0]
 	lst := ss[len(ss)-1]
 	return fst.Pos().Merge(lst)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"maps"
 	"net/url"
+	"runtime/debug"
 	"sync"
 	"testing"
 
@@ -46,7 +47,7 @@ func WithSnapshot[R any](ide *IDE, log Logger, f func(Snapshot) R) (R, error) {
 	defer func() {
 		defer cleanup()
 		if r := recover(); r != nil {
-			log.Errorf("panic: %v", r)
+			log.Errorf("panic: %v (%s)", r, string(debug.Stack()))
 			err = fmt.Errorf("panic: %v", r)
 		}
 	}()

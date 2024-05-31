@@ -90,6 +90,9 @@ func (l VariableDefinitionList) Children() Children {
 func (VariableDefinitionList) Format(io.Writer) {}
 
 func (l VariableDefinitionList) Pos() ast.Position {
+	if len(l) == 0 {
+		return ast.Position{}
+	}
 	fst := l[0]
 	lst := l[len(l)-1]
 	return fst.Pos().Merge(lst)
@@ -122,6 +125,9 @@ func (ArgumentList) Format(io.Writer) {
 }
 
 func (l ArgumentList) Pos() ast.Position {
+	if len(l) == 0 {
+		return ast.Position{}
+	}
 	fst := l[0]
 	lst := l[len(l)-1]
 	return fst.Pos().Merge(lst)

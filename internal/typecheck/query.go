@@ -114,6 +114,8 @@ func (tcx *typechecker) inferSelectionSetType(ty Object, selectionSet syn.Select
 				outTy.Fields.Set(selection.Name.Value, tcx.error(selection, fmt.Sprintf("fragment '%v' not defined", selection.Name.Value)))
 				continue
 			}
+
+			tcx.info.FragmentResolutions[selection] = fragment
 			return tcx.inferSelectionSetType(ty, fragment.SelectionSet)
 		case *syn.InlineFragment:
 			return Any{}

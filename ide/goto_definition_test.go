@@ -18,93 +18,111 @@ func TestGotoDefinition(t *testing.T) {
 		{
 			"name ref",
 			`
-let foo = 1
-#   ...
-1 + foo
-#   ^^^
-`,
+		let foo = 1
+		#   ...
+		1 + foo
+		#   ^^^
+		`,
 		},
 		{
 			"object destructure",
 			`
-let { foo } = { foo: 1 }
-#     ...
-1 + foo
-#   ^^^
-`,
+		let { foo } = { foo: 1 }
+		#     ...
+		1 + foo
+		#   ^^^
+		`,
 		},
 		{
 			"object rest destructure",
 			`
-let { ...foo } = { bar: 2, foo: 1 }
-#        ...
-1 + foo
-#   ^^^
-`,
+		let { ...foo } = { bar: 2, foo: 1 }
+		#        ...
+		1 + foo
+		#   ^^^
+		`,
 		},
 		{
 			"list destructure",
 			`
-let [foo] = [1]
-#    ...
-1 + foo
-#   ^^^
-`,
+		let [foo] = [1]
+		#    ...
+		1 + foo
+		#   ^^^
+		`,
 		},
 		{
 			"nested destructure",
 			`
-let [a, { b, c }] = [15, { b: 16, c: 17 }];
-#    .
-assert [a, b, c] == [15, 16, 17]
-#       ^
-`,
+		let [a, { b, c }] = [15, { b: 16, c: 17 }];
+		#    .
+		assert [a, b, c] == [15, 16, 17]
+		#       ^
+		`,
 		},
 
 		{
 			"object spread name ref",
 			`
-let obj = { a: 1, b: 2, c: 3 }
-#   ...
-let b = { ...obj }
-#            ^^^
-			`,
+		let obj = { a: 1, b: 2, c: 3 }
+		#   ...
+		let b = { ...obj }
+		#            ^^^
+					`,
 		},
 
 		{
 			"match condition",
 			`
-let x = 1
-assert x matches foo if foo == 1
-#                ...    ^^^
-			`,
+		let x = 1
+		assert x matches foo if foo == 1
+		#                ...    ^^^
+					`,
 		},
 
 		{
 			"match condition shadowed",
 			`
-let foo = 1
-assert foo matches foo if foo == 1
-#                  ...    ^^^
-			`,
+		let foo = 1
+		assert foo matches foo if foo == 1
+		#                  ...    ^^^
+					`,
 		},
 
 		{
 			"match condition outer scope",
 			`
-let x = 1
-#   .
-assert foo matches _ if x == 1
-#                       ^
-`,
+		let x = 1
+		#   .
+		assert foo matches _ if x == 1
+		#                       ^
+		`,
 		},
+
 		{
 			"variable pattern",
 			`
-let foo = 42
-#   ...
-assert 42 matches $foo
-#                  ^^^
+		let foo = 42
+		#   ...
+		assert 42 matches $foo
+		#                  ^^^
+					`,
+		},
+
+		{
+			"fragment definition",
+			`
+fragment Foo on Foo {
+       # ...
+	id
+}
+
+query {
+	foos {
+		...Foo
+		  #^^^
+	}
+}
 			`,
 		},
 	}

@@ -38,16 +38,22 @@ func references(typeInfo typecheck.Info, point ast.Point) []syn.Node {
 
 	nodes := []syn.Node{def}
 
-	for node, ref := range typeInfo.NameResolutions {
-		if ref == def {
-			nodes = append(nodes, node)
+	switch def.(type) {
+	case *syn.NamePat:
+		for node, ref := range typeInfo.NameResolutions {
+			if ref == def {
+				nodes = append(nodes, node)
+			}
 		}
-	}
 
-	for node, ref := range typeInfo.VarPatResolutions {
-		if ref == def {
-			nodes = append(nodes, node)
+		for node, ref := range typeInfo.VarPatResolutions {
+			if ref == def {
+				nodes = append(nodes, node)
+			}
 		}
+	case *syn.FragmentDefinition:
+		panic("todo")
+	default:
 	}
 
 	return nodes
