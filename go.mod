@@ -6,6 +6,7 @@ toolchain go1.22.0
 
 require (
 	github.com/agnivade/levenshtein v1.1.1
+	github.com/alecthomas/kong v0.9.0
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
 	github.com/andyyu2004/expect-test v0.6.7
 	github.com/bmatcuk/doublestar/v4 v4.6.1
@@ -20,7 +21,6 @@ require (
 )
 
 require (
-	github.com/alecthomas/kong v0.9.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
