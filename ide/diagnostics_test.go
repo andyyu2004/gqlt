@@ -164,5 +164,19 @@ let _x = 5
 let _x = 5
 `),
 		},
+
+		{
+			"variables referenced in graphql query documents should be considered used", `
+let t = true
+let f = false
+query { fail(yes: $t) }
+`,
+			expect.Expect(`
+let t = true
+let f = false
+#   ^ unused variable 'f'
+query { fail(yes: $t) }
+`),
+		},
 	}, protocol.DiagnosticSeverityHint)
 }

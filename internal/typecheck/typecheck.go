@@ -91,6 +91,7 @@ func New(schema *syn.Schema, settings Settings) *typechecker {
 			ExprTypes:           make(map[syn.Expr]Ty),
 			BindingTypes:        make(map[*syn.NamePat]Ty),
 			NameResolutions:     make(map[*syn.NameExpr]*syn.NamePat),
+			ArgResolutions:      make(map[*syn.Value]*syn.NamePat),
 			VarPatResolutions:   make(map[*syn.VarPat]*syn.NamePat),
 			FragmentResolutions: make(map[*syn.FragmentSpread]*syn.FragmentDefinition),
 		},
@@ -103,6 +104,7 @@ type Info struct {
 	BindingTypes map[*syn.NamePat]Ty
 	// NameResolutions maps name expressions to the binding that it references
 	NameResolutions map[*syn.NameExpr]*syn.NamePat
+	ArgResolutions  map[*syn.Value]*syn.NamePat
 	// VarPatResolutions maps $var patterns to the binding that it references
 	VarPatResolutions   map[*syn.VarPat]*syn.NamePat
 	FragmentResolutions map[*syn.FragmentSpread]*syn.FragmentDefinition
@@ -136,13 +138,18 @@ func (tcx *typechecker) unusedBindings() map[*syn.NamePat]struct{} {
 		unusedBindings[pat] = struct{}{}
 	}
 
-	// remove all bindings that are referenced by name expressions
+	// remove bindings that are referenced by name expressions
 	for _, binding := range tcx.info.NameResolutions {
 		delete(unusedBindings, binding)
 	}
 
-	// remove all bindings that are referenced by $var patterns
+	// remove bindings that are referenced by $var patterns
 	for _, binding := range tcx.info.VarPatResolutions {
+		delete(unusedBindings, binding)
+	}
+
+	// remove bindings that are referenced from a graphql query document
+	for _, binding := range tcx.info.ArgResolutions {
 		delete(unusedBindings, binding)
 	}
 

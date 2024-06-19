@@ -74,6 +74,8 @@ func (tcx *typechecker) inferSelectionSetType(ty Object, selectionSet syn.Select
 				fieldTy = tcx.error(selection, fmt.Sprintf("field '%v' does not exist on type '%v'", selection.Name.Value, ty))
 			}
 
+			tcx.checkQueryArgs(selection.Arguments)
+
 			fieldTy = tcx.expand(fieldTy)
 			if isErr(fieldTy) {
 				outTy.Fields.Set(selection.Alias.Value, fieldTy)
@@ -168,6 +170,32 @@ func (tcx *typechecker) defToTy(def *syn.Definition) Ty {
 		panic("unreachable, can't query for input types")
 	default:
 		panic(fmt.Sprintf("unknown definition kind %v", def.Kind))
+	}
+}
+
+func (tcx *typechecker) checkQueryArgs(args syn.ArgumentList) {
+	for _, arg := range args {
+		tcx.checkQueryArg(arg)
+	}
+}
+
+func (tcx *typechecker) checkQueryArg(arg *syn.Argument) {
+	// not doing much here currently other than registering uses of variables
+	tcx.checkQueryValue(arg.Value)
+}
+
+func (tcx *typechecker) checkQueryValue(value *syn.Value) {
+	switch value.Kind {
+	case syn.Variable:
+		entry, ok := tcx.scope.Lookup(value.Raw)
+		// not bothering to report an error here, we'll catch it later
+		if ok {
+			tcx.info.ArgResolutions[value] = entry.Pat
+		}
+	}
+
+	for _, child := range value.Fields {
+		tcx.checkQueryValue(child.Value)
 	}
 }
 
