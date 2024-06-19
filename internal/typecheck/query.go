@@ -188,9 +188,10 @@ func (tcx *typechecker) checkQueryValue(value *syn.Value) {
 	switch value.Kind {
 	case syn.Variable:
 		entry, ok := tcx.scope.Lookup(value.Raw)
-		// not bothering to report an error here, we'll catch it later
 		if ok {
 			tcx.info.ArgResolutions[value] = entry.Pat
+		} else {
+			tcx.error(value, fmt.Sprintf("variable '%v' not defined", value.Raw))
 		}
 	}
 

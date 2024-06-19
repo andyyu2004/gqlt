@@ -178,5 +178,15 @@ let f = false
 query { fail(yes: $t) }
 `),
 		},
+
+		{
+			"unbound variable in query document", `
+query { fail(yes: $t) }
+`,
+			expect.Expect(`
+query { fail(yes: $t) }
+#                 ^ variable 't' not defined
+`),
+		},
 	}, protocol.DiagnosticSeverityHint)
 }
