@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -311,11 +310,11 @@ var builtinScope = &scope{
 			if len(args) != 1 {
 				return nil, fmt.Errorf("dbg takes exactly 1 argument")
 			}
-			log.Println(args...)
+			fmt.Println(args...)
 			return args[0], nil
 		}),
 		"print": function(func(args []any) (any, error) {
-			log.Println(args...)
+			fmt.Println(args...)
 			return nil, nil
 		}),
 		"len": function(func(args []any) (any, error) {
