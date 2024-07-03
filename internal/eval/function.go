@@ -230,6 +230,18 @@ func fetch(url string, args map[string]any) (any, error) {
 // FIXME typecheck these?
 var builtinScope = &scope{
 	vars: map[string]any{
+		"jsonify": function(func(args []any) (any, error) {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("jsonify takes exactly 1 argument")
+			}
+
+			bytes, err := json.MarshalIndent(args[0], "", "  ")
+			if err != nil {
+				return nil, err
+			}
+
+			return string(bytes), nil
+		}),
 		"format": function(func(args []any) (any, error) {
 			if len(args) < 1 {
 				return nil, fmt.Errorf("format takes at least 1 argument")
