@@ -1,0 +1,28 @@
+# Very similar to JavaScript with `query/mutation` as first-class expressions.
+
+<expr> ::=
+    | <name>                  # name reference
+    | <literal>               # 1 false "string"
+    | [ <expr>,* ]            # arrays
+    | { (<name>: <expr>),* }  # objects
+    | <expr> . <name>         # field access
+    | <name> ( <expr>,* )     # function call
+    | query <graphql>
+    | mutation <graphql>
+    | <expr> matches <pat>
+    # the usual prefix and infix operators
+
+<pat> ::=
+    | _                     # wildcard
+    | <name>                # name binding
+    | [ <pat>,* ]           # array pattern
+    | { (<name>: <pat>),* } # object pattern
+    | <literal>             # literal pattern
+
+
+<stmt> ::=
+    | let <pat> = <expr>
+    | assert <expr>
+    | set <name> <expr>
+    | fragment <fragment>
+    | <expr>
